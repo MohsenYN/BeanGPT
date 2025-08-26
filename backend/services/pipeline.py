@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict, Any
 import json
@@ -564,45 +565,62 @@ def query_openai_stream(context: str, source_list: List[str], question: str, con
         yield f"\n\n*Error generating response: {str(e)}*\n\n"
 
 def generate_suggested_questions(
+    question: str,
     answer: str,
+    conversation_history: List[Dict] = None,
     sources: List[str] | None = None,
     genes: List[dict] | None = None,
-    full_markdown_table: str | None = None
+    full_markdown_table: str | None = None,
+    api_key: str = None
 ) -> List[str]:
-    """Generates a list of suggested follow-up questions based on the provided answer and data."""
+    """Generates a list of suggested follow-up questions based on the original question, answer, and context."""
 
-    # Get API key from environment
-    api_key = os.getenv("OPENAI_API_KEY")
+    # Use provided API key or fall back to environment variable
+    if not api_key:
+        api_key = os.getenv("OPENAI_API_KEY")
+
     if not api_key:
         print("No OpenAI API key found, skipping suggested questions generation")
         return []
-    
+
     from utils.openai_client import create_openai_client
     client = create_openai_client(api_key)
 
     prompt = (
-        "Based on the following assistant response (answer and potentially data/sources), "
-        "generate a concise list of 3-5 relevant follow-up questions that a user might ask. "
-        "Format the response as a simple comma-separated list of questions. "
-        "Ensure questions are natural-sounding and directly relate to the information provided."
-        "Avoid questions that simply ask for a summary or restatement."
-        "Example: 'Tell me more about X, What is the significance of Y, Are there other sources on Z?'\n\n"
+        "Generate 3-5 simple but useful follow-up questions based on this research conversation.\n\n"
+        "GUIDELINES:\n"
+        "- Keep questions straightforward and easy to understand\n"
+        "- Focus on practical next steps or related topics\n"
+        "- Build naturally on the current discussion\n"
+        "- Avoid overly technical or complex questions\n"
+        "- Make them conversational, like what a researcher would ask next\n\n"
+        f"Original Question: {question}\n\n"
         f"Assistant Answer: {answer}\n\n"
     )
 
+    if conversation_history:
+        # Add recent conversation context (last 3 exchanges)
+        recent_history = conversation_history[-6:]  # Last 3 question-answer pairs
+        prompt += "Recent Conversation:\n"
+        for i, msg in enumerate(recent_history):
+            role = "User" if msg.get('role') == 'user' else "Assistant"
+            content = msg.get('content', '')[:300]  # Truncate long messages
+            prompt += f"{role}: {content}\n"
+        prompt += "\n"
+
     if sources:
-        prompt += f"Sources: {', '.join(sources)}\n\n"
+        prompt += f"Sources Cited: {', '.join(sources)}\n\n"
     if genes:
         gene_names = [gene['name'] for gene in genes if 'name' in gene]
-        prompt += f"Genes mentioned: {', '.join(gene_names)}\n\n"
+        prompt += f"Genes Mentioned: {', '.join(gene_names)}\n\n"
     if full_markdown_table:
          # Include table data if it's not too long, otherwise just mention its presence
          if len(full_markdown_table) < 1000:
-             prompt += f"Bean Data Table Provided:\n{full_markdown_table}\n\n"
+             prompt += f"Data Table Summary:\n{full_markdown_table}\n\n"
          else:
-             prompt += "Bean data table was provided.\n\n"
+             prompt += "Detailed data table was provided in the analysis.\n\n"
 
-    prompt += "Suggested Questions:"
+    prompt += "Generate 3-5 specific follow-up questions that would naturally continue this research conversation:"
 
     try:
         response = client.chat.completions.create(
@@ -618,8 +636,34 @@ def generate_suggested_questions(
             max_tokens=150
         )
         suggested_questions_text = response.choices[0].message.content.strip()
-        # Split the comma-separated list into a Python list
-        return [q.strip() for q in suggested_questions_text.split(',') if q.strip()]
+
+        # Parse the response to extract individual questions
+        questions = []
+        lines = suggested_questions_text.split('\n')
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            # Remove numbering (1., 2., etc.) or bullet points
+            line = re.sub(r'^\d+\.\s*', '', line)
+            line = re.sub(r'^[-•*]\s*', '', line)
+
+            # Remove quotes if present
+            line = line.strip('"\'').strip()
+
+            # Only add if it looks like a question (contains ? or starts with question words)
+            question_words = ['what', 'how', 'why', 'when', 'where', 'who', 'which', 'can you', 'could you', 'tell me', 'explain']
+            if line and (line.endswith('?') or any(line.lower().startswith(word) for word in question_words)):
+                questions.append(line)
+
+        # If no questions found, fall back to comma splitting
+        if not questions:
+            questions = [q.strip() for q in suggested_questions_text.split(',') if q.strip() and q.strip().endswith('?')]
+
+        # Limit to 5 questions maximum
+        return questions[:5]
     except Exception as e:
         print(f"Error generating suggested questions: {e}")
         return []
@@ -627,20 +671,20 @@ def generate_suggested_questions(
 async def continue_with_research_stream(question: str, conversation_history: List[Dict] = None, api_key: str = None):
     """
     Continue with research literature search after bean data analysis.
-    This is called when the user chooses to proceed with research after bean data.
+    Now includes web search functionality to combine current information with research literature.
     """
     # Add transition to literature search
-    transition_text = "\n\n---\n\n## 📚 **Related Research Literature**\n\nSearching scientific publications for additional context and insights...\n\n"
+    transition_text = "\n\n---\n\n## 📚 **Related Research Literature**\n\nSearching scientific publications and current web sources for additional context and insights...\n\n"
     for char in transition_text:
         yield {"type": "content", "data": char}
-    
+
     yield {"type": "progress", "data": {"step": "embeddings", "detail": "Processing semantic embeddings"}}
-    
+
     # Generate embeddings using OpenAI
     embedding_vector = embed_query_openai(question, api_key)
-    
+
     yield {"type": "progress", "data": {"step": "search", "detail": "Searching literature database"}}
-    
+
     # Query Zilliz vector database
     matches = query_zilliz(embedding_vector, api_key)
 
@@ -648,40 +692,81 @@ async def continue_with_research_stream(question: str, conversation_history: Lis
     scores = normalize_scores(matches)
     top_sources = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:settings.top_k]
     top_dois = [src for src, _ in top_sources]
-    
+
     yield {"type": "progress", "data": {"step": "papers", "detail": f"Found {len(top_dois)} relevant papers"}}
-    
+
     print("🔎 Top DOIs from Zilliz:", top_dois)
 
     context, source_list = get_rag_context_from_matches(matches, top_dois)
-    
+
+    # Always perform web search for research continuation to get current information
+    enhanced_context = context
+    combined_sources = source_list.copy()
+
+    from utils.web_search import perform_web_search, combine_web_and_rag_context
+
+    yield {"type": "progress", "data": {"step": "web_search", "detail": "Searching for current web information..."}}
+    print("🌐 Performing web search for research continuation...")
+    web_results, web_sources = perform_web_search(question, api_key)
+
+    if web_results:
+        enhanced_context = combine_web_and_rag_context(web_results, context, question)
+        # Add web sources to the combined source list with proper formatting
+        web_source_entries = []
+        for i, url in enumerate(web_sources, 1):
+            web_source_entries.append(f"Web-{i}: {url}")
+        combined_sources.extend(web_source_entries)
+        print(f"✅ Enhanced context with web search results and {len(web_sources)} web sources")
+    else:
+        print("⚠️ Web search failed, using RAG context only")
+
     yield {"type": "progress", "data": {"step": "generation", "detail": "Synthesizing findings with AI"}}
 
     # Modify question to indicate this is a follow-up to bean data analysis
     rag_question = f"We successfully analyzed the bean data for: '{question}'. Now provide additional research context from scientific literature about the genetic and biological factors related to this analysis."
-    
+
     # Stream the response and collect it for gene extraction
     full_response = ""
-    for chunk in query_openai_stream(context, source_list, rag_question, conversation_history, api_key):
+    for chunk in query_openai_stream(enhanced_context, combined_sources, rag_question, conversation_history, api_key, include_web_search=False):
         full_response += chunk
         yield {"type": "content", "data": chunk}
 
-    # Extract genes from the response
+    # Extract genes from the response with timeout and error handling
     genes = []
     if full_response.strip():  # Only extract if there's any content
         yield {"type": "progress", "data": {"step": "gene_extraction", "detail": "Extracting gene mentions from research text"}}
-    print("🧬 Extracting gene mentions...")
-    try:
-        import asyncio
-        gene_mentions, db_hits, gpt_hits = await asyncio.to_thread(extract_gene_mentions, full_response, api_key)
-        print(f"Found gene mentions: {gene_mentions}")
+        print("🧬 Extracting gene mentions...")
 
-        if gene_mentions:  # Only process if genes were found
-            yield {"type": "progress", "data": {"step": "gene_processing", "detail": f"Processing {len(gene_mentions)} genetic elements"}}
-        genes = await asyncio.to_thread(process_genes_batch, gene_mentions, api_key)
-    except Exception as e:
-        print(f"⚠️ Gene extraction failed: {e}")
-        genes = []
+        try:
+            import asyncio
+            import concurrent.futures
+
+            # Use ThreadPoolExecutor with timeout for gene extraction
+            loop = asyncio.get_event_loop()
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                # Run gene extraction with 30 second timeout
+                gene_future = loop.run_in_executor(executor, extract_gene_mentions, full_response, api_key)
+                gene_mentions, db_hits, gpt_hits = await asyncio.wait_for(gene_future, timeout=30.0)
+
+            print(f"Found gene mentions: {gene_mentions}")
+
+            if gene_mentions:  # Only process if genes were found
+                yield {"type": "progress", "data": {"step": "gene_processing", "detail": f"Processing {len(gene_mentions)} genetic elements"}}
+                # Process genes with timeout as well
+                gene_processing_future = loop.run_in_executor(executor, process_genes_batch, gene_mentions, api_key)
+                genes = await asyncio.wait_for(gene_processing_future, timeout=20.0)
+                print(f"✅ Successfully processed {len(genes)} genes")
+            else:
+                print("ℹ️ No gene mentions found in the response")
+
+        except asyncio.TimeoutError:
+            print("⏰ Gene extraction timed out after 30 seconds - continuing without gene processing")
+            genes = []
+        except Exception as e:
+            print(f"⚠️ Gene extraction failed: {e}")
+            genes = []
+    else:
+        print("ℹ️ No response content to extract genes from")
 
     yield {"type": "progress", "data": {"step": "sources", "detail": "Generating research references and citations"}}
 
@@ -689,14 +774,25 @@ async def continue_with_research_stream(question: str, conversation_history: Lis
 
     yield {"type": "progress", "data": {"step": "finalizing", "detail": "Completing analysis"}}
 
+    # Generate context-aware suggested questions
+    suggested_questions = generate_suggested_questions(
+        question=question,
+        answer=full_response,
+        conversation_history=conversation_history,
+        sources=combined_sources,
+        genes=genes,
+        full_markdown_table="",
+        api_key=api_key
+    )
+
     yield {
         "type": "metadata",
         "data": {
-            "sources": source_list,
+            "sources": combined_sources,
             "genes": genes,
             "full_markdown_table": "",
             "chart_data": {},
-            "suggested_questions": []
+            "suggested_questions": suggested_questions
         }
     }
 
@@ -1043,6 +1139,17 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                     for i, url in enumerate(source_urls, 1):
                         formatted_sources.append(f"Web-{i}: {url}")
                     
+                    # Generate context-aware suggested questions
+                    suggested_questions = generate_suggested_questions(
+                        question=question,
+                        answer=enhanced_response,
+                        conversation_history=conversation_history,
+                        sources=formatted_sources,
+                        genes=[],
+                        full_markdown_table="",
+                        api_key=api_key
+                    )
+
                     # Send completion metadata with properly formatted web sources
                     yield {
                         "type": "metadata",
@@ -1050,11 +1157,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             "sources": formatted_sources,
                             "genes": [],
                             "full_markdown_table": "",
-                            "suggested_questions": [
-                                "What bean varieties perform best in Ontario?",
-                                "Show me yield data for black beans", 
-                                "Tell me about current bean market trends"
-                            ]
+                            "suggested_questions": suggested_questions
                         }
                     }
                     return
@@ -1093,6 +1196,17 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
             for char in simple_response:
                 yield {"type": "content", "data": char}
 
+            # Generate context-aware suggested questions
+            suggested_questions = generate_suggested_questions(
+                question=question,
+                answer=simple_response,
+                conversation_history=conversation_history,
+                sources=[],
+                genes=[],
+                full_markdown_table="",
+                api_key=api_key
+            )
+
             # Send completion metadata
             yield {
                 "type": "metadata",
@@ -1100,11 +1214,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                     "sources": [],
                     "genes": [],
                     "full_markdown_table": "",
-                    "suggested_questions": [
-                        "What bean varieties perform best in Ontario?",
-                        "Show me yield data for black beans",
-                        "What genes are involved in disease resistance?"
-                    ]
+                    "suggested_questions": suggested_questions
                 }
             }
             return  # Stop here - no literature search for simple conversational questions
@@ -1186,6 +1296,17 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
 
     yield {"type": "progress", "data": {"step": "finalizing", "detail": "Completing analysis"}}
 
+    # Generate context-aware suggested questions
+    suggested_questions = generate_suggested_questions(
+        question=question,
+        answer=full_response,
+        conversation_history=conversation_history,
+        sources=combined_sources,
+        genes=gene_summaries,
+        full_markdown_table="",
+        api_key=api_key
+    )
+
     yield {
         "type": "metadata",
         "data": {
@@ -1193,7 +1314,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
             "genes": gene_summaries,
             "full_markdown_table": "",
             "chart_data": {},
-            "suggested_questions": []
+            "suggested_questions": suggested_questions
         }
     }
 

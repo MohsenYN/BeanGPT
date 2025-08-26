@@ -327,11 +327,14 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     
     # CRITICAL FIX: Validate cultivar parameter from function call
     function_call_cultivar = args.get('cultivar')
+    unknown_cultivar_detected = False
+    unknown_cultivar_name = None
+
     if function_call_cultivar and function_call_cultivar not in df['Cultivar Name'].values:
         print(f"🚨 WARNING: Function call suggested cultivar '{function_call_cultivar}' does not exist in dataset!")
         # Check if it's similar to any real cultivar (handle OAC 23-1D -> OAC 23-1 case)
         all_cultivars = df['Cultivar Name'].dropna().astype(str)
-        
+
         # First try exact partial match (e.g., "OAC 23-1D" should find "OAC 23-1")
         partial_match = None
         for cultivar in all_cultivars.unique():
@@ -340,7 +343,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             if cultivar_str in function_call_cultivar or function_call_cultivar.replace('-D', '') == cultivar_str:
                 partial_match = cultivar_str
                 break
-        
+
         if partial_match:
             print(f"🔧 Fixed cultivar parameter: '{function_call_cultivar}' -> '{partial_match}'")
             args['cultivar'] = partial_match
@@ -357,7 +360,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                 # Update mentioned_cultivars with corrected name
                 mentioned_cultivars = [args['cultivar']]
             else:
-                print(f"❌ No similar cultivars found. Removing invalid cultivar parameter.")
+                print(f"🌐 Unknown cultivar detected: '{function_call_cultivar}' - will perform web search")
+                unknown_cultivar_detected = True
+                unknown_cultivar_name = function_call_cultivar
                 args.pop('cultivar', None)  # Remove the invalid parameter
 
     # Track if we removed an invalid cultivar for user notification
@@ -368,7 +373,32 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     # After cultivar correction, update the original cultivar name tracking
     if function_call_cultivar and function_call_cultivar != args.get('cultivar'):
         print(f"📝 Original cultivar name was '{function_call_cultivar}', corrected to '{args.get('cultivar')}'")
-    
+
+    # Handle unknown cultivar web search
+    unknown_cultivar_web_context = ""
+    unknown_cultivar_sources = []
+
+    if unknown_cultivar_detected and unknown_cultivar_name and api_key:
+        try:
+            print(f"🌐 Performing web search for unknown cultivar: {unknown_cultivar_name}")
+            from .web_search import perform_web_search
+
+            # Create focused search query for unknown cultivar
+            search_query = f"{unknown_cultivar_name} dry bean cultivar performance yield maturity disease resistance breeding characteristics"
+
+            web_results, sources = perform_web_search(search_query, api_key)
+
+            if web_results and web_results.strip():
+                unknown_cultivar_web_context = web_results
+                unknown_cultivar_sources = sources if sources else []
+                print(f"🌐 Web search completed for {unknown_cultivar_name} - found {len(sources)} sources")
+            else:
+                print(f"⚠️ No web results found for {unknown_cultivar_name}")
+        except Exception as e:
+            print(f"⚠️ Web search failed for unknown cultivar {unknown_cultivar_name}: {e}")
+            unknown_cultivar_web_context = ""
+            unknown_cultivar_sources = []
+
     # Override function call parameters with correctly detected cultivars
     if mentioned_cultivars:
         # Update the cultivar parameter with the first detected cultivar
@@ -1067,27 +1097,23 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     has_limited_data = False
                     if 'Yield' in cultivar_data.columns:
                         avg_yield = cultivar_data['Yield'].mean()
-                        if pd.isna(avg_yield):
-                            has_limited_data = True
-                            response += f"- **Average yield:** Data not available\n"
-                        else:
+                        if not pd.isna(avg_yield):
                             response += f"- **Average yield:** {avg_yield:.2f} kg/ha\n"
+                        else:
+                            has_limited_data = True
                     else:
                         has_limited_data = True
-                        response += f"- **Average yield:** Column not available\n"
 
                     if 'Maturity' in cultivar_data.columns:
                         avg_maturity = cultivar_data['Maturity'].mean()
-                        if pd.isna(avg_maturity):
+                        if not pd.isna(avg_maturity):
+                            response += f"- **Average maturity:** {avg_maturity:.1f} days\n"
+                        else:
                             if not has_limited_data:  # Only set to True if not already True
                                 has_limited_data = True
-                            response += f"- **Average maturity:** Data not available\n"
-                        else:
-                            response += f"- **Average maturity:** {avg_maturity:.1f} days\n"
                     else:
                         if not has_limited_data:  # Only set to True if not already True
                             has_limited_data = True
-                        response += f"- **Average maturity:** Column not available\n"
                     
                     # Enriched breeding information
                     if 'Market Class' in cultivar_data.columns:
@@ -1116,6 +1142,10 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     
                     if resistance_traits:
                         response += f"- **Disease resistance:** {', '.join(resistance_traits)}\n"
+
+                    # Add note for limited data if multiple key fields are missing
+                    if has_limited_data and ('Yield' not in cultivar_data.columns or pd.isna(cultivar_data['Yield'].mean())) and ('Maturity' not in cultivar_data.columns or pd.isna(cultivar_data['Maturity'].mean())):
+                        response += f"- **Note:** Limited performance data available for this cultivar\n"
 
                     # If cultivar has limited data, perform web search to supplement information
                     if has_limited_data and api_key:
@@ -1361,7 +1391,54 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                 response += f"**🫘 {bean_type.title()} analysis:** {len(bean_data)} records, avg yield {bean_data['Yield'].mean():.2f} kg/ha\n"
         
         return response, response, chart_data, cultivar_context
-    
+
+    # Handle unknown cultivar with web search results
+    elif unknown_cultivar_detected and unknown_cultivar_web_context:
+        print(f"🌐 Generating response for unknown cultivar: {unknown_cultivar_name}")
+
+        response = f"## 🌐 **Information for {unknown_cultivar_name} (Not in Local Dataset)**\n\n"
+        response += f"**📝 Note:** {unknown_cultivar_name} is not present in the Ontario bean trial dataset. "
+        response += f"However, I found the following information from current web sources:\n\n"
+
+        # Convert web sources to clickable inline citations
+        web_response = unknown_cultivar_web_context
+        for i, source in enumerate(unknown_cultivar_sources, 1):
+            web_citation = f"[Web-{i}]"
+            clickable_citation = f"[Web-{i}]({source})"
+            web_response = web_response.replace(web_citation, clickable_citation)
+
+        response += web_response
+        response += f"\n\n*🔗 Web sources are linked above for verification*\n"
+
+        # Add Ontario dataset context for comparison
+        response += f"\n---\n\n## 📊 **Ontario Bean Dataset Context**\n\n"
+        response += f"For comparison, the Ontario bean trial dataset contains {len(df)} records from various years "
+        valid_locations = [str(loc) for loc in df['Location'].dropna().unique() if str(loc) != 'nan']
+        response += f"covering {', '.join(valid_locations)}.\n\n"
+
+        # Show similar cultivars from the dataset if any
+        if unknown_cultivar_name:
+            # Try to find similar names in the dataset
+            similar_names = []
+            cultivar_lower = unknown_cultivar_name.lower()
+            for existing_cultivar in df['Cultivar Name'].dropna().unique():
+                existing_lower = str(existing_cultivar).lower()
+                # Check for partial matches or similar words
+                if (cultivar_lower in existing_lower or
+                    existing_lower in cultivar_lower or
+                    any(word in existing_lower for word in cultivar_lower.split() if len(word) > 3)):
+                    similar_names.append(str(existing_cultivar))
+
+            if similar_names:
+                response += f"**💡 Similar cultivars in Ontario dataset:** {', '.join(similar_names[:5])}"
+                if len(similar_names) > 5:
+                    response += f" (+{len(similar_names)-5} more)"
+                response += "\n\n"
+
+        response += f"**💡 Tip:** Try asking about Ontario-specific cultivars or request information about similar varieties from the local dataset.\n"
+
+        return response, response, {}, ""
+
     else:
         # PRIORITY: If we have web search results for non-Ontario queries, lead with that
         if web_context and is_external_region_query:

@@ -89,14 +89,15 @@ def perform_web_search(question: str, api_key: str) -> Tuple[str, List[str]]:
                 "search_context_size": "medium"  # balanced context and latency
             }],
             input=f"""Search for current information about: {question}
-            
+
             CRITICAL REQUIREMENTS:
             1. Focus on recent data, statistics, and authoritative sources
             2. For bean/cultivar questions, prioritize agricultural extension services, research stations, and seed companies
-            3. Include specific cultivar names, release dates, and performance data when available
-            4. For regional questions (provinces/states), include region-specific breeding programs and varieties
-            5. Format information with clear sections and bullet points
-            6. Include source citations as [Web-1], [Web-2], etc.
+            3. ONLY include information that is actually available - do NOT include placeholders like "information not specified" or "data not available"
+            4. If specific data for a cultivar is not found, either omit that cultivar entirely or provide only the information that IS available
+            5. For regional questions (provinces/states), include region-specific breeding programs and varieties
+            6. Format information with clear sections and bullet points
+            7. Include source citations as [Web-1], [Web-2], etc.
             """
         )
         
