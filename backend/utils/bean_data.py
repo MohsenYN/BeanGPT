@@ -70,12 +70,18 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             df = df[df['Market Class'].str.contains('dark red kidney', case=False, na=False)]
         elif market_class_input.lower() in ['kidney', 'kidney bean']:
             df = df[df['Market Class'].str.contains('kidney', case=False, na=False)]
+        elif market_class_input.lower() in ['light red kidney', 'light red kidney bean', 'light kidney', 'light kidney bean']:
+            # For light kidney queries, still include all kidney types since they're related
+            df = df[df['Market Class'].str.contains('kidney', case=False, na=False)]
         elif market_class_input.lower() in ['navy', 'white navy', 'navy bean']:
             df = df[df['Market Class'].str.contains('navy', case=False, na=False)]
         elif market_class_input.lower() in ['black', 'black bean']:
             df = df[df['Market Class'].str.contains('black', case=False, na=False)]
         elif market_class_input.lower() in ['cranberry', 'cranberry bean']:
             df = df[df['Market Class'].str.contains('cranberry', case=False, na=False)]
+        elif 'kidney' in market_class_input.lower():
+            # If any mention of kidney, match all kidney types
+            df = df[df['Market Class'].str.contains('kidney', case=False, na=False)]
         else:
             # Generic filtering for other market classes
             df = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
@@ -88,6 +94,143 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
 
     # Get the original question for analysis
     original_question = args.get("original_question", "")
+
+    # EARLY DETECTION: Check if this is a listing query and handle it immediately
+    # This prevents GPT hallucinations and ensures we use actual dataset
+    list_keywords = ['list all', 'show all', 'all the', 'what are all', 'list every', 'all available',
+                    'full list', 'provide all', 'complete list', 'all cultivars', 'all varieties']
+    latest_keywords = ['latest', 'newest', 'most recent', 'recently released', 'new releases']
+
+    is_list_all_query = any(keyword in original_question.lower() for keyword in list_keywords)
+    is_latest_query = any(keyword in original_question.lower() for keyword in latest_keywords)
+
+    # Also detect if this is clearly a listing request even if keywords don't match exactly
+    query_lower = original_question.lower()
+    is_explicit_listing = ('full list' in query_lower or
+                          'complete list' in query_lower or
+                          ('all' in query_lower and 'list' in query_lower) or
+                          ('provide all' in query_lower and 'table' in query_lower))
+
+    # Debug: Check if this is being detected as a listing query
+    if 'list' in query_lower and ('all' in query_lower or 'full' in query_lower or 'complete' in query_lower):
+        print(f"🔍 DETECTED LISTING QUERY: {original_question}")
+        is_explicit_listing = True
+
+    if (is_list_all_query or is_explicit_listing) and market_class_input:
+        print(f"🎯 EARLY LISTING DETECTION TRIGGERED: is_list_all_query={is_list_all_query}, is_explicit_listing={is_explicit_listing}, market_class={market_class_input}")
+        # Filter by market class and get unique cultivars
+        market_class_data = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
+        if not market_class_data.empty:
+            unique_cultivars = sorted(market_class_data['Cultivar Name'].unique())
+
+            response = f"## 📊 **All {market_class_input} Bean Cultivars in Ontario**\n\n"
+            response += f"Based on the Ontario bean trial dataset, here are **all {len(unique_cultivars)} {market_class_input.lower()} bean cultivars** tested:\n\n"
+
+            # Handle large datasets by providing summary instead of individual listings
+            if len(unique_cultivars) > 50:
+                # For very large datasets, show summary statistics instead of individual listings
+                response += f"⚠️ **Large Dataset Notice:** This market class contains {len(unique_cultivars)} cultivars with {len(market_class_data)} total trial records.\n\n"
+
+                # Show top 10 performers instead of all
+                top_performers = []
+                for cultivar in unique_cultivars[:50]:  # Limit to first 50 for processing
+                    cultivar_data = market_class_data[market_class_data['Cultivar Name'] == cultivar]
+                    avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else 0
+                    top_performers.append((cultivar, avg_yield))
+
+                # Sort by yield and show top 10
+                top_performers.sort(key=lambda x: x[1], reverse=True)
+                response += f"**🏆 Top 10 Performing {market_class_input} Cultivars:**\n\n"
+                for i, (cultivar, avg_yield) in enumerate(top_performers[:10], 1):
+                    response += f"**{i}. {cultivar}** - Average yield: {avg_yield:.1f} kg/ha\n"
+
+                response += f"\n**📋 Complete List:** For the full list of all {len(unique_cultivars)} cultivars, please request a specific subset or use filtering criteria.\n\n"
+            else:
+                # For smaller datasets, show individual cultivar details
+                for i, cultivar in enumerate(unique_cultivars, 1):
+                    cultivar_data = market_class_data[market_class_data['Cultivar Name'] == cultivar]
+                    avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
+                    avg_maturity = cultivar_data['Maturity'].mean() if 'Maturity' in cultivar_data.columns else None
+                    trial_count = len(cultivar_data)
+
+                    response += f"**{i}. {cultivar}**\n"
+                    if avg_yield:
+                        response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
+                    if avg_maturity:
+                        response += f"   - Average maturity: {avg_maturity:.1f} days\n"
+                    response += f"   - Trial records: {trial_count}\n\n"
+
+            # Add summary statistics
+            total_avg_yield = market_class_data['Yield'].mean() if 'Yield' in market_class_data.columns else None
+            total_avg_maturity = market_class_data['Maturity'].mean() if 'Maturity' in market_class_data.columns else None
+
+            response += f"**📈 {market_class_input} Class Summary:**\n"
+            response += f"- Total cultivars: {len(unique_cultivars)}\n"
+            if total_avg_yield:
+                response += f"- Average yield across all cultivars: {total_avg_yield:.1f} kg/ha\n"
+            if total_avg_maturity:
+                response += f"- Average maturity: {total_avg_maturity:.1f} days\n"
+            response += f"- Total trial records: {len(market_class_data)}\n\n"
+
+            print(f"✅ EARLY RETURN: Listing query handled, returning {len(unique_cultivars)} cultivars")
+            return response, response, {}, ""
+
+    # EARLY CHECK: Handle latest releases for market class queries
+    if is_latest_query and market_class_input:
+        # Filter by market class
+        market_class_data = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
+        if not market_class_data.empty:
+            # Get latest cultivars by release year
+            if 'Released Year' in market_class_data.columns:
+                latest_year_data = market_class_data.dropna(subset=['Released Year'])
+                if not latest_year_data.empty:
+                    latest_year = int(latest_year_data['Released Year'].max())
+                    latest_cultivars_data = latest_year_data[latest_year_data['Released Year'] == latest_year]
+                    latest_cultivars = sorted(latest_cultivars_data['Cultivar Name'].unique())
+
+                    response = f"## 📊 **Latest {market_class_input} Bean Cultivars Released in Ontario**\n\n"
+                    response += f"The most recent {market_class_input.lower()} bean cultivars released in Ontario (as of {latest_year}) are:\n\n"
+
+                    for i, cultivar in enumerate(latest_cultivars, 1):
+                        cultivar_data = latest_cultivars_data[latest_cultivars_data['Cultivar Name'] == cultivar]
+                        avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
+
+                        response += f"**{i}. {cultivar}**\n"
+                        if avg_yield:
+                            response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
+                        response += f"   - Released: {latest_year}\n\n"
+
+                    # Add summary
+                    response += f"**📈 Latest {market_class_input} Releases Summary:**\n"
+                    response += f"- Latest release year: {latest_year}\n"
+                    response += f"- Number of new cultivars: {len(latest_cultivars)}\n"
+                    response += f"- Total trial records for latest cultivars: {len(latest_cultivars_data)}\n\n"
+
+                    return response, response, {}, ""
+
+            # Fallback to latest trial year if no release year data
+            elif 'Year' in market_class_data.columns:
+                latest_trial_year = market_class_data['Year'].max()
+                latest_trial_data = market_class_data[market_class_data['Year'] == latest_trial_year]
+                latest_cultivars = sorted(latest_trial_data['Cultivar Name'].unique())
+
+                response = f"## 📊 **Latest {market_class_input} Bean Cultivars in Ontario Trials**\n\n"
+                response += f"Based on the most recent trial data ({latest_trial_year}), here are **all {len(latest_cultivars)} {market_class_input.lower()} bean cultivars** tested:\n\n"
+
+                for i, cultivar in enumerate(latest_cultivars, 1):
+                    cultivar_data = latest_trial_data[latest_trial_data['Cultivar Name'] == cultivar]
+                    avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
+
+                    response += f"**{i}. {cultivar}**\n"
+                    if avg_yield:
+                        response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
+                    response += f"   - Trial year: {latest_trial_year}\n\n"
+
+                response += f"**📈 {latest_trial_year} {market_class_input} Trial Summary:**\n"
+                response += f"- Number of cultivars tested: {len(latest_cultivars)}\n"
+                response += f"- Total trial records: {len(latest_trial_data)}\n\n"
+
+                return response, response, {}, ""
     
     # EARLY CHECK: Handle climate prediction queries BEFORE bean data validation
     # This prevents climate queries from being caught by bean data validation
@@ -105,7 +248,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         print(f"🌡️ Early climate detection triggered for: {original_question}")
         
         # Extract decade and scenario information from the question
-        import re
         climate_decade = None
         climate_scenario = 'RCP 4.5'  # Default to normal scenario
         
@@ -235,16 +377,23 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         'yields in', 'performance in', 'grown at', 'production across', 'nationwide',
         'globally', 'worldwide', 'international', 'country', 'countries', 'region', 'regions'
     ]
-    
+
+    # Check for geographic context, but exclude Ontario-specific queries
     has_geographic_context = any(term in question_lower for term in geographic_terms)
-    
+
     # Also check for broader scope indicators
     broader_scope_terms = ['canada', 'canadian', 'nationwide', 'national', 'global', 'world', 'international']
     has_broader_scope = any(term in question_lower for term in broader_scope_terms)
-    
+
+    # Special handling for Ontario - if the question is specifically about Ontario data,
+    # don't treat it as an external region query
+    is_ontario_specific = any(term in question_lower for term in [
+        'ontario', 'ontario bean', 'ontario trial', 'ontario data', 'grown in ontario'
+    ])
+
     # If the question has geographic context or broader scope, and it's not clearly about Ontario locations only,
     # then we should supplement with web search
-    is_external_region_query = has_geographic_context or has_broader_scope
+    is_external_region_query = (has_geographic_context or has_broader_scope) and not is_ontario_specific
     
     # Debug logging for region detection
     print(f"🔍 Question: '{original_question}'")
@@ -442,8 +591,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         Detect ambiguous references and attempt to resolve them using context.
         Returns (resolved_entities, needs_clarification, clarification_message)
         """
-        import re
-        
         # Detect potential ambiguous patterns dynamically
         ambiguous_patterns = [
             r'\b(this|that|these|those)\s+(\w+)',  # "this cultivar", "that location"
@@ -541,7 +688,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     climate_scenario = 'RCP 4.5'  # Default to normal scenario
     
     if is_climate_prediction_query:
-        import re
         # Extract decade from question
         decade_match = re.search(r'(20[3-9][0-9])', original_question)
         if decade_match:
@@ -939,134 +1085,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         if chart_data is None:
             print("📊 Chart generation failed - showing text analysis only")
             chart_data = {}
-        
-            # SPECIAL HANDLING: List all cultivars for market class queries OR latest releases
-    list_keywords = ['list all', 'show all', 'all the', 'what are all', 'list every', 'all available']
-    latest_keywords = ['latest', 'newest', 'most recent', 'recently released', 'new releases']
-    is_list_all_query = any(keyword in original_question.lower() for keyword in list_keywords)
-    is_latest_query = any(keyword in original_question.lower() for keyword in latest_keywords)
-    
-    # Check if this is a market class listing query
-    market_class_filter = args.get('market_class')
-    if is_list_all_query and market_class_filter:
-        # Filter by market class and get unique cultivars
-        market_class_data = df[df['Market Class'].str.contains(market_class_filter, case=False, na=False)]
-        if not market_class_data.empty:
-            unique_cultivars = sorted(market_class_data['Cultivar Name'].unique())
-            
-            response = f"## 📊 **All {market_class_filter} Bean Cultivars in Ontario**\n\n"
-            response += f"Based on the Ontario bean trial dataset, here are **all {len(unique_cultivars)} {market_class_filter.lower()} bean cultivars** tested:\n\n"
-            
-            # Add each cultivar with key details
-            for i, cultivar in enumerate(unique_cultivars, 1):
-                cultivar_data = market_class_data[market_class_data['Cultivar Name'] == cultivar]
-                avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
-                avg_maturity = cultivar_data['Maturity'].mean() if 'Maturity' in cultivar_data.columns else None
-                trial_count = len(cultivar_data)
-                
-                response += f"**{i}. {cultivar}**\n"
-                if avg_yield:
-                    response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
-                if avg_maturity:
-                    response += f"   - Average maturity: {avg_maturity:.1f} days\n"
-                response += f"   - Trial records: {trial_count}\n\n"
-            
-            # Add summary statistics
-            if avg_yield:
-                total_avg_yield = market_class_data['Yield'].mean()
-                response += f"**📈 {market_class_filter} Class Summary:**\n"
-                response += f"- Total cultivars: {len(unique_cultivars)}\n"
-                response += f"- Average yield across all cultivars: {total_avg_yield:.1f} kg/ha\n"
-                if avg_maturity:
-                    total_avg_maturity = market_class_data['Maturity'].mean()
-                    response += f"- Average maturity: {total_avg_maturity:.1f} days\n"
-                response += f"- Total trial records: {len(market_class_data)}\n\n"
-            
-            return response, response, {}, ""
-    
-    # SPECIAL HANDLING: Latest releases for market class queries
-    if is_latest_query and market_class_filter:
-        # Filter by market class
-        market_class_data = df[df['Market Class'].str.contains(market_class_filter, case=False, na=False)]
-        if not market_class_data.empty:
-            # Find the most recent year with data for this market class
-            if 'Released Year' in market_class_data.columns:
-                # Use Released Year if available
-                market_class_data_clean = market_class_data.dropna(subset=['Released Year'])
-                if not market_class_data_clean.empty:
-                    latest_year = int(market_class_data_clean['Released Year'].max())
-                    latest_cultivars_data = market_class_data_clean[market_class_data_clean['Released Year'] == latest_year]
-                    unique_latest_cultivars = sorted(latest_cultivars_data['Cultivar Name'].unique())
-                    
-                    response = f"## 📊 **Latest {market_class_filter} Bean Cultivars Released in Ontario**\n\n"
-                    response += f"The most recent {market_class_filter.lower()} bean cultivars released in Ontario (as of {latest_year}) are:\n\n"
-                    
-                    # List all cultivars from the latest year
-                    for i, cultivar in enumerate(unique_latest_cultivars, 1):
-                        cultivar_data = latest_cultivars_data[latest_cultivars_data['Cultivar Name'] == cultivar]
-                        avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
-                        avg_maturity = cultivar_data['Maturity'].mean() if 'Maturity' in cultivar_data.columns else None
-                        trial_count = len(cultivar_data)
-                        
-                        response += f"**{i}. {cultivar}** (Released: {latest_year})\n"
-                        if avg_yield:
-                            response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
-                        if avg_maturity:
-                            response += f"   - Average maturity: {avg_maturity:.1f} days\n"
-                        response += f"   - Trial records: {trial_count}\n\n"
-                    
-                    # Add summary
-                    response += f"**📈 Latest {market_class_filter} Releases Summary:**\n"
-                    response += f"- Number of cultivars released in {latest_year}: {len(unique_latest_cultivars)}\n"
-                    if avg_yield:
-                        total_avg_yield = latest_cultivars_data['Yield'].mean()
-                        response += f"- Average yield of latest releases: {total_avg_yield:.1f} kg/ha\n"
-                    if avg_maturity:
-                        total_avg_maturity = latest_cultivars_data['Maturity'].mean()
-                        response += f"- Average maturity: {total_avg_maturity:.1f} days\n"
-                    response += f"- Total trial records: {len(latest_cultivars_data)}\n\n"
-                    
-                    return response, response, {}, ""
-            
-            # Fallback: Use Year column if Released Year not available
-            if 'Year' in market_class_data.columns:
-                year_max = market_class_data['Year'].max()
-                if not pd.isna(year_max):
-                    latest_trial_year = int(year_max)
-                else:
-                    # If all years are NaN, skip this processing
-                    return response, response, {}, ""
-                latest_year_data = market_class_data[market_class_data['Year'] == latest_trial_year]
-                unique_latest_cultivars = sorted(latest_year_data['Cultivar Name'].unique())
-                
-                response = f"## 📊 **Latest {market_class_filter} Bean Cultivars in Ontario Trials**\n\n"
-                response += f"Based on the most recent trial data ({latest_trial_year}), here are **all {len(unique_latest_cultivars)} {market_class_filter.lower()} bean cultivars** tested:\n\n"
-                
-                # List all cultivars from the latest trial year
-                for i, cultivar in enumerate(unique_latest_cultivars, 1):
-                    cultivar_data = latest_year_data[latest_year_data['Cultivar Name'] == cultivar]
-                    avg_yield = cultivar_data['Yield'].mean() if 'Yield' in cultivar_data.columns else None
-                    avg_maturity = cultivar_data['Maturity'].mean() if 'Maturity' in cultivar_data.columns else None
-                    trial_count = len(cultivar_data)
-                    
-                    response += f"**{i}. {cultivar}**\n"
-                    if avg_yield:
-                        response += f"   - Average yield: {avg_yield:.1f} kg/ha\n"
-                    if avg_maturity:
-                        response += f"   - Average maturity: {avg_maturity:.1f} days\n"
-                    response += f"   - Trial records: {trial_count}\n\n"
-                
-                response += f"**📈 {latest_trial_year} {market_class_filter} Trial Summary:**\n"
-                response += f"- Total cultivars tested: {len(unique_latest_cultivars)}\n"
-                if avg_yield:
-                    total_avg_yield = latest_year_data['Yield'].mean()
-                    response += f"- Average yield: {total_avg_yield:.1f} kg/ha\n"
-                if avg_maturity:
-                    total_avg_maturity = latest_year_data['Maturity'].mean()
-                    response += f"- Average maturity: {total_avg_maturity:.1f} days\n"
-                response += f"- Total trial records: {len(latest_year_data)}\n\n"
-                
-                return response, response, {}, ""
+
+            # No special handling needed here - listing queries are handled earlier
+# Duplicate code removed - listing queries are handled earlier in the function
     
     # Create a data-rich response with actual insights
     response = f"## 📊 **Bean Data Analysis**\n\n"
@@ -1080,9 +1101,15 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         response += f"📊 **Cross-Market Class Comparison:** {cross_market_issue['cultivar']} is a **{cross_market_issue['actual_market_class']}** bean, while you requested comparison with {cross_market_issue['requested_market_class']} beans. "
         response += f"The chart below shows both market classes with different colors for clear distinction.\n\n"
     
-    # Add cultivar context if any were mentioned
-    if mentioned_cultivars:
-        response += f"**🌱 Cultivars analyzed:** {', '.join([str(c) for c in mentioned_cultivars])}\n\n"
+            # Add cultivar context if any were mentioned
+        if mentioned_cultivars:
+            response += f"**🌱 Cultivars analyzed:** {', '.join([str(c) for c in mentioned_cultivars])}\n\n"
+
+        # Special handling for kidney bean queries - mention that all kidney types are included
+        if market_class_input and 'kidney' in market_class_input.lower():
+            kidney_types = df['Market Class'].str.extract(r'(.*kidney.*)', flags=re.IGNORECASE)[0].dropna().unique()
+            if len(kidney_types) > 1:
+                response += f"**📝 Note:** This analysis includes all kidney bean market classes: {', '.join(kidney_types)}\n\n"
         
         # Add specific data insights for mentioned cultivars with enriched information
         for cultivar in mentioned_cultivars:
@@ -1440,20 +1467,23 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         return response, response, {}, ""
 
     else:
-        # PRIORITY: If we have web search results for non-Ontario queries, lead with that
-        if web_context and is_external_region_query:
+        # PRIORITY: If we have substantial data in our dataset, prioritize that over web search
+        # Only use web search as primary if we have very limited dataset results
+        has_substantial_data = len(df) > 50  # Consider substantial if we have more than 50 records
+
+        if web_context and is_external_region_query and not has_substantial_data:
             response = f"## 🌐 **Global Bean Information**\n\n"
-            
+
             # Convert web sources to clickable inline citations
             web_response = web_context
             for i, source in enumerate(web_sources, 1):
                 web_citation = f"[Web-{i}]"
                 clickable_citation = f"[Web-{i}]({source})"
                 web_response = web_response.replace(web_citation, clickable_citation)
-            
+
             response += web_response
             response += f"\n\n*🔗 Web sources are linked above for verification*\n"
-            
+
             # Add Ontario context as supplementary information
             response += f"\n---\n\n## 📊 **Supplementary: Ontario Bean Data Context**\n\n"
             # Filter out NaN values and convert to strings
@@ -1463,25 +1493,31 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             year_max = df['Year'].max()
             year_range = f"{year_min:.0f}-{year_max:.0f}" if not (pd.isna(year_min) or pd.isna(year_max)) else "various years"
             response += f"For comparison, the Ontario bean trial dataset contains {len(df)} records from {year_range} covering {', '.join(valid_locations)}.\n"
-            
+
             return response, response, {}, ""
-        
+
         # No chart requested, provide text-based analysis
         response = f"## 📊 **Bean Data Overview**\n\n"
-        
+
         # CRITICAL: Notify user if invalid cultivar was mentioned and no valid ones found
         if invalid_cultivar_mentioned and not mentioned_cultivars:
             response += f"⚠️ **Note:** The cultivar '{invalid_cultivar_name}' was not found in the Ontario bean trial dataset. The analysis below shows general bean performance data.\n\n"
-        
+
         # CRITICAL: Notify user about cross-market class comparison issues
         if cross_market_issue:
             response += f"📊 **Cross-Market Class Comparison:** {cross_market_issue['cultivar']} is a **{cross_market_issue['actual_market_class']}** bean, while you requested comparison with {cross_market_issue['requested_market_class']} beans. "
             response += f"The analysis below shows both market classes for educational comparison.\n\n"
-        
+
         # Add cultivar context if any were mentioned
         if mentioned_cultivars:
             response += f"**🌱 Cultivars mentioned:** {', '.join([str(c) for c in mentioned_cultivars])}\n\n"
-        
+
+        # Special handling for kidney bean queries - mention that all kidney types are included
+        if market_class_input and 'kidney' in market_class_input.lower():
+            kidney_types = df['Market Class'].str.extract(r'(.*kidney.*)', flags=re.IGNORECASE)[0].dropna().unique()
+            if len(kidney_types) > 1:
+                response += f"**📝 Note:** This analysis includes all kidney bean market classes: {', '.join(kidney_types)}\n\n"
+
         response += f"**📊 Dataset:** {len(df)} records from Ontario bean trials\n"
         # Get year range safely for years display
         year_min = df['Year'].min()
@@ -1491,24 +1527,24 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         # Filter out NaN values and convert to strings
         valid_locations = [str(loc) for loc in df['Location'].dropna().unique() if str(loc) != 'nan']
         response += f"**📍 Locations:** {', '.join(valid_locations)}\n\n"
-        
+
         # Add summary statistics
         if 'Cultivar Name' in df.columns:
             unique_cultivars = df['Cultivar Name'].dropna().nunique()
             response += f"**🌱 Unique cultivars:** {unique_cultivars}\n"
-        
+
         if 'Yield' in df.columns and not df['Yield'].isna().all():
             avg_yield = df['Yield'].mean()
             min_yield = df['Yield'].min()
             max_yield = df['Yield'].max()
             response += f"**🌾 Yield range:** {min_yield:.1f} - {max_yield:.1f} kg/ha (avg: {avg_yield:.1f})\n"
-        
+
         if 'Maturity' in df.columns and not df['Maturity'].isna().all():
             avg_maturity = df['Maturity'].mean()
             min_maturity = df['Maturity'].min()
             max_maturity = df['Maturity'].max()
             response += f"**⏰ Maturity range:** {min_maturity:.0f} - {max_maturity:.0f} days (avg: {avg_maturity:.1f})\n"
-        
+
         # CRITICAL: If no specific cultivars mentioned but question asks about performance, show top performers
         performance_keywords = ['perform', 'best', 'top', 'highest', 'yield', 'productive', 'leading']
         if not mentioned_cultivars and any(keyword in original_question.lower() for keyword in performance_keywords):
@@ -1521,9 +1557,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     trial_count = len(cultivar_data)
                     response += f"- **{cultivar}**: {avg_yield:.1f} kg/ha average ({trial_count} trials)\n"
                 response += "\n"
-        
+
         response += f"**💡 Tip:** Ask for a chart or visualization to see the data graphically!\n"
-        
+
         return response, response, {}, ""
 
 # Enhanced function schema for OpenAI function calling with new data capabilities
