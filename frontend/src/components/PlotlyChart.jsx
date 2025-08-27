@@ -36,16 +36,30 @@ const PlotlyChart = ({ chartData, darkMode }) => {
     };
 
     const renderChart = () => {
-      if (!plotRef.current || !chartData || chartData.type === 'error') return;
+      console.log('🎯 PlotlyChart renderChart called');
+      console.log('📊 chartData:', chartData);
+      console.log('📍 plotRef.current:', plotRef.current);
+      
+      if (!plotRef.current || !chartData || chartData.type === 'error') {
+        console.log('❌ Early return from renderChart:', {
+          plotRefExists: !!plotRef.current,
+          chartDataExists: !!chartData,
+          chartDataType: chartData?.type
+        });
+        return;
+      }
 
       try {
         let plotData, layout, config;
 
         if (chartData.type === 'plotly' && chartData.data) {
+          console.log('✅ Processing Plotly chart data');
           // Use the Plotly data directly from backend
           const figData = chartData.data;
           plotData = figData.data || [];
           layout = figData.layout || {};
+          console.log('📈 plotData traces:', plotData.length);
+          console.log('🎨 layout keys:', Object.keys(layout));
           
           // Apply dark mode styling to layout
           if (darkMode) {
@@ -167,7 +181,17 @@ const PlotlyChart = ({ chartData, darkMode }) => {
         // Small delay to ensure cleanup is complete
         setTimeout(() => {
           if (plotRef.current) {
+            console.log('🚀 About to call Plotly.newPlot');
+            console.log('📊 plotData:', plotData);
+            console.log('🎨 layout:', layout);
+            console.log('⚙️ config:', config);
+            console.log('📍 plotRef.current:', plotRef.current);
+            console.log('🌐 window.Plotly exists:', !!window.Plotly);
+            
             window.Plotly.newPlot(plotRef.current, plotData, layout, config);
+            console.log('✅ Plotly.newPlot completed successfully');
+          } else {
+            console.log('❌ plotRef.current is null, cannot create plot');
           }
         }, 10);
 
@@ -191,12 +215,16 @@ const PlotlyChart = ({ chartData, darkMode }) => {
   }, [chartData, darkMode, chartKey]);
 
   if (!chartData) {
+    console.log('🚨 PlotlyChart: No chartData provided');
     return (
       <div className={`p-4 rounded-lg border ${darkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
         <p className="text-sm">No chart data available</p>
       </div>
     );
   }
+
+  // Add a visual indicator that chart data exists
+  console.log('🎯 PlotlyChart component rendered with chartData:', chartData);
 
   if (chartData.type === 'error' || chartData.error) {
     return (
@@ -209,6 +237,12 @@ const PlotlyChart = ({ chartData, darkMode }) => {
 
   return (
     <div key={chartKey} className={`${isMobile ? 'p-2' : 'p-4'} rounded-lg border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+      {/* Visual indicator that chart data exists */}
+      <div className={`mb-2 p-2 rounded text-sm ${darkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'}`}>
+        ✅ Chart data received: {chartData.title || 'Untitled Chart'} 
+        {chartData.description && <span className="block text-xs mt-1">{chartData.description}</span>}
+      </div>
+      
       <div 
         ref={plotRef} 
         key={`plot-${chartKey}`}

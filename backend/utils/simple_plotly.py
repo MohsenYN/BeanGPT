@@ -76,7 +76,8 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
             categorical_info[col] = list(unique_vals)  # Show all unique values
 
     system_msg = (
-        "CRITICAL INSTRUCTION: Output ONLY executable Python code. No explanations, no text, no markdown formatting, no comments about what you're doing.\n\n"
+        "CRITICAL INSTRUCTION: Output ONLY executable Python code. No explanations, no text, no markdown formatting, no comments about what you're doing.\n"
+        "🚨 SYNTAX REQUIREMENTS: Your code MUST be syntactically correct Python. No duplicate else statements, proper indentation, valid syntax only.\n\n"
         "🚨 MARKET CLASS VISUALIZATION RULES:\n"
         "When user mentions market classes or comparisons involving market classes:\n"
         "1. ALWAYS show average yield across ALL LOCATIONS for each market class\n"
@@ -95,6 +96,8 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
         "- The `df` variable contains the FULL REAL DATASET with thousands of records - USE IT DIRECTLY\n"
         "- ALWAYS check if columns exist before using them\n"
         "- ALWAYS check if values exist in columns before filtering\n"
+        "- 🚨 CRITICAL COLUMN NAMES: The cultivar column is 'Name' (not 'Cultivar Name'). ALWAYS use df['Name'] for cultivar names. NEVER use df['Cultivar Name']\n"
+        "- 🚨 MANDATORY: Use .groupby('Name') not .groupby('Cultivar Name'). Use df['Name'].values not df['Cultivar Name'].values\n"
         "- If requested data doesn't exist, create a chart with available data and informative title\n"
         "- When user requests global/world/country data but only local data is available, create a clear table showing the data limitation\n"
         "- Creates exactly ONE Plotly figure assigned to variable `fig`\n" 
@@ -565,16 +568,17 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
 
     messages = [
         {"role": "system", "content": system_msg},
+        {"role": "user", "content": f"🚨 CRITICAL: The cultivar column is 'Name' not 'Cultivar Name'. Use df['Name'] everywhere, never df['Cultivar Name']. Replace ALL instances of 'Cultivar Name' with 'Name' in your code."},
         {"role": "user", "content": f"Dataset info:\n- Columns: {cols}\n- Numeric columns: {num_cols}\n- Categorical columns: {categorical_cols}\n- Date columns: {date_cols}"},
         {"role": "user", "content": f"Sample categorical values: {categorical_info}"},
         {"role": "user", "content": f"Sample data (first 3 rows): {rows[:3]}"},
         {"role": "user", "content": "CRITICAL MARKET CLASS FILTERING: Use the 'Market Class' column for proper bean type filtering. Kidney beans = anything with 'kidney' in Market Class (case-insensitive: 'kidney', 'Kidney', 'white kidney', 'dark red kidney', 'light red kidney', 'dark red kidney bean', 'light red kidney bean'). Navy beans = 'White Navy' in Market Class. IMPORTANT: When user asks for kidney beans, filter by Market Class containing 'kidney', not by bean_type column. CROSS-MARKET COMPARISONS: When comparing different market classes, you MUST show BOTH the specific cultivar (RED) AND the market class data (BLUE) on the same chart. Do NOT show only one or the other."},
-        {"role": "user", "content": "🎯 PERFORMANCE PLOT RULE: When user asks about 'performance' or 'comparing performance' of cultivars, create a SCATTER PLOT with: X-axis = Days to Maturity (Maturity column), Y-axis = Yield (kg/ha). Each cultivar should be ONE POINT (average across all locations). Label each point with cultivar name. Add regression line if multiple cultivars. DO NOT create line charts by location for performance comparisons. CRITICAL: When user mentions a specific cultivar, highlight it in RED with larger markers.\n\n🚨 MANDATORY STEP-BY-STEP INSTRUCTIONS:\n\n1. FIRST: Check if the CONTEXT contains 'HIGHLIGHT_CULTIVAR:'\n2. IF FOUND: Extract the cultivar name after 'HIGHLIGHT_CULTIVAR:' and use it for highlighting\n3. IF NOT FOUND: Only then check the user request for valid cultivar names\n\n❌ NEVER extract cultivar names directly from user request when context is available\n❌ NEVER use misspelled names for highlighting\n\n✅ REQUIRED CODE PATTERN - COPY THIS EXACT STRUCTURE: ```python\n# Step 1: Initialize\nfig = go.Figure()\ntarget_cultivar = None\n\n# Step 2: MANDATORY - Check context first\nif 'HIGHLIGHT_CULTIVAR:' in 'PLACEHOLDER_CONTEXT':\n    start_idx = 'PLACEHOLDER_CONTEXT'.find('HIGHLIGHT_CULTIVAR:') + len('HIGHLIGHT_CULTIVAR:')\n    cultivar_part = 'PLACEHOLDER_CONTEXT'[start_idx:].strip()\n    target_cultivar = cultivar_part.split(',')[0].strip()\n    print(f\"DEBUG: Found cultivar in context: {target_cultivar}\")\n\n# Step 3: Only if no context, check user request\nif target_cultivar is None:\n    for word in 'PLACEHOLDER_REQUEST'.split():\n        if word in df['Cultivar Name'].values:\n            target_cultivar = word\n            print(f\"DEBUG: Found cultivar in request: {target_cultivar}\")\n            break\n\n# Step 4: Filter and plot\nfiltered_data = df[(df['Year'] == 2024) & (df['Market Class'].str.contains('dark red kidney', case=False, na=False))]\ncultivars_avg = filtered_data.groupby('Cultivar Name')[['Yield', 'Maturity']].mean().reset_index()\n\ncolors = ['red' if x == target_cultivar else 'blue' for x in cultivars_avg['Cultivar Name']]\nsizes = [15 if x == target_cultivar else 10 for x in cultivars_avg['Cultivar Name']]\n\nfig.add_trace(go.Scatter(\n    x=cultivars_avg['Maturity'],\n    y=cultivars_avg['Yield'],\n    mode='markers+text',\n    text=cultivars_avg['Cultivar Name'],\n    textposition='top center',\n    marker=dict(color=colors, size=sizes, line=dict(color='black', width=1))\n))\n\nif len(cultivars_avg) > 1:\n    slope, intercept, r_value, p_value, std_err = stats.linregress(cultivars_avg['Maturity'], cultivars_avg['Yield'])\n    line_x = np.linspace(cultivars_avg['Maturity'].min(), cultivars_avg['Maturity'].max(), 100)\n    line_y = slope * line_x + intercept\n    fig.add_trace(go.Scatter(x=line_x, y=line_y, mode='lines', name=f'Regression (R² = {r_value**2:.3f})', line=dict(color='gray', width=2, dash='dash')))\n\nfig.update_layout(title='Dark Red Kidney Bean Performance Comparison 2024', xaxis_title='Days to Maturity', yaxis_title='Yield (kg/ha)', height=450, width=900)\n```"},
+        {"role": "user", "content": "🎯 PERFORMANCE PLOT RULE: When user asks about 'performance' or 'comparing performance' of cultivars, create a SCATTER PLOT with: X-axis = Days to Maturity (Maturity column), Y-axis = Yield (kg/ha). Each cultivar should be ONE POINT (average across all locations). Label each point with cultivar name. Add regression line if multiple cultivars. DO NOT create line charts by location for performance comparisons. CRITICAL: When user mentions a specific cultivar, highlight it in RED with larger markers.\n\n🚨 MANDATORY STEP-BY-STEP INSTRUCTIONS:\n\n1. FIRST: Check if the CONTEXT contains 'HIGHLIGHT_CULTIVAR:'\n2. IF FOUND: Extract the cultivar name after 'HIGHLIGHT_CULTIVAR:' and use it for highlighting\n3. IF NOT FOUND: Only then check the user request for valid cultivar names\n\n❌ NEVER extract cultivar names directly from user request when context is available\n❌ NEVER use misspelled names for highlighting\n\n✅ REQUIRED CODE PATTERN - COPY THIS EXACT STRUCTURE: ```python\n# Step 1: Initialize\nfig = go.Figure()\ntarget_cultivar = None\n\n# Step 2: MANDATORY - Check context first\nif 'HIGHLIGHT_CULTIVAR:' in '{context}':\n    start_idx = '{context}'.find('HIGHLIGHT_CULTIVAR:') + len('HIGHLIGHT_CULTIVAR:')\n    cultivar_part = '{context}'[start_idx:].strip()\n    target_cultivar = cultivar_part.split(',')[0].strip()\n    print(f\"DEBUG: Found cultivar in context: {target_cultivar}\")\n\n# Step 3: Only if no context, check user request\nif target_cultivar is None:\n    for word in '{user_request}'.split():\n        if word in df['Name'].values:\n            target_cultivar = word\n            print(f\"DEBUG: Found cultivar in request: {target_cultivar}\")\n            break\n\n# Step 4: Filter and plot\nfiltered_data = df[df['Market Class'].str.contains('Otebo', case=False, na=False)]\ncultivars_avg = filtered_data.groupby('Name')[['Yield', 'Maturity']].mean().reset_index()\n# Remove cultivars with NaN values\ncultivars_avg = cultivars_avg.dropna()\n\nif len(cultivars_avg) >= 2:\n    colors = ['red' if x == target_cultivar else 'blue' for x in cultivars_avg['Name']]\n    sizes = [15 if x == target_cultivar else 10 for x in cultivars_avg['Name']]\n\n    fig.add_trace(go.Scatter(\n        x=cultivars_avg['Maturity'],\n        y=cultivars_avg['Yield'],\n        mode='markers+text',\n        text=cultivars_avg['Name'],\n        textposition='top center',\n        marker=dict(color=colors, size=sizes, line=dict(color='black', width=1))\n    ))\n\n    # Add regression line only if we have 2+ points\n    if len(cultivars_avg) >= 2:\n        slope, intercept, r_value, p_value, std_err = stats.linregress(cultivars_avg['Maturity'], cultivars_avg['Yield'])\n        line_x = np.linspace(cultivars_avg['Maturity'].min(), cultivars_avg['Maturity'].max(), 100)\n        line_y = slope * line_x + intercept\n        fig.add_trace(go.Scatter(x=line_x, y=line_y, mode='lines', name=f'Regression (R² = {r_value**2:.3f})', line=dict(color='gray', width=2, dash='dash')))\n\n    fig.update_layout(title='Otebo Bean Performance Comparison', xaxis_title='Days to Maturity', yaxis_title='Yield (kg/ha)', height=450, width=900)\nelse:\n    fig = None\n```"},
         {"role": "user", "content": "ENHANCED DATA CONTEXT: This dataset includes enriched breeding information - Market Class, Pedigree, Released Year, Disease Resistance markers (Common Mosaic Virus R1/R15, Anthracnose R17/R23/R73, Common Blight). IMPORTANT: Historical weather data is available in a separate dataset that can be accessed via db_manager.historical_data - it contains 15+ weather variables by location and year that can be linked to bean performance. CRITICAL LOCATION AGGREGATION: When showing performance by location, always group by location and calculate averages - don't show multiple data points per location unless explicitly requested."},
         {"role": "user", "content": f"User request: {prompt}"},
         {"role": "user", "content": "CRITICAL: Extract any cultivar names mentioned in the user request and use them in your analysis"},
         {"role": "user", "content": "🚨 CROSS-MARKET COMPARISON REQUIREMENT: If user asks to compare 'OAC 23-1' with 'Kidney beans', you MUST show BOTH on the same chart: OAC 23-1 data (RED) AND Kidney beans data (BLUE). Do NOT show only kidney beans - that's incomplete!"},
-        {"role": "user", "content": "🚨 ABSOLUTE RULE: If your chart would only show 1 data point (1 bar, 1 value, etc.), set fig = None instead. Single-value charts are USELESS and FORBIDDEN."},
+        {"role": "user", "content": "🚨 ABSOLUTE RULE: If your chart would only show 1 data point (1 bar, 1 value, etc.), set fig = None instead. Single-value charts are USELESS and FORBIDDEN. Charts with 2+ data points are acceptable."},
         {"role": "user", "content": "🔢 COMPLETE DATA RULE: ALWAYS show ALL available data in charts and text responses. NEVER limit, sample, or truncate data. For market class queries (cranberry beans, kidney beans, etc.), show EVERY cultivar in that market class. For 'list all' queries, show the complete list. NO exceptions - use the full dataset without any .head(), .sample(), or limiting operations."},
         {"role": "user", "content": "RESPOND WITH ONLY PYTHON CODE - NO EXPLANATORY TEXT"},
     ]
@@ -730,9 +734,17 @@ def run_generated_code(code: str, df: pd.DataFrame) -> go.Figure:
             
             total_data_points += trace_points
         
-        # If chart only shows 1 data point total, it's useless
-        if total_data_points <= 1:
-            print("⚠️ Chart generation failed: Single-value chart detected (useless)")
+        # Allow charts with at least 1 data point - don't reject single points as they're still meaningful
+        if total_data_points < 1:
+            print("⚠️ Chart generation failed: No data points found")
+            print("💡 Returning None - will show text analysis only")
+            return None
+        
+        # CRITICAL: Check for syntax errors in generated code before execution
+        try:
+            compile(code, '<string>', 'exec')
+        except SyntaxError as e:
+            print(f"⚠️ Chart generation failed: Syntax error in generated code - {e}")
             print("💡 Returning None - will show text analysis only")
             return None
         
@@ -751,6 +763,49 @@ def run_generated_code(code: str, df: pd.DataFrame) -> go.Figure:
                 error_msg = f"Chart generation failed: Plotly configuration error. {str(e)}"
         else:
             error_msg = f"Generated code failed → {e}"
+        
+        # Try to create a simple fallback chart if the error is column-related
+        if "'Cultivar Name'" in str(e) or "KeyError" in str(e):
+            print("🔧 Attempting fallback chart with correct column names...")
+            try:
+                # Simple fallback chart for market class queries
+                if 'Market Class' in df.columns and 'Name' in df.columns:
+                    # Filter for the market class mentioned in the prompt
+                    market_class_terms = ['otebo', 'kidney', 'navy', 'black', 'cranberry']
+                    market_class_filter = None
+                    
+                    for term in market_class_terms:
+                        if term.lower() in prompt.lower():
+                            market_class_filter = term
+                            break
+                    
+                    if market_class_filter:
+                        filtered_data = df[df['Market Class'].str.contains(market_class_filter, case=False, na=False)]
+                        if not filtered_data.empty and 'Yield' in df.columns and 'Maturity' in df.columns:
+                            cultivars_avg = filtered_data.groupby('Name')[['Yield', 'Maturity']].mean().reset_index()
+                            cultivars_avg = cultivars_avg.dropna()
+                            
+                            if len(cultivars_avg) >= 2:
+                                fig = go.Figure()
+                                fig.add_trace(go.Scatter(
+                                    x=cultivars_avg['Maturity'],
+                                    y=cultivars_avg['Yield'],
+                                    mode='markers+text',
+                                    text=cultivars_avg['Name'],
+                                    textposition='top center',
+                                    marker=dict(color='blue', size=10, line=dict(color='black', width=1))
+                                ))
+                                fig.update_layout(
+                                    title=f'{market_class_filter.title()} Bean Performance Comparison',
+                                    xaxis_title='Days to Maturity',
+                                    yaxis_title='Yield (kg/ha)',
+                                    height=450,
+                                    width=900
+                                )
+                                print("✅ Fallback chart created successfully!")
+                                return fig
+            except Exception as fallback_error:
+                print(f"❌ Fallback chart also failed: {fallback_error}")
             
         raise DataProcessingError(error_msg) from e
 
@@ -766,6 +821,130 @@ def create_smart_chart(df: pd.DataFrame, user_request: str, api_key: str, contex
                 "error": "No data available for visualization",
                 "title": "Chart Generation Error"
             }
+        
+        # FIRST: Try direct chart creation for common market class queries
+        market_class_terms = ['otebo', 'kidney', 'navy', 'black', 'cranberry', 'pinto', 'white']
+        market_class_filter = None
+        
+        print(f"🔍 Analyzing user request: '{user_request}'")
+        for term in market_class_terms:
+            if term.lower() in user_request.lower():
+                market_class_filter = term
+                print(f"✅ Market class detected: {market_class_filter}")
+                break
+        
+        if not market_class_filter:
+            print("❌ No market class detected in request")
+        
+        # If this is a market class query or performance query, create chart directly
+        if market_class_filter and ('plot' in user_request.lower() or 'performance' in user_request.lower() or 'compare' in user_request.lower()):
+            print(f"🎯 Direct chart creation for {market_class_filter} market class")
+            try:
+                print(f"🔍 Filtering data for market class: {market_class_filter}")
+                filtered_data = df[df['Market Class'].str.contains(market_class_filter, case=False, na=False)]
+                print(f"📊 Filtered data: {len(filtered_data)} rows")
+                
+                # Determine the correct cultivar column name
+                cultivar_col = 'Name' if 'Name' in df.columns else 'Cultivar Name'
+                
+                print(f"🔍 Checking conditions:")
+                print(f"  - Filtered data empty: {filtered_data.empty}")
+                print(f"  - Yield column exists: {'Yield' in df.columns}")
+                print(f"  - Maturity column exists: {'Maturity' in df.columns}")
+                print(f"  - Cultivar column ({cultivar_col}) exists: {cultivar_col in df.columns}")
+                print(f"📋 Available columns: {df.columns.tolist()}")
+                print(f"🔍 Using cultivar column: {cultivar_col}")
+                
+                if not filtered_data.empty and 'Yield' in df.columns and 'Maturity' in df.columns and cultivar_col in df.columns:
+                    print("✅ Required columns found, grouping by cultivar")
+                    cultivars_avg = filtered_data.groupby(cultivar_col)[['Yield', 'Maturity']].mean().reset_index()
+                    print(f"📈 Cultivars before dropna: {len(cultivars_avg)}")
+                    cultivars_avg = cultivars_avg.dropna()
+                    print(f"📈 Cultivars after dropna: {len(cultivars_avg)}")
+                    print(f"📋 Cultivars data:\n{cultivars_avg}")
+                    
+                    if len(cultivars_avg) >= 2:
+                        print("🎨 Creating scatter plot with regression line")
+                        fig = go.Figure()
+                        
+                        # Add scatter plot
+                        fig.add_trace(go.Scatter(
+                            x=cultivars_avg['Maturity'],
+                            y=cultivars_avg['Yield'],
+                            mode='markers+text',
+                            text=cultivars_avg[cultivar_col],
+                            textposition='top center',
+                            marker=dict(
+                                color='blue',
+                                size=12,
+                                line=dict(color='black', width=1)
+                            ),
+                            name='Cultivars'
+                        ))
+                        
+                        # Add regression line if we have 2+ points
+                        if len(cultivars_avg) >= 2:
+                            from scipy import stats
+                            slope, intercept, r_value, p_value, std_err = stats.linregress(cultivars_avg['Maturity'], cultivars_avg['Yield'])
+                            line_x = [cultivars_avg['Maturity'].min(), cultivars_avg['Maturity'].max()]
+                            line_y = [slope * x + intercept for x in line_x]
+                            
+                            fig.add_trace(go.Scatter(
+                                x=line_x,
+                                y=line_y,
+                                mode='lines',
+                                name=f'Regression (R² = {r_value**2:.3f})',
+                                line=dict(color='red', width=2, dash='dash')
+                            ))
+                        
+                        fig.update_layout(
+                            title=f'{market_class_filter.title()} Bean Performance Comparison',
+                            xaxis_title='Days to Maturity',
+                            yaxis_title='Yield (kg/ha)',
+                            height=450,
+                            width=900,
+                            showlegend=True
+                        )
+                        
+                        print("✅ Direct chart created successfully!")
+                        
+                        # Convert to JSON for frontend
+                        fig_json = fig.to_json()
+                        chart_result = {
+                            "type": "plotly",
+                            "data": json.loads(fig_json),
+                            "title": f'{market_class_filter.title()} Bean Performance Comparison',
+                            "description": f"Interactive chart showing {len(cultivars_avg)} cultivars from {len(filtered_data)} trials"
+                        }
+                        
+                        # Debug: Log the chart data structure
+                        print(f"📊 Chart data structure:")
+                        print(f"  - Type: {chart_result['type']}")
+                        print(f"  - Title: {chart_result['title']}")
+                        print(f"  - Description: {chart_result['description']}")
+                        print(f"  - Data keys: {list(chart_result['data'].keys())}")
+                        print(f"  - Number of traces: {len(chart_result['data']['data'])}")
+                        
+                        return chart_result
+                    else:
+                        print(f"⚠️ Not enough cultivars with data: {len(cultivars_avg)} (need >= 2)")
+                else:
+                    print("❌ Conditions not met for direct chart creation")
+                    if filtered_data.empty:
+                        print("  - No data found for market class")
+                    if 'Yield' not in df.columns:
+                        print("  - Yield column missing")
+                    if 'Maturity' not in df.columns:
+                        print("  - Maturity column missing")
+                    if cultivar_col not in df.columns:
+                        print(f"  - {cultivar_col} column missing")
+                        
+            except Exception as direct_error:
+                print(f"❌ Direct chart creation failed: {direct_error}")
+                import traceback
+                traceback.print_exc()
+        
+        print("🤖 Falling back to GPT-4o chart generation")
         
         # Create OpenAI client
         client = create_openai_client(api_key)

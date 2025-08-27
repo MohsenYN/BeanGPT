@@ -667,6 +667,10 @@ export default function App() {
                   }]);
                   break;
                 } else if (data.type === 'bean_complete') {
+                  console.log('🎯 Frontend received bean_complete message');
+                  console.log('📊 Chart data in bean_complete:', data.data.chart_data);
+                  console.log('📋 Full data object:', data.data);
+                  
                   // Bean data analysis is complete, show toggle for research continuation
                   setIsLoading(false);
                   setIsStreaming(false);
@@ -683,6 +687,8 @@ export default function App() {
                     showResearchToggle: true, // Flag to show the research toggle
                     originalQuestion: userMsgText // Store the original question for research continuation
                   }]);
+                  
+                  console.log('✅ Message added to state with chartData:', data.data.chart_data);
                   
                   setStreamingText('');
                   return; // Stop processing here

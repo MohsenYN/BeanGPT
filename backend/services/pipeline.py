@@ -944,10 +944,16 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                         "⚠️ CRITICAL BEHAVIOR - ABSOLUTE RULES\n"
                                         "• NEVER provide analysis steps or recommendations\n"
                                         "• 🚨 CRITICAL: NEVER invent cultivar names like \"Cultivar A\", \"Cultivar B\", \"Cultivar C\", \"Cultivar X\", etc.\n"
-                                        "• 🚨 CRITICAL: ONLY use ACTUAL cultivar names that exist in the dataset (e.g., OAC Rex, AC Pintoba, Black Hawk)\n"
-                                        "• 🚨 CRITICAL: If you don't know specific cultivar names from the data, say \"the top-performing cultivars\" instead\n"
+                                        "• 🚨 CRITICAL: ONLY use ACTUAL cultivar names that exist in the dataset - DO NOT make up or invent any cultivar names\n"
+                                        "• 🚨 CRITICAL: For market class queries (e.g., 'Otebo beans'), ONLY show cultivars that actually belong to that market class in the dataset\n"
+                                        "• 🚨 CRITICAL: When the preview shows specific cultivar names (e.g., 'Otebo cultivars in dataset: Samurai, Hime, Sundust...'), USE THESE EXACT NAMES in your analysis\n"
+                                        "• 🚨 CRITICAL: When the preview shows performance data (e.g., 'Samurai: 3,450.2 kg/ha yield, 92.3 days maturity'), USE THESE EXACT VALUES in your analysis\n"
+                                        "• 🚨 CRITICAL: If you don't know specific cultivar names from the data, say \"the cultivars in this market class\" instead\n"
                                         "• NEVER say \"sample data\" — this is the complete dataset\n"
-                                        "• NEVER generate vague placeholder values like [specific yield]\n"
+                                        "• NEVER generate vague placeholder values like [specific yield], [specific maturity], etc.\n"
+                                        "• 🚨 MARKET CLASS INTEGRITY: When showing cultivars for a market class, ensure they actually belong to that market class\n"
+                                        "• 🚨 USE PROVIDED DATA: The preview contains the exact cultivar names and performance data - use them directly in your analysis\n"
+                                        "• 🚨 EXTRACT ACTUAL VALUES: When the preview shows 'Hime: 2,950.3 kg/ha yield, 89.5 days maturity', report these exact numbers, not placeholders\n"
                                         "• 🚨 PROVIDE CONCRETE AVERAGES: When comparing market classes, calculate and state the actual average values (e.g., 'Kidney beans: 3,200 kg/ha average yield, 95 days average maturity'). Never say 'would need to be extracted' - extract and calculate them immediately\n"
                                         "• 🚨 KIDNEY BEAN IDENTIFICATION: Kidney beans include ANY Market Class containing 'kidney' (case-insensitive): kidney, Kidney, white kidney, dark red kidney, light red kidney, dark red kidney bean, light red kidney bean. The dataset DOES contain kidney bean data - analyze it properly!\n"
                                         "• 🚨 CULTIVAR CORRECTION: If the user misspelled a cultivar name and it was automatically corrected during processing, focus your analysis on the CORRECTED cultivar name, not the original misspelling. Use the corrected name in all your analysis and comparisons.\n"
@@ -1034,6 +1040,11 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         bean_data_found = True
                         
                         # Instead of automatically continuing, send a toggle for user choice
+                        print(f"🚀 Sending bean_complete response with chart_data:")
+                        print(f"  - Chart data type: {type(chart_data)}")
+                        print(f"  - Chart data keys: {list(chart_data.keys()) if isinstance(chart_data, dict) else 'Not a dict'}")
+                        print(f"  - Chart data empty: {not chart_data}")
+                        
                         yield {
                             "type": "bean_complete",
                             "data": {
@@ -1044,6 +1055,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                 "suggested_questions": []
                             }
                         }
+                        print(f"✅ bean_complete response sent successfully")
                         return  # Stop here, don't continue to research automatically
                     else:
                         # No data found, fall back to literature search
