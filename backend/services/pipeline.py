@@ -803,7 +803,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     Now requires user-provided API key.
     """
     # Immediately show thinking indicator
-    yield {"type": "progress", "data": {"step": "thinking", "detail": "Thinking..."}}
+    yield {"type": "progress", "data": {"step": "thinking", "detail": "Analyzing your question..."}}
     
     # Create client with user-provided API key
     from utils.openai_client import create_openai_client
@@ -824,7 +824,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     is_genetic = is_genetics_question(question, api_key)
     print(f"🧪 Is this a genetics question? {is_genetic}")
     
-    yield {"type": "progress", "data": {"step": "analysis", "detail": "Analyzing question type"}}
+    yield {"type": "progress", "data": {"step": "analysis", "detail": "Determining research strategy..."}}
 
     # Flag to determine if we should proceed to literature search
     should_search_literature = is_genetic
@@ -917,7 +917,27 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                     args['original_question'] = question
                     args['api_key'] = api_key
                     
+                    # Determine what type of query this is for better progress messages
+                    question_lower = question.lower()
+                    if any(region in question_lower for region in ['michigan', 'usa', 'canada', 'minnesota', 'north dakota']):
+                        yield {"type": "progress", "data": {"step": "loading", "detail": "Loading USA/Canada cultivar database..."}}
+                    else:
+                        yield {"type": "progress", "data": {"step": "loading", "detail": "Loading Ontario bean trial dataset..."}}
+                    
+                    # Check if web search will be performed
+                    if args.get('api_key'):
+                        if 'latest' in question_lower:
+                            yield {"type": "progress", "data": {"step": "processing", "detail": "Finding latest cultivar releases..."}}
+                        elif any(keyword in question_lower for keyword in ['all', 'every', 'complete']):
+                            yield {"type": "progress", "data": {"step": "processing", "detail": "Processing complete cultivar dataset..."}}
+                        else:
+                            yield {"type": "progress", "data": {"step": "processing", "detail": "Analyzing cultivar performance data..."}}
+                    
                     preview, full_md, chart_data, cultivar_context = answer_bean_query(args)
+                    
+                    # Add web search progress update
+                    if args.get('api_key'):
+                        yield {"type": "progress", "data": {"step": "web_search", "detail": "Searching for additional research context..."}}
 
                     if preview and not preview.strip().startswith("## 🔍 **Dataset Query Results**\n\nNo matching"):
                         yield {"type": "progress", "data": {"step": "dataset_success", "detail": "Found matching data"}}
@@ -995,14 +1015,19 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             print(f"DEBUG: Preview middle section: ...{preview[500:800]}...")
                             print(f"DEBUG: Preview ends with: ...{preview[-200:]}")
 
+                        # Progress update for AI summarization
+                        yield {"type": "progress", "data": {"step": "ai_summary", "detail": "Generating research summary..."}}
+
                         summary_response = client.chat.completions.create(
                             model="gpt-4o",
                             messages=[
                                 {
                                     "role": "system",
                                     "content": (
+                                        "🚨 CRITICAL USA/CANADA DATA INSTRUCTION: If the dataset response contains '🌍 Bean Cultivars - USA/Canada Database' or mentions USA/Canada cultivar data, this is VALID DATA from a 260-record database. You MUST summarize and present this data fully. NEVER respond with 'Only Ontario research station data is available' when USA/Canada data is present.\n\n"
+                                        "🌐 USA/CANADA WEB INTEGRATION: If the response includes '🌐 Additional Research Context' with web search results, you MUST integrate this information with the cultivar data. Highlight performance insights, yield comparisons, and breeding achievements from the web research. Do not just list cultivars - synthesize the web research to identify the best performers.\n\n"
                                         "You are a dry bean research analyst reporting to PhD-level researchers.\n"
-                                        "You must present only direct statistical findings, comparisons, and evidence-based conclusions using the Ontario trial dataset.\n\n"
+                                        "You must present only direct statistical findings, comparisons, and evidence-based conclusions using the available datasets.\n\n"
                                         "🚨 ABSOLUTE LIST ALL REQUIREMENT: If the user asks 'list all', 'show all', 'what are all', or similar phrases requesting complete lists, you MUST provide EVERY SINGLE item from the dataset. Do NOT summarize, truncate, or show only 'top' performers. List ALL items with their complete data in numbered format.\n\n"
                                         "⚠️ CRITICAL BEHAVIOR - ABSOLUTE RULES\n"
                                         "• NEVER provide analysis steps or recommendations\n"
@@ -1046,9 +1071,13 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                         "WINC – Winchester\n"
                                         "WOOD – Woodstock\n\n"
                                         
-                                        "If the user asks for global data:\n"
-                                        "• If the dataset response includes web search context with citations like [Web-1](url), preserve these EXACTLY as provided\n"
-                                        "• If no web context is available, respond with: \"Only Ontario research station data is available.\"\n"
+                                        "CRITICAL: For USA/Canada queries:\n"
+                                        "• If the dataset response contains '🌍 Bean Cultivars - USA/Canada Database' or mentions 'USA/Canada cultivar database', this is VALID DATA - summarize and present it fully\n"
+                                        "• If the response contains cultivar names, breeders, market classes, or web search results, this is VALID DATA - present it\n"
+                                        "• For 'best performance' queries, use web research to identify top performers (e.g., Eclipse, Vista, Dynasty) and explain WHY they're best\n"
+                                        "• Synthesize database cultivars with web research performance data - don't just list cultivars without context\n"
+                                        "• NEVER respond with \"Only Ontario research station data is available\" if USA/Canada data or web context is present\n"
+                                        "• Only use the fallback message if the response is completely empty or contains only error messages\n"
                                         "• Always provide the best possible insight based on the available data\n"
                                         "• PRESERVE any web citations and clickable links [Web-1](url) format from the dataset response\n\n"
                                         
@@ -1093,6 +1122,9 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         )
                         
                         final_answer = summary_response.choices[0].message.content.strip()
+                        
+                        # Progress update before streaming final answer
+                        yield {"type": "progress", "data": {"step": "streaming", "detail": "Streaming research results..."}}
                         
                         # Stream the complete answer
                         for char in final_answer:

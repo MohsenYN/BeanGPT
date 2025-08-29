@@ -80,6 +80,9 @@ export default function App() {
   const [showSuggestedQuestions, setShowSuggestedQuestions] = useState({});
   const [showGenePanel, setShowGenePanel] = useState({});
   
+  // Dynamic loading steps state
+  const [dynamicLoadingSteps, setDynamicLoadingSteps] = useState([]);
+  
   // Modal states
   const [showGeneSearchModal, setShowGeneSearchModal] = useState(false);
   const [showResourcesModal, setShowResourcesModal] = useState(false);
@@ -455,6 +458,7 @@ export default function App() {
     if (isLoading) {
       setCurrentStep(0);
       setCompletedSteps([]);
+      setDynamicLoadingSteps([]); // Reset dynamic loading steps
       
       // The thinking step will be triggered immediately by backend
       // No need for frontend timing since backend sends "thinking" progress immediately
@@ -462,6 +466,7 @@ export default function App() {
       // Reset when loading stops
       setCurrentStep(0);
       setCompletedSteps([]);
+      setDynamicLoadingSteps([]); // Reset dynamic loading steps
     }
 
     return () => {
@@ -575,6 +580,8 @@ export default function App() {
                   }
                 } else if (data.type === 'progress') {
                   // Handle progress updates from backend
+                  console.log('🔄 Progress update received:', data.data.step, data.data.detail);
+                  
                   if (data.data.paper_count) {
                     setActualPaperCount(data.data.paper_count);
                   }
@@ -582,72 +589,86 @@ export default function App() {
                   // Update loading step based on backend progress
                   const currentSteps = getLoadingSteps();
                   
+                  // Initialize dynamic steps if not set
+                  if (dynamicLoadingSteps.length === 0) {
+                    setDynamicLoadingSteps([...currentSteps]);
+                  }
+                  
+                  // Create a dynamic step directly from backend data
+                  const createDynamicStep = (step, detail) => {
+                    const stepIcons = {
+                      'thinking': '💭',
+                      'analysis': '🤔', 
+                      'loading': '🗃️',
+                      'processing': '📊',
+                      'web_search': '🔍',
+                      'ai_summary': '🧠',
+                      'streaming': '✨',
+                      'dataset': '🗃️',
+                      'dataset_success': '✅'
+                    };
+                    
+                    return {
+                      step: detail.split('...')[0] + '...' || step,
+                      detail: detail,
+                      icon: stepIcons[step] || '⚙️'
+                    };
+                  };
+
                   if (data.data.step === 'thinking') {
-                    // Initial thinking step - set to first step
+                    // Initial thinking step
+                    const thinkingStep = createDynamicStep('thinking', data.data.detail || 'Processing your question...');
+                    console.log('🔄 Setting thinking step:', thinkingStep);
                     setCurrentStep(0);
                     setCompletedSteps([]);
-                  } else if (data.data.step === 'analysis') {
-                    // Analysis step - move to analysis step and mark thinking as completed
-                    setCurrentStep(1);
-                    setCompletedSteps([0]);
-                  } else if (data.data.step === 'dataset') {
-                    // Dataset query started
-                    const datasetStepIndex = currentSteps.findIndex(step => step.step.includes('dataset') || step.step.includes('Checking'));
-                    if (datasetStepIndex >= 0) setCurrentStep(datasetStepIndex);
-                  } else if (data.data.step === 'processing') {
-                    // Dataset processing
-                    const processStepIndex = currentSteps.findIndex(step => step.step.includes('Processing') || step.step.includes('results'));
-                    if (processStepIndex >= 0) setCurrentStep(processStepIndex);
-                  } else if (data.data.step === 'dataset_success') {
-                    // Dataset found data successfully
+                    setDynamicLoadingSteps([thinkingStep]);
+                  } else {
+                    // For all other steps, add them dynamically
+                    const newStep = createDynamicStep(data.data.step, data.data.detail);
+                    console.log('🔄 Adding dynamic step:', newStep);
+                    
+                    setDynamicLoadingSteps(prev => {
+                      const newSteps = [...prev];
+                      
+                      // Find if this step type already exists
+                      const existingIndex = newSteps.findIndex(s => s.step.includes(newStep.step.split('...')[0]));
+                      
+                      if (existingIndex >= 0) {
+                        // Update existing step
+                        newSteps[existingIndex] = newStep;
+                        setCurrentStep(existingIndex);
+                      } else {
+                        // Add new step
+                        newSteps.push(newStep);
+                        setCurrentStep(newSteps.length - 1);
+                        // Mark previous step as completed
+                        if (newSteps.length > 1) {
+                          setCompletedSteps(prev => [...prev, newSteps.length - 2]);
+                        }
+                      }
+                      
+                      return newSteps;
+                    });
+                  }
+                  
+                  // Handle special cases that affect query type
+                  if (data.data.step === 'dataset_success') {
                     setQueryType('dataset');
-                    const responseStepIndex = currentSteps.findIndex(step => step.step.includes('response') || step.step.includes('Generating'));
-                    if (responseStepIndex >= 0) setCurrentStep(responseStepIndex);
                   } else if (data.data.step === 'fallback' || data.data.step === 'error_fallback') {
-                    // Falling back to literature search
                     setQueryType('mixed');
-                    const searchStepIndex = currentSteps.findIndex(step => step.step.includes('literature') || step.step.includes('Searching'));
-                    if (searchStepIndex >= 0) setCurrentStep(searchStepIndex);
-                  } else if (data.data.step === 'embeddings') {
-                    // Processing embeddings
-                    setCurrentStep(2); // Processing embeddings step (now index 2)
-                  } else if (data.data.step === 'search') {
-                    // Searching literature database
-                    const searchStepIndex = currentSteps.findIndex(step => step.step.includes('literature') || step.step.includes('Searching'));
-                    if (searchStepIndex >= 0) setCurrentStep(searchStepIndex);
-                  } else if (data.data.step === 'papers') {
-                    // Found papers
-                    const paperStepIndex = currentSteps.findIndex(step => step.step.includes('papers') || step.step.includes('Retrieving'));
-                    if (paperStepIndex >= 0) {
-                      setCurrentStep(paperStepIndex);
-                      // Update the step detail with actual count
-                      currentSteps[paperStepIndex].detail = data.data.detail;
-                    }
-                  } else if (data.data.step === 'generation') {
-                    // AI generation started
-                    const genStepIndex = currentSteps.findIndex(step => step.step.includes('response') || step.step.includes('Generating'));
-                    if (genStepIndex >= 0) setCurrentStep(genStepIndex);
-                  } else if (data.data.step === 'genes') {
-                    // Gene analysis
-                    const geneStepIndex = currentSteps.findIndex(step => step.step.includes('genetic') || step.step.includes('Analyzing'));
-                    if (geneStepIndex >= 0) setCurrentStep(geneStepIndex);
-                  } else if (data.data.step === 'gene_extraction') {
-                    // Start post-processing: gene extraction
+                  }
+                  
+                  // Handle post-processing steps
+                  if (data.data.step === 'gene_extraction') {
                     setIsStreaming(false);
                     setIsPostProcessing(true);
                     setPostProcessingStep(0);
                   } else if (data.data.step === 'gene_processing') {
-                    // Continue post-processing: gene database lookups
                     setIsPostProcessing(true);
                     setPostProcessingStep(1);
                   } else if (data.data.step === 'sources') {
-                    // Continue post-processing: source generation
                     setIsPostProcessing(true);
                     setPostProcessingStep(2);
-                  } else if (data.data.step === 'finalizing') {
-                    // Final processing
-                    const finalStepIndex = currentSteps.findIndex(step => step.step.includes('Finalizing') || step.step.includes('output'));
-                    if (finalStepIndex >= 0) setCurrentStep(finalStepIndex);
                   }
                 } else if (data.type === 'error') {
                   // Handle API key errors and other errors
@@ -1728,16 +1749,16 @@ export default function App() {
                     <div className="space-y-3">
                       {/* Current step */}
                       <div className="flex items-center space-x-3">
-                        <div className="text-lg">{getLoadingSteps()[currentStep].icon}</div>
+                        <div className="text-lg">{(dynamicLoadingSteps[currentStep] || getLoadingSteps()[currentStep]).icon}</div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-900 dark:text-slate-100 font-medium">
-                              {getLoadingSteps()[currentStep].step}
+                              {(dynamicLoadingSteps[currentStep] || getLoadingSteps()[currentStep]).step}
                             </span>
                             <FaSpinner className="animate-spin text-blue-500 text-xs" />
                           </div>
                           <div className="text-xs text-gray-600 dark:text-slate-400 mt-1">
-                            {getLoadingSteps()[currentStep].detail}
+                            {(dynamicLoadingSteps[currentStep] || getLoadingSteps()[currentStep]).detail}
                           </div>
                         </div>
                       </div>
@@ -1748,10 +1769,10 @@ export default function App() {
                           <div className="text-xs text-gray-500 dark:text-slate-500 mb-2">Previous steps:</div>
                           {completedSteps.slice(-3).map((stepIdx) => (
                             <div key={stepIdx} className="flex items-center space-x-3 opacity-60">
-                              <div className="text-sm">{getLoadingSteps()[stepIdx].icon}</div>
+                              <div className="text-sm">{(dynamicLoadingSteps[stepIdx] || getLoadingSteps()[stepIdx]).icon}</div>
                               <div className="flex-1">
                                 <div className="text-sm text-gray-700 dark:text-slate-300">
-                                  {getLoadingSteps()[stepIdx].step}
+                                  {(dynamicLoadingSteps[stepIdx] || getLoadingSteps()[stepIdx]).step}
                                 </div>
                               </div>
                               <div className="text-green-500 text-sm">✓</div>

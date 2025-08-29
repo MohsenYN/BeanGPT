@@ -96,6 +96,16 @@ def handle_non_ontario_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_da
             filtered_data = filtered_data[filtered_data['Market Class'].str.contains(market_class_input, case=False, na=False)]
             print(f"🔍 DEBUG: Filtered by market class '{market_class_input}': {len(filtered_data)} records")
     
+    # Sort by performance indicators if available (for "best performance" queries)
+    performance_keywords = ['best', 'top', 'highest', 'performance', 'yield']
+    if any(keyword in original_question.lower() for keyword in performance_keywords):
+        # Try to sort by yield or other performance indicators if available
+        if 'Yield' in filtered_data.columns:
+            filtered_data = filtered_data.sort_values('Yield', ascending=False, na_position='last')
+        elif 'Maturity' in filtered_data.columns:
+            # For maturity, earlier is often better (shorter season)
+            filtered_data = filtered_data.sort_values('Maturity', ascending=True, na_position='last')
+    
     # Build response
     if target_region:
         response = f"## 🌍 **{market_class_input} Bean Cultivars from {target_region}**\n\n"
@@ -105,9 +115,22 @@ def handle_non_ontario_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_da
     response += f"*📋 **Data Source:** USA/Canada cultivar database ({len(usa_canada_data)} total records)*\n\n"
     
     if not filtered_data.empty:
-        response += f"**Found {len(filtered_data)} {market_class_input.lower()} bean cultivars:**\n\n"
+        # Limit cultivars for performance (unless user asks for "all")
+        if any(keyword in original_question.lower() for keyword in ['all', 'every', 'complete', 'list all']):
+            display_data = filtered_data
+        elif any(keyword in original_question.lower() for keyword in ['best', 'top', 'highest']):
+            # For "best" queries, show top 10-15 for faster response
+            display_data = filtered_data.head(15)
+        else:
+            # For general queries, show top 30
+            display_data = filtered_data.head(30)
+            
+        response += f"**Found {len(filtered_data)} {market_class_input.lower()} bean cultivars"
+        if len(display_data) < len(filtered_data):
+            response += f" (showing top {len(display_data)})"
+        response += ":**\n\n"
         
-        for _, row in filtered_data.iterrows():
+        for _, row in display_data.iterrows():
             name = row.get('Name', 'Unknown')
             breeder = row.get('Breeder and Vendor', 'Unknown')
             market_class = row.get('Market Class', 'Unknown')
@@ -120,22 +143,23 @@ def handle_non_ontario_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_da
                 response += f"- **Market Class:** {market_class}\n"
             if breeder and breeder != 'Unknown':
                 response += f"- **Breeder:** {breeder}\n"
-            if parentage:
-                response += f"- **Parentage:** {parentage}\n"
-            if characteristics:
+            if parentage and pd.notna(parentage) and str(parentage).strip():
+                response += f"- **Parentage:** {str(parentage)}\n"
+            if characteristics and pd.notna(characteristics) and str(characteristics).strip():
+                characteristics_str = str(characteristics)
                 # Extract maturity info from characteristics
-                maturity_match = re.search(r'(\d+)\s*days', characteristics)
+                maturity_match = re.search(r'(\d+)\s*days', characteristics_str)
                 if maturity_match:
                     response += f"- **Maturity:** {maturity_match.group(1)} days\n"
                 
                 # Extract growth habit
-                if 'bush-determinate' in characteristics.lower():
+                if 'bush-determinate' in characteristics_str.lower():
                     response += f"- **Growth Habit:** Bush-determinate\n"
-                elif 'indeterminate' in characteristics.lower():
+                elif 'indeterminate' in characteristics_str.lower():
                     response += f"- **Growth Habit:** Indeterminate\n"
             
-            if resistance:
-                response += f"- **Disease Resistance:** {resistance}\n"
+            if resistance and pd.notna(resistance) and str(resistance).strip():
+                response += f"- **Disease Resistance:** {str(resistance)}\n"
             response += "\n"
     else:
         if target_region:
@@ -325,8 +349,8 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     unique_cultivars = df['Cultivar Name'].dropna().unique()
                     print(f"🔍 DEBUG: Found {len(unique_cultivars)} unique kidney bean cultivars: {unique_cultivars}")
             elif market_class_input.lower() in ['navy', 'white navy', 'navy bean']:
-                # Exact match for navy
-                df = df[df['Market Class'].str.lower().str.strip() == 'navy']
+                # Exact match for navy - check for both 'navy' and 'white navy'
+                df = df[df['Market Class'].str.lower().str.strip().isin(['navy', 'white navy'])]
             elif market_class_input.lower() in ['black', 'black bean']:
                 # Exact match for black
                 df = df[df['Market Class'].str.lower().str.strip() == 'black']
@@ -345,8 +369,33 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             print(f"✅ Filtered dataset: {len(df)} records for '{market_class_input}' market class")
         
         if df.empty:
-            return f"No data found for market class '{market_class_input}' in the dataset.", "", {}
-    print(f"📊 Passing FULL dataset to GPT: {len(df)} rows")
+            return f"No data found for market class '{market_class_input}' in the dataset.", "", {}, ""
+    
+    # Apply additional filters: year, location, etc.
+    year_filter = args.get('year')
+    location_filter = args.get('location')
+    
+    if year_filter:
+        print(f"🔍 Applying year filter: {year_filter}")
+        year_filtered = df[df['Year'] == int(year_filter)]
+        if not year_filtered.empty:
+            df = year_filtered
+            print(f"✅ Year filtered dataset: {len(df)} records for year {year_filter}")
+        else:
+            available_years = sorted(df['Year'].dropna().unique())
+            return f"No data found for year {year_filter}. Available years: {min(available_years)}-{max(available_years)}", "", {}, ""
+    
+    if location_filter:
+        print(f"🔍 Applying location filter: {location_filter}")
+        location_filtered = df[df['Location'].str.contains(location_filter, case=False, na=False)]
+        if not location_filtered.empty:
+            df = location_filtered
+            print(f"✅ Location filtered dataset: {len(df)} records for location '{location_filter}'")
+        else:
+            available_locations = df['Location'].dropna().unique()
+            return f"No data found for location '{location_filter}'. Available locations: {', '.join(available_locations)}", "", {}, ""
+    
+    print(f"📊 Final filtered dataset: {len(df)} rows")
 
     # Get the original question for analysis
     original_question = args.get("original_question", "")
@@ -476,7 +525,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                 
                 return response, response, {}, ""
             else:
-                return f"**⚠️ No climate data available for {location_input} in {climate_decade}s under {climate_scenario} scenario**", "", {}
+                return f"**⚠️ No climate data available for {location_input} in {climate_decade}s under {climate_scenario} scenario**", "", {}, ""
         else:
             # General climate query without specific decade
             response = f"## 🌡️ **Climate Information for {location_input}**\n\n"
@@ -525,7 +574,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     mentioned_cultivars = find_mentioned_cultivars(original_question, df)
     print(f"🔍 DEBUG: mentioned_cultivars found: {mentioned_cultivars}")
     print(f"🔍 DEBUG: len(mentioned_cultivars): {len(mentioned_cultivars)}")
-
+    
     # CRITICAL FIX: Validate cultivar parameter from function call
     function_call_cultivar = args.get('cultivar')
     unknown_cultivar_detected = False
@@ -698,7 +747,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     
     if needs_clarification:
         # Return the clarification message without chart
-        return clarification_message, clarification_message, {}
+        return clarification_message, clarification_message, {}, ""
     
     # Check if charts are requested
     chart_keywords = ['chart', 'graph', 'plot', 'visualize', 'visualization', 'show me', 'display', 'table', 'create', 'regression', 'linear regression', 'correlation', 'scatter', 'trend', 'relationship']
@@ -821,9 +870,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     
                     return response, response, {}, ""
                 else:
-                    return f"**⚠️ No cultivar data found for {hottest_location}**", "", {}
+                    return f"**⚠️ No cultivar data found for {hottest_location}**", "", {}, ""
             else:
-                return "**⚠️ Unable to calculate location temperatures - insufficient weather data linkage**", "", {}
+                return "**⚠️ Unable to calculate location temperatures - insufficient weather data linkage**", "", {}, ""
                 
         except Exception as e:
             print(f"⚠️ Error processing cross-analysis query: {e}")
@@ -913,7 +962,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     
                     return response, response, {}, ""
                 else:
-                    return f"**⚠️ No climate data available for {location_input} in {climate_decade}s under {climate_scenario} scenario**", "", {}
+                    return f"**⚠️ No climate data available for {location_input} in {climate_decade}s under {climate_scenario} scenario**", "", {}, ""
             else:
                 # General climate query without specific decade
                 response = f"## 🌡️ **Climate Information for {location_input}**\n\n"
@@ -1141,10 +1190,11 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
 
         # Special handling for kidney bean queries - mention that all kidney types are included
         if market_class_input and 'kidney' in market_class_input.lower():
+            import re  # Import re module for regex operations
             kidney_types = df['Market Class'].str.extract(r'(.*kidney.*)', flags=re.IGNORECASE)[0].dropna().unique()
             if len(kidney_types) > 1:
                 response += f"**📝 Note:** This analysis includes all kidney bean market classes: {', '.join(kidney_types)}\n\n"
-
+        
         # Add specific data insights for mentioned cultivars with enriched information
         # When chart generation fails or for market class queries, ensure we analyze available cultivars
         cultivars_to_analyze = mentioned_cultivars.copy()
@@ -1181,45 +1231,67 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             print(f"🔍 DEBUG: is_all_request detected: {is_all_request}")
             print(f"🔍 DEBUG: question_lower: '{question_lower}'")
 
-            # ALWAYS show ALL cultivars - no more limiting to top 5!
-            all_cultivars = sorted(market_data[cultivar_col].dropna().unique())
-            print(f"🔍 DEBUG: Found {len(all_cultivars)} cultivars - showing ALL of them: {all_cultivars}")
-            cultivars_to_analyze = all_cultivars
+            # Check if this is a "latest" query
+            is_latest_request = any(keyword in question_lower for keyword in [
+                'latest', 'newest', 'most recent', 'recent', 'new', 'last released'
+            ])
             
-            # Determine appropriate header based on query type
-            if is_all_request:
-                response += f"**📋 Complete List of ALL {market_class_input} Cultivars** ({len(all_cultivars)} total):\n\n"
+            if is_latest_request and 'Released Year' in market_data.columns:
+                # For "latest" queries, show only cultivars from the most recent year
+                latest_year = market_data['Released Year'].max()
+                if not pd.isna(latest_year):
+                    latest_cultivars_data = market_data[market_data['Released Year'] == latest_year]
+                    latest_cultivars = sorted(latest_cultivars_data[cultivar_col].dropna().unique())
+                    print(f"🔍 DEBUG: Latest year: {latest_year}, Found {len(latest_cultivars)} latest cultivars: {latest_cultivars}")
+                    cultivars_to_analyze = latest_cultivars
+                    response += f"**📋 Latest {market_class_input} Cultivars ({int(latest_year)})** ({len(latest_cultivars)} total):\n\n"
+                else:
+                    # No release year data, fall back to all cultivars
+                    all_cultivars = sorted(market_data[cultivar_col].dropna().unique())
+                    cultivars_to_analyze = all_cultivars
+                    response += f"**📋 All {market_class_input} Cultivars** ({len(all_cultivars)} total - no release year data available):\n\n"
             else:
-                response += f"**📋 All {market_class_input} Cultivars** ({len(all_cultivars)} total):\n\n"
+                # For other queries, show ALL cultivars
+                all_cultivars = sorted(market_data[cultivar_col].dropna().unique())
+                print(f"🔍 DEBUG: Found {len(all_cultivars)} cultivars - showing ALL of them: {all_cultivars}")
+                cultivars_to_analyze = all_cultivars
+                
+                # Determine appropriate header based on query type
+                if is_all_request:
+                    response += f"**📋 Complete List of ALL {market_class_input} Cultivars** ({len(all_cultivars)} total):\n\n"
+                else:
+                    response += f"**📋 All {market_class_input} Cultivars** ({len(all_cultivars)} total):\n\n"
             
             # Add a debug indicator that will show in the response
-            response += f"**🔍 DEBUG INFO:** Processing ALL {len(all_cultivars)} cultivars for complete dataset coverage.\n\n"
+            response += f"**🔍 DEBUG INFO:** Processing {len(cultivars_to_analyze)} cultivars for complete dataset coverage.\n\n"
 
 
 
         # If chart generation failed but we still have no cultivars to analyze, show market class summary
-    if force_detailed_analysis and not cultivars_to_analyze and market_class_input:
-        response += f"**📊 {market_class_input} Market Class Summary:**\n"
-        response += f"- Total records: {len(df)} trials\n"
-        if 'Cultivar Name' in df.columns:
-            unique_cultivars = df['Cultivar Name'].nunique()
-            response += f"- Unique cultivars: {unique_cultivars}\n"
-        if 'Yield' in df.columns:
-            avg_yield = df['Yield'].mean()
-            response += f"- Average yield: {avg_yield:.1f} kg/ha\n"
-        if 'Maturity' in df.columns:
-            avg_maturity = df['Maturity'].mean()
-            response += f"- Average maturity: {avg_maturity:.1f} days\n"
-        response += "\n"
+        if force_detailed_analysis and not cultivars_to_analyze and market_class_input:
+            response += f"**📊 {market_class_input} Market Class Summary:**\n"
+            response += f"- Total records: {len(df)} trials\n"
+            if 'Cultivar Name' in df.columns:
+                unique_cultivars = df['Cultivar Name'].nunique()
+                response += f"- Unique cultivars: {unique_cultivars}\n"
+            if 'Yield' in df.columns:
+                avg_yield = df['Yield'].mean()
+                response += f"- Average yield: {avg_yield:.1f} kg/ha\n"
+            if 'Maturity' in df.columns:
+                avg_maturity = df['Maturity'].mean()
+                response += f"- Average maturity: {avg_maturity:.1f} days\n"
+            response += "\n"
 
     print(f"🔍 DEBUG: About to analyze {len(cultivars_to_analyze)} cultivars: {cultivars_to_analyze}")
     print(f"🔍 DEBUG: Response length before cultivar processing: {len(response)}")
 
     cultivar_count = 0
+    web_search_count = 0  # Limit individual cultivar web searches to 5
     for cultivar in cultivars_to_analyze:
         cultivar_count += 1
         if cultivar_count <= 3 or cultivar_count % 10 == 0:  # Log first 3 and every 10th cultivar
             print(f"🔍 DEBUG: Processing cultivar {cultivar_count}/{len(cultivars_to_analyze)}: {cultivar}")
+        
         # Reset limited data flag for each cultivar
         has_limited_data = False
         cultivar_col = 'Cultivar Name' if 'Cultivar Name' in df.columns else 'Name'
@@ -1247,129 +1319,100 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             else:
                 if not has_limited_data:  # Only set to True if not already True
                     has_limited_data = True
-
+            
             # Enriched breeding information
             if 'Market Class' in cultivar_data.columns:
                 market_class = cultivar_data['Market Class'].dropna().iloc[0] if not cultivar_data['Market Class'].dropna().empty else None
                 if market_class:
                     response += f"- **Market class:** {market_class}\n"
-
-            if 'Released Year' in cultivar_data.columns:
-                released_year = cultivar_data['Released Year'].dropna().iloc[0] if not cultivar_data['Released Year'].dropna().empty else None
-                if released_year and not pd.isna(released_year):
-                    response += f"- **Released:** {int(released_year)}\n"
-
-            if 'Pedigree' in cultivar_data.columns:
-                pedigree = cultivar_data['Pedigree'].dropna().iloc[0] if not cultivar_data['Pedigree'].dropna().empty else None
-                if pedigree:
-                    response += f"- **Pedigree:** {pedigree}\n"
-
-            # Disease resistance information
-            resistance_traits = []
-            for col in ['Common Mosaic Virus R1', 'Common Mosaic Virus R15', 'Anthracnose R17', 'Anthracnose R23', 'Anthracnose R73', 'Common Blight']:
-                if col in cultivar_data.columns:
-                    resistance = cultivar_data[col].dropna().iloc[0] if not cultivar_data[col].dropna().empty else None
-                    if resistance and str(resistance).upper() == 'R':
-                        trait_name = col.replace('Common Mosaic Virus R1', 'CMV R1').replace('Common Mosaic Virus R15', 'CMV R15').replace('Anthracnose R17', 'Anth R17').replace('Anthracnose R23', 'Anth R23').replace('Anthracnose R73', 'Anth R73').replace('Common Blight', 'CB')
-                        resistance_traits.append(trait_name)
-
-            if resistance_traits:
-                response += f"- **Disease resistance:** {', '.join(resistance_traits)}\n"
-
-            # Add note for limited data if multiple key fields are missing
-            if has_limited_data and ('Yield' not in cultivar_data.columns or pd.isna(cultivar_data['Yield'].mean())) and ('Maturity' not in cultivar_data.columns or pd.isna(cultivar_data['Maturity'].mean())):
-                response += f"- **Note:** Limited performance data available for this cultivar\n"
-
-            # If cultivar has limited data, perform web search to supplement information
-            if has_limited_data and api_key:
-                        try:
-                            print(f"🌐 Detected limited data for {cultivar}, performing web search...")
-                            from .web_search import perform_web_search
-
-                            # Create focused search query for cultivar information
-                            search_query = f"{cultivar} dry bean cultivar performance yield maturity disease resistance"
-
-                            web_results, sources = perform_web_search(search_query, api_key)
-
-                            if web_results and web_results.strip():
-                                # Extract only key performance data, not full paragraphs
-                                lines = web_results.split('\n')
-                                key_info = []
-                                for line in lines:
-                                    line = line.strip()
-                                    if any(keyword in line.lower() for keyword in ['yield:', 'maturity:', 'resistance:', 'days', 'kg/ha', 'resistant to']):
-                                        if len(line) < 150:  # Keep only concise information
-                                            key_info.append(line.replace('- ', '').replace('*', ''))
-                                
-                                if key_info:
-                                    response += f"- **Web supplement:** {'; '.join(key_info[:2])}\n"  # Max 2 key facts
-                            else:
-                                print(f"⚠️ No web results found for {cultivar}")
-                        except Exception as e:
-                            print(f"⚠️ Web search failed for {cultivar}: {e}")
-
-            # Trial context
-            if cultivar_count == len(cultivars_to_analyze):
-                print(f"🔍 DEBUG: Completed processing all {cultivar_count} cultivars")
-                print(f"🔍 DEBUG: Response length after cultivar processing: {len(response)}")
-                print(f"🔍 DEBUG: Response preview after processing: {response[-200:]}")
-            if 'Year' in cultivar_data.columns:
-                year_min = cultivar_data['Year'].min()
-                year_max = cultivar_data['Year'].max()
-                if not pd.isna(year_min) and not pd.isna(year_max):
-                    years = f"{year_min:.0f}-{year_max:.0f}"
-                    response += f"- **Years tested:** {years}\n"
-            # Filter out NaN values and convert to strings
-            valid_locations = [str(loc) for loc in cultivar_data['Location'].dropna().unique() if str(loc) != 'nan']
-            response += f"- **Locations:** {', '.join(valid_locations)}\n"
-
-            # Add environmental context if available
-            if historical_data_available and 'Year' in cultivar_data.columns and 'Location' in cultivar_data.columns:
-                sample_location = cultivar_data['Location'].iloc[0]
-                year_value = cultivar_data['Year'].iloc[0]
-
-                # Check if both location and year values are valid (not NaN) before proceeding
-                if not pd.isna(sample_location) and not pd.isna(year_value):
-                    sample_year = int(year_value)
-                    env_data = db_manager.get_historical_data_for_location_year(sample_location, sample_year, 'growing_season')
-                else:
-                    # Skip environmental data if location or year is invalid
-                    env_data = pd.DataFrame()  # Empty DataFrame to skip processing
-                if not env_data.empty:
-                    if 'Temperature' in env_data.columns:
-                        avg_temp = env_data['Temperature'].iloc[0]
-                        response += f"- **Growing season temp:** {avg_temp:.1f}°C (sample year/location)\n"
-                    if 'Total_Precipitation_mm' in env_data.columns:
-                        total_precip = env_data['Total_Precipitation_mm'].iloc[0] * 153  # Approximate growing season days
-                        response += f"- **Growing season precip:** {total_precip:.0f}mm (sample year/location)\n"
                     
-                    response += "\n"
+                    if 'Released Year' in cultivar_data.columns:
+                        released_year = cultivar_data['Released Year'].dropna().iloc[0] if not cultivar_data['Released Year'].dropna().empty else None
+                        if released_year and not pd.isna(released_year):
+                            response += f"- **Released:** {int(released_year)}\n"
+                    
+                    if 'Pedigree' in cultivar_data.columns:
+                        pedigree = cultivar_data['Pedigree'].dropna().iloc[0] if not cultivar_data['Pedigree'].dropna().empty else None
+                        if pedigree:
+                            response += f"- **Pedigree:** {pedigree}\n"
+                    
+                    # Disease resistance information
+                    resistance_traits = []
+                    for col in ['Common Mosaic Virus R1', 'Common Mosaic Virus R15', 'Anthracnose R17', 'Anthracnose R23', 'Anthracnose R73', 'Common Blight']:
+                        if col in cultivar_data.columns:
+                            resistance = cultivar_data[col].dropna().iloc[0] if not cultivar_data[col].dropna().empty else None
+                            if resistance and str(resistance).upper() == 'R':
+                                trait_name = col.replace('Common Mosaic Virus R1', 'CMV R1').replace('Common Mosaic Virus R15', 'CMV R15').replace('Anthracnose R17', 'Anth R17').replace('Anthracnose R23', 'Anth R23').replace('Anthracnose R73', 'Anth R73').replace('Common Blight', 'CB')
+                                resistance_traits.append(trait_name)
+                    
+                    if resistance_traits:
+                        response += f"- **Disease resistance:** {', '.join(resistance_traits)}\n"
 
-        # Add market class comparison context if user asked for comparison
-        comparison_keywords = ['compare', 'versus', 'vs', 'other', 'against', 'with other']
-        if mentioned_cultivars and any(keyword in original_question.lower() for keyword in comparison_keywords) and market_class_input:
-            # Get other cultivars in the same market class
-            market_class_cultivars = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]['Cultivar Name'].unique()
-            other_cultivars = [c for c in market_class_cultivars if c not in mentioned_cultivars]
+                    # Add note for limited data if multiple key fields are missing
+                    if has_limited_data and ('Yield' not in cultivar_data.columns or pd.isna(cultivar_data['Yield'].mean())) and ('Maturity' not in cultivar_data.columns or pd.isna(cultivar_data['Maturity'].mean())):
+                        response += f"- **Note:** Limited performance data available for this cultivar\n"
 
-            if other_cultivars:
-                response += f"\n**📊 {market_class_input} Market Class Comparison:**\n"
-                response += f"- **Other cultivars in this market class:** {', '.join(other_cultivars)}"
-                response += "\n"
+            # If cultivar has limited data, perform web search to supplement information (limit to 5 searches)
+            if has_limited_data and api_key and web_search_count < 5:
+                try:
+                    web_search_count += 1
+                    print(f"🌐 Detected limited data for {cultivar}, performing web search...")
+                    from .web_search import perform_web_search
 
-                # Show performance data for top other cultivars
-                market_class_data = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
-                other_performers = market_class_data[~market_class_data['Cultivar Name'].isin(mentioned_cultivars)]
-                if not other_performers.empty and 'Yield' in other_performers.columns:
-                    top_others = other_performers.groupby('Cultivar Name')['Yield'].mean().sort_values(ascending=False)
-                    response += f"- **Top performers in {market_class_input}:**\n"
-                    for cultivar, avg_yield in top_others.items():
-                        trial_count = len(other_performers[other_performers['Cultivar Name'] == cultivar])
-                        response += f"  - {cultivar}: {avg_yield:.1f} kg/ha ({trial_count} trials)\n"
+                    # Create focused search query for cultivar information
+                    search_query = f"{cultivar} dry bean cultivar performance yield maturity disease resistance"
 
-        # Add year-specific context if specified
+                    web_results, sources = perform_web_search(search_query, api_key)
+
+                    if web_results and web_results.strip():
+                        # Extract only key performance data, not full paragraphs
+                        lines = web_results.split('\n')
+                        key_info = []
+                        for line in lines:
+                            line = line.strip()
+                            if any(keyword in line.lower() for keyword in ['yield:', 'maturity:', 'resistance:', 'days', 'kg/ha', 'resistant to']):
+                                if len(line) < 150:  # Keep only concise information
+                                    key_info.append(line.replace('- ', '').replace('*', ''))
+                        
+                        if key_info:
+                            response += f"- **Web supplement:** {'; '.join(key_info[:2])}\n"  # Max 2 key facts
+                    else:
+                        print(f"⚠️ No web results found for {cultivar}")
+                except Exception as e:
+                    print(f"⚠️ Web search failed for {cultivar}: {e}")
+
+            # Add newline after each cultivar
+            response += "\n"
+
+    # Debug completion
+    print(f"🔍 DEBUG: Completed processing all {len(cultivars_to_analyze)} cultivars")
+    print(f"🔍 DEBUG: Response length after cultivar processing: {len(response)}")
+
+    # Add market class comparison context if user asked for comparison
+    comparison_keywords = ['compare', 'versus', 'vs', 'other', 'against', 'with other']
+    if mentioned_cultivars and any(keyword in original_question.lower() for keyword in comparison_keywords) and market_class_input:
+        # Get other cultivars in the same market class
+        market_class_cultivars = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]['Cultivar Name'].unique()
+        other_cultivars = [c for c in market_class_cultivars if c not in mentioned_cultivars]
+
+        if other_cultivars:
+            response += f"\n**📊 {market_class_input} Market Class Comparison:**\n"
+            response += f"- **Other cultivars in this market class:** {', '.join(other_cultivars)}"
+            response += "\n"
+
+            # Show performance data for top other cultivars
+            market_class_data = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
+            other_performers = market_class_data[~market_class_data['Cultivar Name'].isin(mentioned_cultivars)]
+            if not other_performers.empty and 'Yield' in other_performers.columns:
+                top_others = other_performers.groupby('Cultivar Name')['Yield'].mean().sort_values(ascending=False)
+                response += f"- **Top performers in {market_class_input}:**\n"
+                for cultivar, avg_yield in top_others.items():
+                    trial_count = len(other_performers[other_performers['Cultivar Name'] == cultivar])
+                    response += f"  - {cultivar}: {avg_yield:.1f} kg/ha ({trial_count} trials)\n"
+
+        # Add year-specific context if specified (only once)
         year_filter = args.get('year')
-        if year_filter:
+        if year_filter and '📅' not in response:  # Only add if not already added
             year_data = df[df['Year'] == year_filter]
             if not year_data.empty:
                 response += f"\n**📅 {year_filter} Data Summary:**\n"
@@ -1385,12 +1428,18 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                             # Show all cultivars, no truncation
                             response += ")\n"
 
-        # Add overall dataset context
-        # Get year range safely for dataset context
-        year_min = df['Year'].min()
-        year_max = df['Year'].max()
-        year_range = f"{year_min:.0f}-{year_max:.0f}" if not (pd.isna(year_min) or pd.isna(year_max)) else "various years"
-        response += f"**📊 Dataset context:** {len(df)} total records, {year_range}\n"
+        # Add overall dataset context (only once)
+        if "📊 Dataset context:" not in response:
+            # Get year range safely for dataset context
+            year_min = df['Year'].min()
+            year_max = df['Year'].max()
+            year_range = f"{year_min:.0f}-{year_max:.0f}" if not (pd.isna(year_min) or pd.isna(year_max)) else "various years"
+            response += f"**📊 Dataset context:** {len(df)} total records, {year_range}\n"
+        
+        # Clean up any duplicate dataset context lines
+        import re
+        response = re.sub(r'(\*\*📊 Dataset context:\*\* \d+ total records, \d{4}-\d{4}\n)+', 
+                         lambda m: m.group(0).split('\n')[0] + '\n', response)
         
         # CRITICAL: If no specific cultivars mentioned but question asks about performance, show top performers
         performance_keywords = ['perform', 'best', 'top', 'highest', 'yield', 'productive', 'leading']
@@ -1734,7 +1783,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     if len(response) > 1000:
         print(f"🔍 DEBUG: Response middle (chars 500-1000): {response[500:1000]}")
     print(f"🔍 DEBUG: Response contains word 'cultivar': {'cultivar' in response.lower()}")
-
+    
     return response, response, chart_data, cultivar_context
 
 # Enhanced function schema for OpenAI function calling with new data capabilities
