@@ -21,6 +21,7 @@ class DatabaseManager:
         self._bean_data: Optional[pd.DataFrame] = None
         self._historical_data: Optional[pd.DataFrame] = None
         self._climate_data: Optional[pd.DataFrame] = None
+        self._usa_canada_data: Optional[pd.DataFrame] = None
 
         
         # Efficient lookup indices for gene operations
@@ -50,6 +51,13 @@ class DatabaseManager:
         if self._bean_data is None:
             self._load_bean_data()
         return self._bean_data
+    
+    @property
+    def usa_canada_data(self) -> pd.DataFrame:
+        """Lazy-loaded USA/Canada bean cultivars data."""
+        if self._usa_canada_data is None:
+            self._load_usa_canada_data()
+        return self._usa_canada_data
     
     @property
     def historical_data(self) -> pd.DataFrame:
@@ -272,6 +280,40 @@ class DatabaseManager:
             raise DatabaseError(f"Bean dataset not found at {settings.merged_data_path}")
         except Exception as e:
             raise DatabaseError(f"Failed to load bean dataset: {str(e)}")
+    
+    def _load_usa_canada_data(self) -> None:
+        """Load the USA/Canada bean cultivars data."""
+        try:
+            usa_canada_path = "../data/Bean_Cultivars_USA_Canada_cleaned.xlsx"
+            
+            # Try to load from optimized CSV format first
+            csv_path = usa_canada_path.replace('.xlsx', '.csv')
+            if os.path.exists(csv_path):
+                print(f"📈 Loading USA/Canada data from optimized CSV format: {csv_path}")
+                df = pd.read_csv(csv_path)
+            else:
+                print(f"📊 Loading USA/Canada data from Excel format: {usa_canada_path}")
+                df = pd.read_excel(usa_canada_path)
+                
+                # Create optimized CSV for future loads
+                try:
+                    print(f"💾 Creating optimized CSV for future loads: {csv_path}")
+                    df.to_csv(csv_path, index=False)
+                    print(f"✅ Saved optimized format: {csv_path}")
+                except Exception as e:
+                    print(f"⚠️ Could not save optimized format: {e}")
+            
+            print(f"✅ Loaded {len(df)} USA/Canada bean cultivar records with {len(df.columns)} columns")
+            
+            # Store the processed data
+            self._usa_canada_data = df
+            
+        except FileNotFoundError:
+            print(f"⚠️ USA/Canada dataset not found at {usa_canada_path}")
+            self._usa_canada_data = pd.DataFrame()  # Empty DataFrame as fallback
+        except Exception as e:
+            print(f"⚠️ Failed to load USA/Canada dataset: {str(e)}")
+            self._usa_canada_data = pd.DataFrame()  # Empty DataFrame as fallback
     
     def _load_historical_data(self) -> None:
         """Load the historical weather data for environmental context."""

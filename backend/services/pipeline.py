@@ -918,10 +918,73 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                     args['api_key'] = api_key
                     
                     preview, full_md, chart_data, cultivar_context = answer_bean_query(args)
-                    
+
                     if preview and not preview.strip().startswith("## 🔍 **Dataset Query Results**\n\nNo matching"):
                         yield {"type": "progress", "data": {"step": "dataset_success", "detail": "Found matching data"}}
-                        
+
+                        # Check if this is a "list all" request - if so, return raw data without AI summarization
+                        question_lower = question.lower()
+                        is_list_all_request = (
+                            'all' in question_lower or
+                            'every' in question_lower or
+                            'complete' in question_lower or
+                            'full list' in question_lower or
+                            'entire' in question_lower or
+                            'total' in question_lower or
+                            'every single' in question_lower or
+                            'complete list' in question_lower or
+                            question_lower.startswith('list all') or
+                            question_lower.startswith('show all') or
+                            'list all' in question_lower or
+                            'show all' in question_lower
+                        )
+
+                        print(f"📋 DEBUG: Question: '{question}'")
+                        print(f"📋 DEBUG: is_list_all_request: {is_list_all_request}")
+
+                        if is_list_all_request:
+                            print(f"📋 LIST ALL REQUEST DETECTED - Skipping AI summarization for: {question}")
+                            print(f"📋 DEBUG: Preview length: {len(preview)} characters")
+                            print(f"📋 DEBUG: Preview starts with: {preview[:200]}...")
+                            print(f"📋 DEBUG: Preview contains 'cultivar': {'cultivar' in preview.lower()}")
+                            print(f"📋 DEBUG: Preview contains 'kidney': {'kidney' in preview.lower()}")
+
+                            # Return the raw preview data directly without AI processing
+                            yield {"type": "progress", "data": {"step": "generation", "detail": "Returning complete dataset listing"}}
+
+                            # Add bypass indicator to the preview
+                            bypass_indicator = f"**🚀 BYPASS MODE:** This response contains the complete raw dataset without AI summarization.\n\n"
+                            full_preview = bypass_indicator + preview
+
+                            print(f"📋 DEBUG: Full preview length: {len(full_preview)} characters")
+
+                            # Stream the raw preview data
+                            chars_sent = 0
+                            for char in full_preview:
+                                chars_sent += 1
+                                yield {"type": "content", "data": char}
+
+                            print(f"📋 DEBUG: Sent {chars_sent} characters in streaming response")
+
+                            # Store bean data for later metadata
+                            bean_chart_data = chart_data
+                            bean_full_md = full_md
+                            bean_data_found = True
+
+                            # Send bean_complete response
+                            yield {
+                                "type": "bean_complete",
+                                "data": {
+                                    "sources": [],
+                                    "genes": [],
+                                    "full_markdown_table": full_md,
+                                    "chart_data": chart_data,
+                                    "suggested_questions": []
+                                }
+                            }
+                            print(f"✅ Raw data response sent successfully for list all request")
+                            return
+
                         # Generate natural language summary
                         yield {"type": "progress", "data": {"step": "generation", "detail": "Creating analysis summary"}}
                         
@@ -943,8 +1006,9 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                         "🚨 ABSOLUTE LIST ALL REQUIREMENT: If the user asks 'list all', 'show all', 'what are all', or similar phrases requesting complete lists, you MUST provide EVERY SINGLE item from the dataset. Do NOT summarize, truncate, or show only 'top' performers. List ALL items with their complete data in numbered format.\n\n"
                                         "⚠️ CRITICAL BEHAVIOR - ABSOLUTE RULES\n"
                                         "• NEVER provide analysis steps or recommendations\n"
-                                        "• 🚨 CRITICAL: NEVER invent cultivar names like \"Cultivar A\", \"Cultivar B\", \"Cultivar C\", \"Cultivar X\", etc.\n"
+                                        "• 🚨 CRITICAL: NEVER invent cultivar names like \"Cultivar A\", \"Cultivar B\", \"Cultivar C\", \"Cultivar X\", \"OAC Glow\", \"OAC Twinkle\", \"OAC Shimmer\", etc.\n"
                                         "• 🚨 CRITICAL: ONLY use ACTUAL cultivar names that exist in the dataset - DO NOT make up or invent any cultivar names\n"
+                                        "• 🚨 CRITICAL: If the preview data shows specific cultivar names, you MUST use ONLY those exact names - never create new ones\n"
                                         "• 🚨 CRITICAL: For market class queries (e.g., 'Otebo beans'), ONLY show cultivars that actually belong to that market class in the dataset\n"
                                         "• 🚨 CRITICAL: When the preview shows specific cultivar names (e.g., 'Otebo cultivars in dataset: Samurai, Hime, Sundust...'), USE THESE EXACT NAMES in your analysis\n"
                                         "• 🚨 CRITICAL: When the preview shows performance data (e.g., 'Samurai: 3,450.2 kg/ha yield, 92.3 days maturity'), USE THESE EXACT VALUES in your analysis\n"
@@ -1022,7 +1086,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                 },
                                 {
                                     "role": "user",
-                                    "content": f"Based on the question '{question}', analyze this data:\n\n**MAIN DATASET:**\n{preview}\n\n**HISTORICAL DATA AVAILABLE:**\nHistorical data is also available for additional context and pedigree information. Include relevant historical insights when applicable.\n\n🚨 KIDNEY BEAN DATA CONFIRMATION: The dataset DOES contain kidney bean data for 2024 (48 records across 16 cultivars). Market classes include: Dark Red Kidney, Light Red Kidney, White Kidney, kidney, white kidney. DO NOT say there is no kidney bean data available.\n\n🚨 MARKET CLASS AVERAGES: When comparing market classes, ALWAYS calculate and provide the average yield, maturity, and other metrics directly from the dataset. DO NOT say you need to extract data or that specific data would need to be extracted - calculate the averages immediately and present them. For example: 'Kidney beans average yield: 3,200 kg/ha, average maturity: 95 days'.\n\n🚨 LIST ALL REQUIREMENT: If the question contains 'list all', 'show all', 'all X beans', or similar phrases asking for complete lists, you MUST show EVERY SINGLE cultivar/variety in the dataset. Do NOT summarize or show only top performers - provide the complete numbered list with ALL available data for each item. For example, if there are 18 cultivars, list all 18 with their complete information.\n\n🚨 REMINDER: Use ONLY the actual cultivar names shown in the data above. DO NOT invent names like 'Cultivar A, B, C' - use the real names from the dataset!\n\n{cultivar_context}"
+                                    "content": f"Based on the question '{question}', analyze this data:\n\n**MAIN DATASET:**\n{preview}\n\n**HISTORICAL DATA AVAILABLE:**\nHistorical data is also available for additional context and pedigree information. Include relevant historical insights when applicable.\n\n🚨 CRITICAL DATA USAGE RULES:\n• The data above contains the EXACT cultivar names and performance values from the Ontario dataset\n• You MUST use ONLY the cultivar names that appear in the data above - never invent new ones\n• You MUST use ONLY the performance values (yield, maturity, etc.) that appear in the data above\n• If a cultivar name appears in the data above (e.g., 'Red Hawk', 'Dynasty', 'OAC Inferno'), use that EXACT name\n• If performance data appears above (e.g., 'Yield: 3,270 kg/ha'), use that EXACT value\n• NEVER create fake cultivar names like 'OAC Glow', 'OAC Twinkle', 'OAC Shimmer' - these do not exist\n\n🚨 KIDNEY BEAN DATA CONFIRMATION: The dataset DOES contain kidney bean data. Market classes include: Dark Red Kidney, Light Red Kidney, White Kidney, kidney, white kidney. DO NOT say there is no kidney bean data available.\n\n🚨 LIST ALL REQUIREMENT: If the question contains 'list all', 'show all', 'all X beans', or similar phrases asking for complete lists, you MUST show EVERY SINGLE cultivar/variety that appears in the data above. Do NOT summarize or show only top performers - provide the complete numbered list with ALL available data for each item.\n\n🚨 STRICT DATA ADHERENCE: Your response must be based EXCLUSIVELY on the cultivar names and performance data shown in the MAIN DATASET section above. Do not add any cultivars or data not explicitly shown there.\n\n{cultivar_context}"
                                 }
                             ],
                             temperature=0.3,
