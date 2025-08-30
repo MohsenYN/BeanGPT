@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   FaDna, FaFlask, FaMoon, FaSun, FaPaperPlane, FaSpinner, 

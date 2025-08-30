@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 import { useState } from 'react';
 import { FaUpload } from 'react-icons/fa';
 

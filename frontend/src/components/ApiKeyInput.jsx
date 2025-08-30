@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 import React, { useState, useEffect } from 'react';
 import { FaKey, FaEye, FaEyeSlash, FaCheck, FaExclamationTriangle, FaCog, FaShieldAlt, FaLock, FaPlus, FaTimes } from 'react-icons/fa';
 

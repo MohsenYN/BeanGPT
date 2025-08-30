@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 

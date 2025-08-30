@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 import { API_ENDPOINTS } from "../config";
 import { useState, useEffect, useRef } from 'react';
 import { FaSearch, FaSpinner } from 'react-icons/fa';

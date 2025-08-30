@@ -1,3 +1,6 @@
+// © Kiarash Mirkamandari, August 30 2025 
+// All rights reserved. Unauthorized use, distribution, or modification prohibited. 
+
 // API Configuration
 // For production (GitHub Pages), use AWS Lightsail backend
 // For development, use local backend
