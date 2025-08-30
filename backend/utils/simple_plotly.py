@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 """
 Simplified Plotly chart generation using GPT-4o.
 Based on the user's tested dynamic_graph_server_plotly.py approach.

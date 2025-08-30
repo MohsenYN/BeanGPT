@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel

@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 import os
 import re
 from dotenv import load_dotenv

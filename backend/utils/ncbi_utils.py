@@ -1,3 +1,6 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
 import re
 import pandas as pd
 from typing import List, Dict, Optional

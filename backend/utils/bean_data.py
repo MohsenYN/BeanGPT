@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 """
 Simplified bean data analysis with single chart generation function.
 Replaces all the complex chart type logic with GPT-4o intelligence.

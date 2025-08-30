@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 """
 Configuration settings for the BeanGPT backend.
 Loads settings from environment variables with sensible defaults.

@@ -1,3 +1,7 @@
+# © Kiarash Mirkamandari, August 30 2025
+# All rights reserved. Unauthorized use, distribution, or modification prohibited.
+
+
 """
 OpenAI client wrapper using the modern OpenAI API (v1.x).
 Supports both old sk- and new sk-proj- API key formats.
