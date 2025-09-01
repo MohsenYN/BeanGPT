@@ -1,4 +1,4 @@
-// © Kiarash Mirkamandari, August 30 2025 
+// © Mohsen Yousefzadeh Najafabadi, August 30 2025 
 // All rights reserved. Unauthorized use, distribution, or modification prohibited. 
 
 import React, { useEffect, useRef, useState } from 'react';
