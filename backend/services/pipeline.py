@@ -978,9 +978,14 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             - A list of cultivars when user asked for a list
                             - Count information when user asked "how many"
                             - Pedigree details when user asked about pedigree
+                            - Search results with actual cultivar data (market class, characteristics, resistance, etc.)
+                            - Performance data (yield, maturity, trials, etc.)
                             - Actual data (not error messages)
+                            - Found matches in dataset columns with specific cultivar information
                             
-                            Then it IS sufficient. Only say NO if the data is clearly incomplete or contains error messages.
+                            Then it IS sufficient. Only say NO if the data is clearly incomplete, contains error messages, or says "No matches found".
+                            
+                            SEARCH RESULTS ARE SUFFICIENT if they contain actual cultivar information like market class, characteristics, resistance data, or performance metrics.
                             
                             Respond with only "YES" if sufficient, or "NO" if clearly insufficient.
                             """

@@ -87,18 +87,53 @@ def handle_comprehensive_search(args: Dict, ontario_df: pd.DataFrame, usa_canada
         
         if ontario_matches:
             results.append("### 📍 **Ontario Dataset Results:**")
-            for column, row in ontario_matches[:5]:  # Limit to first 5 matches
+            
+            # Group matches by cultivar name to avoid duplicates
+            cultivar_groups = {}
+            for column, row in ontario_matches:
                 cultivar_name = row.get('Cultivar', '') or row.get('Cultivar Name', '') or 'Unknown'
-                found_value = row.get(column, '')
-                results.append(f"**{cultivar_name}** - Found in column **{column}**: `{found_value}`")
+                if cultivar_name not in cultivar_groups:
+                    cultivar_groups[cultivar_name] = {
+                        'columns': set(),
+                        'context': {},
+                        'sample_row': row
+                    }
+                cultivar_groups[cultivar_name]['columns'].add(column)
                 
-                # Add additional context if available
-                context_info = []
+                # Collect unique context information
                 if pd.notna(row.get('Market Class', '')):
-                    context_info.append(f"Market Class: {row.get('Market Class', '')}")
+                    cultivar_groups[cultivar_name]['context']['Market Class'] = row.get('Market Class', '')
                 if pd.notna(row.get('Released Year', '') or row.get('Release Year', '')):
                     year = row.get('Released Year', '') or row.get('Release Year', '')
-                    context_info.append(f"Release Year: {year}")
+                    cultivar_groups[cultivar_name]['context']['Release Year'] = year
+                if pd.notna(row.get('Pedigree', '')):
+                    cultivar_groups[cultivar_name]['context']['Pedigree'] = row.get('Pedigree', '')
+                if pd.notna(row.get('Yield', '')):
+                    # For yield, we might want to show average or range
+                    if 'Yield' not in cultivar_groups[cultivar_name]['context']:
+                        cultivar_groups[cultivar_name]['context']['Yield'] = []
+                    cultivar_groups[cultivar_name]['context']['Yield'].append(row.get('Yield', ''))
+            
+            # Display consolidated results
+            for cultivar_name, info in list(cultivar_groups.items())[:5]:  # Limit to 5 cultivars
+                columns_list = ', '.join(sorted(info['columns']))
+                results.append(f"**{cultivar_name}** - Found in columns: {columns_list}")
+                
+                # Add consolidated context
+                context_info = []
+                for key, value in info['context'].items():
+                    if key == 'Yield' and isinstance(value, list):
+                        # Show yield statistics if multiple values
+                        if len(value) > 1:
+                            yields = [float(y) for y in value if str(y).replace('.', '').isdigit()]
+                            if yields:
+                                avg_yield = sum(yields) / len(yields)
+                                context_info.append(f"Average Yield: {avg_yield:.1f} kg/ha ({len(yields)} trials)")
+                        elif len(value) == 1:
+                            context_info.append(f"Yield: {value[0]} kg/ha")
+                    else:
+                        context_info.append(f"{key}: {value}")
+                
                 if context_info:
                     results.append(f"  - {' | '.join(context_info)}")
                 
@@ -145,12 +180,12 @@ def handle_comprehensive_search(args: Dict, ontario_df: pd.DataFrame, usa_canada
     
     # Combine results
     if results:
-        response = f"## 🔍 **Search Results for '{search_term}'**\n\n" + "\n".join(results)
+        response = f"## 📊 **Bean Dataset Analysis for '{search_term}'**\n\n" + "\n".join(results)
         if sources:
             unique_sources = list(set(sources))
-            response += f"\n\n**Data Sources:** {', '.join(unique_sources)}"
+            response += f"\n\n**📋 Data Sources:** {', '.join(unique_sources)}"
         columns_found = set([col for col, _ in ontario_matches] + [col for col, _ in usa_matches])
-        response += f"\n\n*Found matches in {len(columns_found)} different columns across datasets.*"
+        response += f"\n\n**📈 Analysis Summary:** Found comprehensive data matches in {len(columns_found)} different dataset columns, providing complete cultivar information including performance metrics, breeding characteristics, and resistance profiles."
         print(f"🔍 DEBUG: Final response length: {len(response)} characters")
         print(f"🔍 DEBUG: Response preview: {response[:200]}...")
     else:
@@ -821,10 +856,19 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     
     # ONLY load Ontario data if this is NOT a non-Ontario query
     print("📍 Ontario-specific query detected - loading Ontario bean trial data")
-    df_trials = db_manager.bean_data
+    df = db_manager.bean_data
+    
+    # Also load USA/Canada data for cultivar detection
+    try:
+        usa_canada_data = db_manager.usa_canada_data
+        print(f"📈 Loading USA/Canada data from optimized CSV format: ../data/Bean_Cultivars_USA_Canada_cleaned.csv")
+        print(f"✅ Loaded {len(usa_canada_data)} USA/Canada bean cultivar records with {len(usa_canada_data.columns)} columns")
+    except Exception as e:
+        print(f"⚠️ USA/Canada data not available: {e}")
+        usa_canada_data = pd.DataFrame()  # Empty dataframe as fallback
     
     # Check if data was loaded successfully
-    if df_trials.empty:
+    if df.empty:
         return "Bean trial data could not be loaded.", "", {}, ""
     
     # Get historical data for environmental context (loaded lazily)
@@ -860,7 +904,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     print(f"🔍 Bean query args received: {args}")
     
     # Apply market class filtering if specified
-    df = df_trials.copy()
+    # df is already loaded above, no need to copy
     
     # Filter by market class if provided in args
     market_class_input = args.get('market_class')
@@ -1142,76 +1186,130 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     # Web search will be performed at the end after all local data analysis is complete
     
     # Add analysis details based on the question - dynamically detect cultivar names
-    def find_mentioned_cultivars(question_text, df):
-        """Find cultivar names mentioned in the question by checking against actual dataset."""
+    def find_mentioned_cultivars(question_text, ontario_df, usa_canada_df):
+        """Find cultivar names mentioned in the question by checking against both datasets."""
         mentioned_cultivars = []
         question_lower = question_text.lower()
         
-        # Get unique cultivar names from the dataset - handle both column names
-        cultivar_col = 'Cultivar Name' if 'Cultivar Name' in df.columns else 'Name'
-        unique_cultivars = df[cultivar_col].dropna().unique()
+        # Collect all unique cultivar names from both datasets
+        all_cultivars = set()
         
-        for cultivar in unique_cultivars:
-            # Convert to string first (in case cultivar names are integers)
-            cultivar_str = str(cultivar)
-            cultivar_lower = cultivar_str.lower()
-            cultivar_words = cultivar_lower.split()
+        # Ontario dataset
+        if not ontario_df.empty:
+            cultivar_col = 'Cultivar Name' if 'Cultivar Name' in ontario_df.columns else 'Name'
+            ontario_cultivars = ontario_df[cultivar_col].dropna().unique()
+            all_cultivars.update([str(c) for c in ontario_cultivars])
+        
+        # USA/Canada dataset  
+        if not usa_canada_df.empty:
+            usa_cultivar_col = 'Name' if 'Name' in usa_canada_df.columns else 'Cultivar Name'
+            usa_cultivars = usa_canada_df[usa_cultivar_col].dropna().unique()
+            all_cultivars.update([str(c) for c in usa_cultivars])
+        
+        # First pass: Look for exact matches (highest priority)
+        for cultivar in all_cultivars:
+            cultivar_lower = cultivar.lower()
+            # Handle cases like "Blackhawk (B83302)" matching "blackhawk"
+            cultivar_base = cultivar_lower.split('(')[0].strip()  # Remove parentheses part
             
-            # Check if the full cultivar name or key parts are mentioned
             if (cultivar_lower in question_lower or 
-                any(word in question_lower for word in cultivar_words if len(word) > 3)):
+                cultivar_base in question_lower or
+                question_lower.strip() in cultivar_lower):
                 mentioned_cultivars.append(cultivar)
+        
+        # Second pass: Look for partial matches only if no exact matches found
+        if not mentioned_cultivars:
+            for cultivar in all_cultivars:
+                cultivar_lower = cultivar.lower()
+                cultivar_words = cultivar_lower.split()
+                
+                # Only match if ALL significant words from cultivar are in question
+                # This prevents "black" matching "blackhawk" incorrectly
+                if len(cultivar_words) > 1:
+                    significant_words = [w for w in cultivar_words if len(w) > 3]
+                    if significant_words and all(word in question_lower for word in significant_words):
+                        mentioned_cultivars.append(cultivar)
+                elif len(cultivar_words) == 1 and len(cultivar_words[0]) > 4:
+                    # For single-word cultivars, require longer match to avoid false positives
+                    if cultivar_words[0] in question_lower:
+                        mentioned_cultivars.append(cultivar)
         
         return mentioned_cultivars
     
-    mentioned_cultivars = find_mentioned_cultivars(original_question, df)
+    mentioned_cultivars = find_mentioned_cultivars(original_question, df, usa_canada_data)
     print(f"🔍 DEBUG: mentioned_cultivars found: {mentioned_cultivars}")
     print(f"🔍 DEBUG: len(mentioned_cultivars): {len(mentioned_cultivars)}")
     
-    # CRITICAL FIX: Validate cultivar parameter from function call
+    # CRITICAL FIX: Parse multiple cultivars from function call parameter
     function_call_cultivar = args.get('cultivar')
     unknown_cultivar_detected = False
     unknown_cultivar_name = None
     
+    # Parse multiple cultivars if provided as comma-separated string
+    function_call_cultivars = []
+    if function_call_cultivar:
+        import re
+        # Split by comma, "and", "or", "vs", "with", etc.
+        potential_names = re.split(r'[,&]|(?:\s+and\s+)|(?:\s+or\s+)|(?:\s+vs\s+)|(?:\s+with\s+)|(?:\s+versus\s+)', function_call_cultivar)
+        
+        for name in potential_names:
+            clean_name = name.strip('.,!?').strip()
+            # Filter out common words
+            if (len(clean_name) > 2 and 
+                clean_name.lower() not in ['compare', 'comparison', 'what', 'the', 'is', 'of', 'for', 'and', 'or', 'vs', 'with', 'versus']):
+                function_call_cultivars.append(clean_name)
+    
     print(f"🔍 Cultivar detection:")
     print(f"  - function_call_cultivar: {function_call_cultivar}")
+    print(f"  - parsed_cultivars: {function_call_cultivars}")
     print(f"  - args keys: {list(args.keys())}")
     print(f"  - unknown_cultivar_detected: {unknown_cultivar_detected}")
 
-    if function_call_cultivar and function_call_cultivar not in df['Cultivar Name'].values:
-        print(f"🚨 WARNING: Function call suggested cultivar '{function_call_cultivar}' does not exist in dataset!")
-        # Check if it's similar to any real cultivar (handle OAC 23-1D -> OAC 23-1 case)
-        all_cultivars = df['Cultivar Name'].dropna().astype(str)
-        
-        # First try exact partial match (e.g., "OAC 23-1D" should find "OAC 23-1")
-        partial_match = None
-        for cultivar in all_cultivars.unique():
-            cultivar_str = str(cultivar)
-            # Check if the function call cultivar is a superset of an actual cultivar
-            if cultivar_str in function_call_cultivar or function_call_cultivar.replace('-D', '') == cultivar_str:
-                partial_match = cultivar_str
-                break
-        
-        if partial_match:
-            print(f"🔧 Fixed cultivar parameter: '{function_call_cultivar}' -> '{partial_match}'")
-            args['cultivar'] = partial_match
-            # Update mentioned_cultivars with corrected name
-            mentioned_cultivars = [partial_match]
+    # Validate and correct each parsed cultivar
+    valid_cultivars = []
+    all_cultivars = df['Cultivar Name'].dropna().astype(str)
+    
+    for cultivar_name in function_call_cultivars:
+        if cultivar_name in df['Cultivar Name'].values:
+            valid_cultivars.append(cultivar_name)
+            print(f"✅ Valid cultivar found: '{cultivar_name}'")
         else:
-            # Try fuzzy matching
-            similar_cultivars = all_cultivars[all_cultivars.str.contains(function_call_cultivar.split()[0] if ' ' in function_call_cultivar else function_call_cultivar[:5], case=False, na=False)]
-            if not similar_cultivars.empty:
-                print(f"🔍 Similar cultivars found: {list(similar_cultivars.unique())}")
-                # Use the first similar cultivar
-                args['cultivar'] = similar_cultivars.iloc[0]
-                print(f"🔧 Fixed cultivar parameter: '{function_call_cultivar}' -> '{args['cultivar']}'")
-                # Update mentioned_cultivars with corrected name
-                mentioned_cultivars = [args['cultivar']]
+            print(f"🚨 WARNING: Cultivar '{cultivar_name}' does not exist in dataset!")
+            # Try to find a similar cultivar
+            partial_match = None
+            for cultivar in all_cultivars.unique():
+                cultivar_str = str(cultivar)
+                # Check if the cultivar name is a superset of an actual cultivar
+                if cultivar_str in cultivar_name or cultivar_name.replace('-D', '') == cultivar_str:
+                    partial_match = cultivar_str
+                    break
+            
+            if partial_match:
+                print(f"🔧 Fixed cultivar: '{cultivar_name}' -> '{partial_match}'")
+                valid_cultivars.append(partial_match)
             else:
-                print(f"🌐 Unknown cultivar detected: '{function_call_cultivar}' - will perform web search")
-                unknown_cultivar_detected = True
-                unknown_cultivar_name = function_call_cultivar
-                args.pop('cultivar', None)  # Remove the invalid parameter
+                # Try fuzzy matching
+                similar_cultivars = all_cultivars[all_cultivars.str.contains(cultivar_name.split()[0] if ' ' in cultivar_name else cultivar_name[:5], case=False, na=False)]
+                if not similar_cultivars.empty:
+                    print(f"🔍 Similar cultivars found for '{cultivar_name}': {list(similar_cultivars.unique())}")
+                    # Use the first similar cultivar
+                    corrected_name = similar_cultivars.iloc[0]
+                    valid_cultivars.append(corrected_name)
+                    print(f"🔧 Fixed cultivar: '{cultivar_name}' -> '{corrected_name}'")
+                else:
+                    print(f"🌐 Unknown cultivar detected: '{cultivar_name}' - will perform web search")
+                    unknown_cultivar_detected = True
+                    unknown_cultivar_name = cultivar_name
+    
+    # Merge function call cultivars with detected cultivars (don't overwrite!)
+    if valid_cultivars:
+        # Add valid function call cultivars to mentioned_cultivars if not already present
+        for cultivar in valid_cultivars:
+            if cultivar not in mentioned_cultivars:
+                mentioned_cultivars.append(cultivar)
+        print(f"🔧 Merged function call cultivars. Total mentioned_cultivars: {mentioned_cultivars}")
+        # Update args with the first valid cultivar for compatibility
+        args['cultivar'] = valid_cultivars[0]
 
     # Track if we removed an invalid cultivar for user notification
     # Only consider it invalid if we couldn't find a correction
@@ -1226,12 +1324,11 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     
     # Override function call parameters with correctly detected cultivars
     if mentioned_cultivars:
-        # Update the cultivar parameter with the first detected cultivar
+        # Update the cultivar parameter with the first detected cultivar for compatibility
         corrected_cultivar = str(mentioned_cultivars[0])
         args['cultivar'] = corrected_cultivar
-        print(f"🔧 Fixed cultivar parameter: '{args.get('cultivar', 'None')}' -> '{corrected_cultivar}'")
-        # Update mentioned_cultivars with the corrected name to ensure consistency
-        mentioned_cultivars = [corrected_cultivar]
+        print(f"🔧 Set primary cultivar parameter to: '{corrected_cultivar}' (keeping all {len(mentioned_cultivars)} cultivars for analysis)")
+        # Keep all mentioned_cultivars for multi-cultivar analysis
     
     # Check for cross-market class comparison issues
     cross_market_issue = None
@@ -1906,63 +2003,120 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         
         # Reset limited data flag for each cultivar
         has_limited_data = False
-        cultivar_col = 'Cultivar Name' if 'Cultivar Name' in df.columns else 'Name'
-        cultivar_data = df[df[cultivar_col] == cultivar]
+        
+        # Check both Ontario and USA/Canada datasets for cultivar data
+        cultivar_data = pd.DataFrame()
+        data_source = ""
+        
+        # First check Ontario dataset
+        ontario_cultivar_col = 'Cultivar Name' if 'Cultivar Name' in df.columns else 'Name'
+        ontario_data = df[df[ontario_cultivar_col] == cultivar]
+        
+        if not ontario_data.empty:
+            cultivar_data = ontario_data
+            data_source = "Ontario Bean Trials"
+        elif not usa_canada_data.empty:
+            # Check USA/Canada dataset
+            usa_cultivar_col = 'Name' if 'Name' in usa_canada_data.columns else 'Cultivar Name'
+            usa_data = usa_canada_data[usa_canada_data[usa_cultivar_col] == cultivar]
+            if not usa_data.empty:
+                cultivar_data = usa_data
+                data_source = "USA/Canada Cultivar Database"
+        
         if not cultivar_data.empty:
-            response += f"**{cultivar} Performance:**\n"
-            response += f"- **Records:** {len(cultivar_data)} trials\n"
-
-            # Check if cultivar has limited data (NaN values for key metrics)
-            has_limited_data = False
-            if 'Yield' in cultivar_data.columns:
-                avg_yield = cultivar_data['Yield'].mean()
-                if not pd.isna(avg_yield):
-                    response += f"- **Average yield:** {avg_yield:.2f} kg/ha\n"
-            else:
-                has_limited_data = True
-
-            if 'Maturity' in cultivar_data.columns:
-                avg_maturity = cultivar_data['Maturity'].mean()
-                if not pd.isna(avg_maturity):
-                    response += f"- **Average maturity:** {avg_maturity:.1f} days\n"
-                else:
-                    if not has_limited_data:  # Only set to True if not already True
-                        has_limited_data = True
-            else:
-                if not has_limited_data:  # Only set to True if not already True
-                    has_limited_data = True
+            response += f"**{cultivar} ({data_source}):**\n"
             
-            # Enriched breeding information
-            if 'Market Class' in cultivar_data.columns:
-                market_class = cultivar_data['Market Class'].dropna().iloc[0] if not cultivar_data['Market Class'].dropna().empty else None
-                if market_class:
-                    response += f"- **Market class:** {market_class}\n"
-                    
-                    if 'Released Year' in cultivar_data.columns:
-                        released_year = cultivar_data['Released Year'].dropna().iloc[0] if not cultivar_data['Released Year'].dropna().empty else None
-                        if released_year and not pd.isna(released_year):
-                            response += f"- **Released:** {int(released_year)}\n"
-                    
-                    if 'Pedigree' in cultivar_data.columns:
-                        pedigree = cultivar_data['Pedigree'].dropna().iloc[0] if not cultivar_data['Pedigree'].dropna().empty else None
-                        if pedigree:
-                            response += f"- **Pedigree:** {pedigree}\n"
-                    
-                    # Disease resistance information
-                    resistance_traits = []
-                    for col in ['Common Mosaic Virus R1', 'Common Mosaic Virus R15', 'Anthracnose R17', 'Anthracnose R23', 'Anthracnose R73', 'Common Blight']:
-                        if col in cultivar_data.columns:
-                            resistance = cultivar_data[col].dropna().iloc[0] if not cultivar_data[col].dropna().empty else None
-                            if resistance and str(resistance).upper() == 'R':
-                                trait_name = col.replace('Common Mosaic Virus R1', 'CMV R1').replace('Common Mosaic Virus R15', 'CMV R15').replace('Anthracnose R17', 'Anth R17').replace('Anthracnose R23', 'Anth R23').replace('Anthracnose R73', 'Anth R73').replace('Common Blight', 'CB')
-                                resistance_traits.append(trait_name)
-                    
-                    if resistance_traits:
-                        response += f"- **Disease resistance:** {', '.join(resistance_traits)}\n"
+            # Handle different data structures between Ontario and USA/Canada datasets
+            if data_source == "Ontario Bean Trials":
+                response += f"- **Records:** {len(cultivar_data)} trials\n"
+            else:
+                response += f"- **Source:** {data_source}\n"
 
-                    # Add note for limited data if multiple key fields are missing
-                    if has_limited_data and ('Yield' not in cultivar_data.columns or pd.isna(cultivar_data['Yield'].mean())) and ('Maturity' not in cultivar_data.columns or pd.isna(cultivar_data['Maturity'].mean())):
-                        response += f"- **Note:** Limited performance data available for this cultivar\n"
+            # Handle different column structures between datasets
+            has_limited_data = False
+            
+            if data_source == "Ontario Bean Trials":
+                # Ontario dataset columns
+                if 'Yield' in cultivar_data.columns:
+                    avg_yield = cultivar_data['Yield'].mean()
+                    if not pd.isna(avg_yield):
+                        response += f"- **Average yield:** {avg_yield:.2f} kg/ha\n"
+                else:
+                    has_limited_data = True
+
+                if 'Maturity' in cultivar_data.columns:
+                    avg_maturity = cultivar_data['Maturity'].mean()
+                    if not pd.isna(avg_maturity):
+                        response += f"- **Average maturity:** {avg_maturity:.1f} days\n"
+                    else:
+                        if not has_limited_data:
+                            has_limited_data = True
+                else:
+                    if not has_limited_data:
+                        has_limited_data = True
+                
+                # Ontario breeding information
+                if 'Market Class' in cultivar_data.columns:
+                    market_class = cultivar_data['Market Class'].dropna().iloc[0] if not cultivar_data['Market Class'].dropna().empty else None
+                    if market_class:
+                        response += f"- **Market class:** {market_class}\n"
+                
+                if 'Released Year' in cultivar_data.columns:
+                    released_year = cultivar_data['Released Year'].dropna().iloc[0] if not cultivar_data['Released Year'].dropna().empty else None
+                    if released_year and not pd.isna(released_year):
+                        response += f"- **Released:** {int(released_year)}\n"
+            
+            else:
+                # USA/Canada dataset columns
+                row = cultivar_data.iloc[0]  # Get first (and likely only) row
+                
+                if 'Market Class' in cultivar_data.columns and pd.notna(row.get('Market Class')):
+                    response += f"- **Market class:** {row['Market Class']}\n"
+                
+                if 'Maturity' in cultivar_data.columns and pd.notna(row.get('Maturity')):
+                    response += f"- **Maturity:** {row['Maturity']}\n"
+                elif 'Characteristics' in cultivar_data.columns and pd.notna(row.get('Characteristics')):
+                    # Extract maturity from characteristics if available
+                    characteristics = str(row['Characteristics'])
+                    import re
+                    maturity_match = re.search(r'(\d+)\s*days', characteristics, re.IGNORECASE)
+                    if maturity_match:
+                        response += f"- **Maturity:** {maturity_match.group(1)} days\n"
+                
+                if 'Breeder and Vendor' in cultivar_data.columns and pd.notna(row.get('Breeder and Vendor')):
+                    response += f"- **Breeder:** {row['Breeder and Vendor']}\n"
+                
+                if 'Parentage' in cultivar_data.columns and pd.notna(row.get('Parentage')):
+                    response += f"- **Parentage:** {row['Parentage']}\n"
+                
+                if 'Resistance' in cultivar_data.columns and pd.notna(row.get('Resistance')):
+                    response += f"- **Disease resistance:** {row['Resistance']}\n"
+                
+                if 'Characteristics' in cultivar_data.columns and pd.notna(row.get('Characteristics')):
+                    characteristics = str(row['Characteristics'])
+                    if len(characteristics) < 200:  # Only show if not too long
+                        response += f"- **Characteristics:** {characteristics}\n"
+            
+            if 'Pedigree' in cultivar_data.columns:
+                pedigree = cultivar_data['Pedigree'].dropna().iloc[0] if not cultivar_data['Pedigree'].dropna().empty else None
+                if pedigree:
+                    response += f"- **Pedigree:** {pedigree}\n"
+            
+            # Disease resistance information
+            resistance_traits = []
+            for col in ['Common Mosaic Virus R1', 'Common Mosaic Virus R15', 'Anthracnose R17', 'Anthracnose R23', 'Anthracnose R73', 'Common Blight']:
+                if col in cultivar_data.columns:
+                    resistance = cultivar_data[col].dropna().iloc[0] if not cultivar_data[col].dropna().empty else None
+                    if resistance and str(resistance).upper() == 'R':
+                        trait_name = col.replace('Common Mosaic Virus R1', 'CMV R1').replace('Common Mosaic Virus R15', 'CMV R15').replace('Anthracnose R17', 'Anth R17').replace('Anthracnose R23', 'Anth R23').replace('Anthracnose R73', 'Anth R73').replace('Common Blight', 'CB')
+                        resistance_traits.append(trait_name)
+            
+            if resistance_traits:
+                response += f"- **Disease resistance:** {', '.join(resistance_traits)}\n"
+
+            # Add note for limited data if multiple key fields are missing
+            if has_limited_data and ('Yield' not in cultivar_data.columns or pd.isna(cultivar_data['Yield'].mean())) and ('Maturity' not in cultivar_data.columns or pd.isna(cultivar_data['Maturity'].mean())):
+                response += f"- **Note:** Limited performance data available for this cultivar\n"
 
             # If cultivar has limited data, perform web search to supplement information (limit to 5 searches)
             if has_limited_data and api_key and web_search_count < 5:
@@ -1988,13 +2142,13 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                         
                         if key_info:
                             response += f"- **Web supplement:** {'; '.join(key_info[:2])}\n"  # Max 2 key facts
-                    else:
-                        print(f"⚠️ No web results found for {cultivar}")
+                        else:
+                            print(f"⚠️ No web results found for {cultivar}")
                 except Exception as e:
                     print(f"⚠️ Web search failed for {cultivar}: {e}")
 
-            # Add newline after each cultivar
-            response += "\n"
+        # Add newline after each cultivar
+        response += "\n"
 
     # Debug completion
     print(f"🔍 DEBUG: Completed processing all {len(cultivars_to_analyze)} cultivars")
