@@ -819,6 +819,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     bean_chart_data = {}
     bean_full_md = ""
     bean_data_found = False
+    function_call_messages = []  # Initialize to avoid UnboundLocalError
     
     # Add current question to conversation history for context
     if conversation_history is None:
@@ -835,7 +836,13 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     print(f"🧬 Is this a pedigree question? {is_pedigree_question}")
     
     # Check if this is a "name" query that should search datasets comprehensively
-    is_name_query = any(keyword in question.lower() for keyword in ['name', 'referring to', 'what is', 'identify', 'who is', 'called'])
+    name_keywords = ['name', 'referring to', 'what is', 'identify', 'who is', 'called', 'what about', 'tell me about', 'about', 'what kind', 'kind of']
+    is_name_query = any(keyword in question.lower() for keyword in name_keywords)
+    
+    # Also check for specific cultivar names that should trigger name queries
+    cultivar_names = ['hooter', 'wallace', 'charro', 'blast', 'charm', 'vortex', 'gallantry', 'snowshoe', 'seal', 'lighthouse', 'steam']
+    has_cultivar_name = any(cultivar in question.lower() for cultivar in cultivar_names)
+    is_name_query = is_name_query or has_cultivar_name
     print(f"🔍 Is this a name/identification query? {is_name_query}")
     
     yield {"type": "progress", "data": {"step": "analysis", "detail": "Determining research strategy..."}}
@@ -852,9 +859,11 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
         
         # Check for bean data keywords - broader detection for data analysis
         bean_keywords = ["yield", "maturity", "cultivar", "variety", "performance", "bean", "production", "steam", "lighthouse", "seal", 
-                        "cranberry", "kidney", "navy", "black", "pinto", "market class", "list all", "beans in ontario", 
-                        "oac", "ac ", "breeding", "trial", "data", "dataset", "pedigree", "parentage", "parent", "cross", 
-                        "breeding line", "lineage", "genetic background", "name", "referring to", "what is", "identify", "called"]
+                         "cranberry", "kidney", "navy", "black", "pinto", "market class", "list all", "beans in ontario", 
+                         "oac", "ac ", "breeding", "trial", "data", "dataset", "pedigree", "parentage", "parent", "cross", 
+                         "breeding line", "lineage", "genetic background", "name", "referring to", "what is", "identify", "called", 
+                         "what about", "tell me about", "about", "resistance", "resistant", "resistancy", "disease", "traits", 
+                         "characteristics", "hooter", "wallace", "charro", "blast", "charm", "vortex", "gallantry", "snowshoe"]
         
         # Add location-based keywords for environmental/weather queries at trial locations
         location_keywords = ["auburn", "blyth", "elora", "granton", "kippen", "monkton", "thorndale", "winchester", "woodstock", 
@@ -882,12 +891,156 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
         has_future_climate_keywords = any(keyword in question.lower() for keyword in future_climate_keywords)
         explicitly_wants_chart = any(keyword in question.lower() for keyword in chart_keywords)
         
-        # Trigger bean data if: regular bean keywords OR (location + weather keywords) OR future climate keywords
-        should_query_bean_data = has_bean_keywords or (has_location_keywords and has_weather_keywords) or has_future_climate_keywords
+        # Trigger bean data if: regular bean keywords OR (location + weather keywords) OR future climate keywords OR name/pedigree queries
+        should_query_bean_data = has_bean_keywords or (has_location_keywords and has_weather_keywords) or has_future_climate_keywords or is_name_query or is_pedigree_question
+        
+        print(f"🔍 DEBUG: Bean data trigger check for '{question}':")
+        print(f"  - has_bean_keywords: {has_bean_keywords}")
+        print(f"  - is_name_query: {is_name_query}")
+        print(f"  - is_pedigree_question: {is_pedigree_question}")
+        print(f"  - should_query_bean_data: {should_query_bean_data}")
+        
+        # Check if this is a count/listing query that should also force bean function call
+        count_keywords = ['how many', 'count', 'number of', 'list all', 'show all', 'all the']
+        is_count_query = any(keyword in question.lower() for keyword in count_keywords)
+        print(f"  - is_count_query: {is_count_query}")
         
         if should_query_bean_data:
-            # Let GPT decide whether to call the bean function
-            function_call_messages = [
+            # For name queries, pedigree questions, and count queries, force the function call
+            if is_name_query or is_pedigree_question or is_count_query:
+                query_type = 'name' if is_name_query else ('pedigree' if is_pedigree_question else 'count')
+                print(f"🔍 DEBUG: Forcing bean function call for {query_type} query")
+                yield {"type": "progress", "data": {"step": "processing", "detail": "Processing cultivar data"}}
+                
+                # Create args for the bean function
+                args = {
+                    'original_question': question,
+                    'api_key': api_key
+                }
+                
+                # For name queries, try to extract the cultivar name
+                if is_name_query:
+                    # Simple extraction - look for capitalized words or words after "about"
+                    words = question.split()
+                    for i, word in enumerate(words):
+                        if word.lower() == 'about' and i + 1 < len(words):
+                            args['cultivar'] = words[i + 1].strip('.,!?')
+                            break
+                        elif word[0].isupper() and len(word) > 3 and word.lower() not in ['what', 'where', 'when', 'why', 'how', 'who', 'which']:
+                            args['cultivar'] = word.strip('.,!?')
+                            break
+                
+                print(f"🔍 DEBUG: Calling bean function with args: {args}")
+                
+                # Determine what type of query this is for better progress messages
+                question_lower = question.lower()
+                if any(region in question_lower for region in ['michigan', 'usa', 'canada', 'minnesota', 'north dakota']):
+                    yield {"type": "progress", "data": {"step": "loading", "detail": "Loading USA/Canada cultivar database..."}}
+                else:
+                    yield {"type": "progress", "data": {"step": "loading", "detail": "Loading Ontario bean trial dataset..."}}
+                
+                # Call the bean function directly
+                preview, full_md, chart_data, cultivar_context = answer_bean_query(args)
+                
+                print(f"🔍 DEBUG: Bean function returned preview length: {len(preview)}")
+                
+                # For count queries, accept both numeric responses and formatted count responses
+                is_count_response = (is_count_query and preview and 
+                                   (preview.strip().isdigit() or 
+                                    'total count:' in preview.lower() or 
+                                    'beans in north america' in preview.lower()))
+                is_valid_response = (preview and len(preview) > 50) or is_count_response
+                
+                if is_valid_response:
+                    bean_data_found = True
+                    
+                    # Use GPT to decide if the dataset results are sufficient (much more accurate than hardcoded rules)
+                    if len(preview) > 100:  # Only check if we have reasonable content
+                        yield {"type": "progress", "data": {"step": "evaluating", "detail": "Evaluating dataset completeness..."}}
+                        
+                        # For large datasets (>10k chars), assume it's sufficient
+                        if len(preview) > 10000:
+                            print(f"🔍 Large dataset ({len(preview)} chars) - assuming sufficient without GPT evaluation")
+                            is_sufficient = True
+                        else:
+                            # Ask GPT if the dataset results answer the user's question sufficiently
+                            evaluation_prompt = f"""
+                            User asked: "{question}"
+                            
+                            Dataset returned this result (first 1000 chars):
+                            {preview[:1000]}...
+                            
+                            The dataset result is {len(preview)} characters long.
+                            
+                            Does this dataset result sufficiently answer the user's question? 
+                            
+                            IMPORTANT: Be generous in evaluation. If the dataset shows:
+                            - A list of cultivars when user asked for a list
+                            - Count information when user asked "how many"
+                            - Pedigree details when user asked about pedigree
+                            - Actual data (not error messages)
+                            
+                            Then it IS sufficient. Only say NO if the data is clearly incomplete or contains error messages.
+                            
+                            Respond with only "YES" if sufficient, or "NO" if clearly insufficient.
+                            """
+                        
+                            try:
+                                eval_response = client.chat.completions.create(
+                                    model="gpt-4o-mini",  # Use cheaper model for evaluation
+                                    messages=[{"role": "user", "content": evaluation_prompt}],
+                                    max_tokens=10,
+                                    temperature=0
+                                )
+                                
+                                is_sufficient = eval_response.choices[0].message.content.strip().upper() == "YES"
+                                print(f"🤖 GPT evaluation: Dataset sufficient = {is_sufficient}")
+                                
+                            except Exception as e:
+                                print(f"⚠️ GPT evaluation failed: {e}, defaulting to show dataset results")
+                                is_sufficient = True  # Default to showing results if evaluation fails
+                        
+                        if is_sufficient:
+                            print(f"🔍 Dataset provided complete answer, skipping literature search")
+                            # Stream the bean data content directly to UI
+                            yield {"type": "progress", "data": {"step": "streaming", "detail": "Streaming results..."}}
+                            
+                            # Stream the content character by character
+                            for char in preview:
+                                yield {"type": "content", "data": char}
+                            
+                            # Send final metadata
+                            yield {
+                                "type": "metadata",
+                                "data": {
+                                    "sources": [],
+                                    "genes": [],
+                                    "full_markdown_table": full_md,
+                                    "chart_data": chart_data,
+                                    "suggested_questions": []
+                                }
+                            }
+                            return  # Stop here since we have complete answer
+                        else:
+                            print(f"🔍 GPT evaluation: dataset incomplete, continuing to literature search")
+                            # Store bean data for later metadata but continue searching
+                            bean_chart_data = chart_data
+                            bean_full_md = full_md  
+                            bean_data_found = True
+                            should_search_literature = True
+                            # Add a transition message for literature search
+                            transition_text = "\n\n---\n\n## 📚 **Additional Research Literature**\n\nSearching scientific publications for additional context...\n\n"
+                            for char in transition_text:
+                                yield {"type": "content", "data": char}
+                    else:
+                        print(f"🔍 DEBUG: Bean function returned insufficient data, continuing to literature search")
+                        should_search_literature = True
+                else:
+                    print(f"🔍 DEBUG: Bean function returned insufficient data, continuing to literature search")
+                    should_search_literature = True
+            else:
+                # Let GPT decide whether to call the bean function for other queries
+                function_call_messages = [
                 {
                     "role": "system",
                     "content": (
@@ -904,6 +1057,8 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         "- Climate change impacts on bean production\n"
                         "- How cultivars will perform under future climate conditions\n"
                         "- Location comparisons (e.g., 'Compare Elora and Woodstock')\n"
+                        "- Name/identification queries (e.g., 'what about Wallace', 'tell me about Charro')\n"
+                        "- Pedigree questions (e.g., 'what is the pedigree of X', 'previous name of Y')\n"
                         "- Any question that mentions bean characteristics, locations, years, or future scenarios\n\n"
                         "IMPORTANT FOR LOCATION COMPARISONS: When the user asks to compare multiple locations (e.g., 'Compare Elora and Woodstock'), extract ALL location names and pass them as comma-separated codes in the location parameter (e.g., 'ELOR, WOOD').\n\n"
                         "The user's question mentions bean-related terms, trial locations, or climate predictions, so you should call the function."
@@ -911,23 +1066,23 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                 }
             ]
             
-            # Add conversation history for context
-            if conversation_history:
-                function_call_messages.extend(conversation_history)
-            
-            function_call_messages.append({"role": "user", "content": question})
-            
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=function_call_messages,
-                functions=[function_schema],
-                function_call="auto",
-            )
+                # Add conversation history for context
+                if conversation_history:
+                    function_call_messages.extend(conversation_history)
+                
+                function_call_messages.append({"role": "user", "content": question})
+                
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=function_call_messages,
+                    functions=[function_schema],
+                    function_call="auto",
+                )
 
-            choice = response.choices[0]
-            
-            if choice.finish_reason == "function_call":
-                yield {"type": "progress", "data": {"step": "processing", "detail": "Processing cultivar data"}}
+                choice = response.choices[0]
+                
+                if choice.finish_reason == "function_call":
+                    yield {"type": "progress", "data": {"step": "processing", "detail": "Processing cultivar data"}}
                 
                 call = choice.message.function_call
                 
@@ -1044,6 +1199,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                     "content": (
                                         "🚨 CRITICAL USA/CANADA DATA INSTRUCTION: If the dataset response contains '🌍 Bean Cultivars - USA/Canada Database' or mentions USA/Canada cultivar data, this is VALID DATA from a 260-record database. You MUST summarize and present this data fully. NEVER respond with 'Only Ontario research station data is available' when USA/Canada data is present.\n\n"
                                         "🌐 USA/CANADA WEB INTEGRATION: If the response includes '🌐 Additional Research Context' with web search results, you MUST integrate this information with the cultivar data. Highlight performance insights, yield comparisons, and breeding achievements from the web research. Do not just list cultivars - synthesize the web research to identify the best performers.\n\n"
+                                        "📝 PREVIOUS NAME EXTRACTION: When asked about 'previous name' or 'old name' of a cultivar, look for the format 'Cultivar Name (Previous-ID)' in the dataset. The text in parentheses is the previous breeding line designation. For example: 'Wallace (773-V98)' means the previous name was '773-V98', 'Charro (P16901)' means the previous name was 'P16901'.\n\n"
                                         "You are a dry bean research analyst reporting to PhD-level researchers.\n"
                                         "You must present only direct statistical findings, comparisons, and evidence-based conclusions using the available datasets.\n\n"
                                         "🚨 ABSOLUTE LIST ALL REQUIREMENT: If the user asks 'list all', 'show all', 'what are all', or similar phrases requesting complete lists, you MUST provide EVERY SINGLE item from the dataset. Do NOT summarize, truncate, or show only 'top' performers. List ALL items with their complete data in numbered format.\n\n"
@@ -1153,21 +1309,44 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         bean_full_md = full_md
                         bean_data_found = True
                         
-                        # For pedigree or name questions, continue to literature search even after bean data analysis
+                        # For pedigree or name questions, check if we got a complete answer
                         if is_pedigree_question or is_name_query:
-                            print(f"🔍 {'Pedigree' if is_pedigree_question else 'Name'} question: continuing to literature search after bean data analysis")
-                            # Store bean data for later metadata but don't stop here
-                            bean_chart_data = chart_data
-                            bean_full_md = full_md  
-                            bean_data_found = True
-                            should_search_literature = True
-                            # Add a transition message for literature search
-                            if is_name_query:
-                                transition_text = "\n\n---\n\n## 📚 **Additional Context from Research Literature**\n\nSearching scientific publications for related information...\n\n"
+                            # Check if the dataset provided substantial information
+                            has_substantial_info = (
+                                len(preview) > 200 and  # Reasonable amount of content
+                                any(keyword in preview.lower() for keyword in ['pedigree:', 'parentage:', 'breeder:', 'market class:', 'release year:', 'found in column']) and
+                                'no pedigree information found' not in preview.lower() and
+                                'no matches found' not in preview.lower()
+                            )
+                            
+                            if has_substantial_info:
+                                 print(f"🔍 {'Pedigree' if is_pedigree_question else 'Name'} question: dataset provided complete answer, skipping literature search")
+                                 # Send the bean data content directly to UI
+                                 yield {
+                                     "type": "bean_complete",
+                                     "data": {
+                                         "sources": [],
+                                         "genes": [],
+                                         "full_markdown_table": full_md,
+                                         "chart_data": chart_data,
+                                         "suggested_questions": []
+                                     }
+                                 }
+                                 return  # Stop here since we have complete answer
                             else:
-                                transition_text = "\n\n---\n\n## 📚 **Related Research Literature**\n\nSearching scientific publications for additional genetic and breeding context...\n\n"
-                            for char in transition_text:
-                                yield {"type": "content", "data": char}
+                                print(f"🔍 {'Pedigree' if is_pedigree_question else 'Name'} question: dataset incomplete, continuing to literature search")
+                                # Store bean data for later metadata but continue searching
+                                bean_chart_data = chart_data
+                                bean_full_md = full_md  
+                                bean_data_found = True
+                                should_search_literature = True
+                                # Add a transition message for literature search
+                                if is_name_query:
+                                    transition_text = "\n\n---\n\n## 📚 **Additional Context from Research Literature**\n\nSearching scientific publications for related information...\n\n"
+                                else:
+                                    transition_text = "\n\n---\n\n## 📚 **Related Research Literature**\n\nSearching scientific publications for additional genetic and breeding context...\n\n"
+                                for char in transition_text:
+                                    yield {"type": "content", "data": char}
                         else:
                             # For non-pedigree questions, send toggle for user choice
                             print(f"🚀 Sending bean_complete response with chart_data:")
@@ -1193,15 +1372,15 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         should_search_literature = True
                         bean_chart_data = {}
                         bean_full_md = ""
-            else:
-                # Bean keywords found but no function call - proceed to literature search
-                yield {"type": "progress", "data": {"step": "generation", "detail": "Proceeding to literature search"}}
-                should_search_literature = True
-                
-                # Add transition to literature search
-                transition_text = "\n\n## 📚 **Research Literature Search**\n\nSearching scientific publications for relevant information...\n\n"
-                for char in transition_text:
-                    yield {"type": "content", "data": char}
+                else:
+                    # Bean keywords found but no function call - proceed to literature search
+                    yield {"type": "progress", "data": {"step": "generation", "detail": "Proceeding to literature search"}}
+                    should_search_literature = True
+                    
+                    # Add transition to literature search
+                    transition_text = "\n\n## 📚 **Research Literature Search**\n\nSearching scientific publications for relevant information...\n\n"
+                    for char in transition_text:
+                        yield {"type": "content", "data": char}
         else:
             # No bean keywords and not genetics - check if web search is needed for current info
             from utils.web_search import needs_current_info, perform_web_search, create_web_enhanced_response
@@ -1456,9 +1635,9 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     
     if bean_data_found and (is_pedigree_question or is_name_query):
         print(f"🔍 Combining bean data results with literature search for {'pedigree' if is_pedigree_question else 'name'} question")
-        if bean_full_md and "Error loading data" not in bean_full_md:
+        if 'bean_full_md' in locals() and bean_full_md and "Error loading data" not in bean_full_md:
             final_full_md = bean_full_md
-        if bean_chart_data:
+        if 'bean_chart_data' in locals() and bean_chart_data:
             final_chart_data = bean_chart_data
         # Bean sources would be included in the content, literature sources in combined_sources
     
