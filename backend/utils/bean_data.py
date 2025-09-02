@@ -61,6 +61,361 @@ def extract_site_name(url: str) -> str:
     except Exception:
         return "Source"
 
+def handle_comprehensive_search(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str, search_term: str) -> Tuple[str, str, Dict, str]:
+    """Handle comprehensive search through ALL columns of both datasets for any term"""
+    
+    print(f"🔍 Comprehensive search for term: '{search_term}' in question: {original_question}")
+    
+    results = []
+    sources = []
+    
+    # Search Ontario dataset - ALL columns
+    ontario_matches = []
+    if not ontario_df.empty and search_term:
+        print(f"🔍 Searching Ontario dataset columns: {list(ontario_df.columns)}")
+        
+        seen_rows = set()
+        for column in ontario_df.columns:
+            if ontario_df[column].dtype == 'object':  # Only search string/object columns
+                matches = ontario_df[ontario_df[column].astype(str).str.contains(search_term, case=False, na=False)]
+                if not matches.empty:
+                    for _, row in matches.iterrows():
+                        row_id = hash(tuple(row.values))  # Create unique ID for row
+                        if row_id not in seen_rows:
+                            ontario_matches.append((column, row))
+                            seen_rows.add(row_id)
+        
+        if ontario_matches:
+            results.append("### 📍 **Ontario Dataset Results:**")
+            for column, row in ontario_matches[:5]:  # Limit to first 5 matches
+                cultivar_name = row.get('Cultivar', '') or row.get('Cultivar Name', '') or 'Unknown'
+                found_value = row.get(column, '')
+                results.append(f"**{cultivar_name}** - Found in column **{column}**: `{found_value}`")
+                
+                # Add additional context if available
+                context_info = []
+                if pd.notna(row.get('Market Class', '')):
+                    context_info.append(f"Market Class: {row.get('Market Class', '')}")
+                if pd.notna(row.get('Released Year', '') or row.get('Release Year', '')):
+                    year = row.get('Released Year', '') or row.get('Release Year', '')
+                    context_info.append(f"Release Year: {year}")
+                if context_info:
+                    results.append(f"  - {' | '.join(context_info)}")
+                
+            sources.append("Ontario Bean Trial Dataset")
+    
+    # Search USA/Canada dataset - ALL columns  
+    usa_matches = []
+    if not usa_canada_data.empty and search_term:
+        print(f"🔍 Searching USA/Canada dataset columns: {list(usa_canada_data.columns)}")
+        
+        seen_rows = set()
+        for column in usa_canada_data.columns:
+            if usa_canada_data[column].dtype == 'object':  # Only search string/object columns
+                matches = usa_canada_data[usa_canada_data[column].astype(str).str.contains(search_term, case=False, na=False)]
+                if not matches.empty:
+                    for _, row in matches.iterrows():
+                        row_id = hash(tuple(row.values))  # Create unique ID for row
+                        if row_id not in seen_rows:
+                            usa_matches.append((column, row))
+                            seen_rows.add(row_id)
+        
+        if usa_matches:
+            results.append("\n### 🌍 **USA/Canada Dataset Results:**")
+            for column, row in usa_matches[:5]:  # Limit to first 5 matches
+                cultivar_name = row.get('Cultivar Name', '') or row.get('Name', '') or 'Unknown'
+                found_value = row.get(column, '')
+                results.append(f"**{cultivar_name}** - Found in column **{column}**: `{found_value}`")
+                
+                # Add additional context if available
+                context_info = []
+                if pd.notna(row.get('Market Class', '')):
+                    context_info.append(f"Market Class: {row.get('Market Class', '')}")
+                if pd.notna(row.get('Release Year', '')):
+                    context_info.append(f"Release Year: {row.get('Release Year', '')}")
+                if pd.notna(row.get('Breeder and Vendor', '')):
+                    context_info.append(f"Breeder: {row.get('Breeder and Vendor', '')}")
+                if context_info:
+                    results.append(f"  - {' | '.join(context_info)}")
+                    
+            sources.append("USA/Canada Bean Cultivars Dataset")
+    
+    # Combine results
+    if results:
+        response = f"## 🔍 **Search Results for '{search_term}'**\n\n" + "\n".join(results)
+        if sources:
+            unique_sources = list(set(sources))
+            response += f"\n\n**Data Sources:** {', '.join(unique_sources)}"
+        columns_found = set([col for col, _ in ontario_matches] + [col for col, _ in usa_matches])
+        response += f"\n\n*Found matches in {len(columns_found)} different columns across datasets.*"
+    else:
+        response = f"No matches found for **'{search_term}'** in available bean datasets."
+        response += "\n\nSearched through all columns in both Ontario bean trial dataset and USA/Canada cultivars database."
+    
+    return response, response, {}, ""
+
+def handle_pedigree_analysis(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
+    """Handle pedigree analysis questions - finding common patterns across market classes"""
+    
+    print(f"🧬 Analyzing pedigree patterns for: {original_question}")
+    
+    # Extract market class from question
+    question_lower = original_question.lower()
+    market_class = ""
+    
+    # Map question terms to market class values
+    if any(term in question_lower for term in ['dark red kidney', 'red kidney']):
+        market_class_patterns = ['Dark Red Kidney', 'Red Kidney', 'kidney']
+    elif any(term in question_lower for term in ['white kidney', 'kidney']):
+        market_class_patterns = ['White Kidney', 'kidney']
+    elif 'navy' in question_lower:
+        market_class_patterns = ['Navy', 'White Navy', 'navy']
+    elif 'black' in question_lower:
+        market_class_patterns = ['Black', 'black']
+    elif 'pinto' in question_lower:
+        market_class_patterns = ['Pinto', 'pinto']
+    elif 'cranberry' in question_lower:
+        market_class_patterns = ['Cranberry', 'cranberry']
+    else:
+        market_class_patterns = ['kidney', 'navy', 'black', 'pinto', 'cranberry']  # All if not specified
+    
+    print(f"🔍 Looking for market class patterns: {market_class_patterns}")
+    
+    # Collect all pedigree information for matching cultivars
+    all_pedigrees = []
+    cultivar_count = 0
+    
+    # Search Ontario dataset
+    if not ontario_df.empty and 'Market Class' in ontario_df.columns:
+        for pattern in market_class_patterns:
+            ontario_matches = ontario_df[ontario_df['Market Class'].str.contains(pattern, case=False, na=False)]
+            for _, row in ontario_matches.iterrows():
+                pedigree = row.get('Pedigree', '')
+                if pd.notna(pedigree) and pedigree.strip():
+                    all_pedigrees.append(pedigree.strip())
+                    cultivar_count += 1
+    
+    # Search USA/Canada dataset  
+    if not usa_canada_data.empty and 'Market Class' in usa_canada_data.columns:
+        for pattern in market_class_patterns:
+            usa_matches = usa_canada_data[usa_canada_data['Market Class'].str.contains(pattern, case=False, na=False)]
+            for _, row in usa_matches.iterrows():
+                # Check both Pedigree and Parentage columns
+                pedigree = row.get('Pedigree', '') or row.get('Parentage', '')
+                if pd.notna(pedigree) and pedigree.strip():
+                    all_pedigrees.append(pedigree.strip())
+                    cultivar_count += 1
+    
+    if not all_pedigrees:
+        return f"No pedigree information found for {' '.join(market_class_patterns)} cultivars in the datasets.", "", {}, ""
+    
+    print(f"🔍 Found {len(all_pedigrees)} pedigrees from {cultivar_count} cultivars")
+    
+    # Parse pedigrees to extract individual parental lines
+    from collections import Counter
+    import re
+    
+    parental_lines = []
+    
+    for pedigree in all_pedigrees:
+        # Common pedigree separators: /, x, X, ×, //
+        # Split by these separators and clean up
+        parts = re.split(r'[/×xX]|//', pedigree)
+        
+        for part in parts:
+            parent = part.strip()
+            # Remove common descriptors and clean up
+            parent = re.sub(r'\s*\([^)]*\)', '', parent)  # Remove parentheses content
+            parent = parent.strip()
+            
+            # Only count meaningful parent names (not empty, not just numbers)
+            if (len(parent) > 2 and 
+                not parent.isdigit() and 
+                parent.lower() not in ['unknown', 'na', 'n/a', '', '-']):
+                parental_lines.append(parent)
+    
+    if not parental_lines:
+        return f"No identifiable parental lines found in pedigree data for {' '.join(market_class_patterns)} cultivars.", "", {}, ""
+    
+    # Count frequencies
+    parent_counts = Counter(parental_lines)
+    most_common = parent_counts.most_common(10)  # Top 10
+    
+    print(f"🔍 Found {len(parent_counts)} unique parental lines")
+    
+    # Format response
+    response_parts = []
+    response_parts.append(f"## 🧬 **Pedigree Analysis: {' '.join(market_class_patterns).title()} Beans**")
+    response_parts.append(f"\n**📊 Dataset Summary:**")
+    response_parts.append(f"- **{cultivar_count} cultivars** analyzed")
+    response_parts.append(f"- **{len(all_pedigrees)} pedigree records** found")  
+    response_parts.append(f"- **{len(parent_counts)} unique parental lines** identified")
+    
+    response_parts.append(f"\n**🏆 Most Common Parental Lines:**")
+    
+    for i, (parent, count) in enumerate(most_common, 1):
+        percentage = (count / len(parental_lines)) * 100
+        response_parts.append(f"{i}. **{parent}** - {count} occurrences ({percentage:.1f}%)")
+    
+    response = "\n".join(response_parts)
+    
+    # Create summary for metadata
+    top_parents = [f"{parent} ({count})" for parent, count in most_common[:3]]
+    summary = f"Top parental lines in {' '.join(market_class_patterns)}: {', '.join(top_parents)}"
+    
+    return response, response, {}, summary
+
+
+def handle_pedigree_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
+    """Handle pedigree questions by searching both Ontario and USA/Canada datasets"""
+    
+    print(f"🧬 Handling pedigree query: {original_question}")
+    
+    cultivar_names = []
+    
+    # Check if cultivar provided in args - but it might be a comma-separated list!
+    single_cultivar = args.get('cultivar', '')
+    if single_cultivar:
+        # Even if provided in args, it might be "Marker, Epic, and Dynasty" as a single string
+        # So we still need to split it
+        cultivar_text = single_cultivar
+    else:
+        # Extract multiple cultivar names from question
+        # Handle questions like "pedigree of Marker, Epic, and Dynasty"
+        question_lower = original_question.lower()
+        
+        # Find the part after "of" or "for"
+        cultivar_text = ""
+        if " of " in question_lower:
+            cultivar_text = original_question.split(" of ", 1)[1]
+        elif " for " in question_lower:
+            cultivar_text = original_question.split(" for ", 1)[1]
+        else:
+            # Fallback: look for capitalized words
+            cultivar_text = original_question
+
+    
+    # Now split the cultivar_text regardless of where it came from
+    import re
+    # Split by comma, "and", "or", "aned" (typo), etc.
+    potential_names = re.split(r'[,&]|(?:\s+and\s+)|(?:\s+or\s+)|(?:\s+aned\s+)', cultivar_text)
+    
+    for name in potential_names:
+        clean_name = name.strip('.,!?').strip()
+        # Filter out common words
+        if (len(clean_name) > 2 and 
+            clean_name.lower() not in ['pedigree', 'what', 'the', 'is', 'of', 'for', 'and', 'or', 'aned']):
+            # Preserve original capitalization instead of using .title()
+            cultivar_names.append(clean_name)
+    
+    if not cultivar_names:
+        cultivar_names = ['']  # Fallback to empty search
+        
+    print(f"🔍 Searching for cultivars: {cultivar_names}")
+    
+    results = []
+    sources = []
+    
+    # Search for each cultivar
+    for cultivar_name in cultivar_names:
+        if not cultivar_name.strip():
+            continue
+            
+        cultivar_found = False
+        print(f"🔍 Searching for: '{cultivar_name}'")
+        
+        # Search Ontario dataset for pedigree info
+        if not ontario_df.empty:
+            # Look for pedigree information in Ontario data
+            cultivar_col = 'Cultivar' if 'Cultivar' in ontario_df.columns else 'Cultivar Name'
+            if cultivar_col in ontario_df.columns:
+                # Try exact match first, then partial match
+                ontario_exact = ontario_df[ontario_df[cultivar_col].str.lower() == cultivar_name.lower()]
+                ontario_partial = ontario_df[ontario_df[cultivar_col].str.contains(cultivar_name, case=False, na=False)]
+                
+                # Prefer exact match over partial match
+                ontario_matches = ontario_exact if not ontario_exact.empty else ontario_partial
+                
+                if not ontario_matches.empty:
+                    cultivar_found = True
+                    for _, row in ontario_matches.iterrows():
+                        pedigree_info = []
+                        if pd.notna(row.get('Pedigree', '')):
+                            pedigree_info.append(f"**Pedigree:** {row.get('Pedigree', '')}")
+                        if pd.notna(row.get('Market Class', '')):
+                            pedigree_info.append(f"**Market Class:** {row.get('Market Class', '')}")
+                        if pd.notna(row.get('Release Year', '') or row.get('Released Year', '')):
+                            release_year = row.get('Release Year', '') or row.get('Released Year', '')
+                            pedigree_info.append(f"**Release Year:** {release_year}")
+                        if pd.notna(row.get('Breeding Program', '')):
+                            pedigree_info.append(f"**Breeding Program:** {row.get('Breeding Program', '')}")
+                        
+                        if pedigree_info:
+                            results.append(f"**{row.get(cultivar_col, '')}** (Ontario Dataset):\n" + "\n".join(pedigree_info))
+                            if "Ontario Bean Trial Dataset" not in sources:
+                                sources.append("Ontario Bean Trial Dataset")
+        
+        # Search USA/Canada dataset for pedigree info
+        if not usa_canada_data.empty:
+            # Look for pedigree information in USA/Canada data
+            name_col = 'Cultivar Name' if 'Cultivar Name' in usa_canada_data.columns else 'Name'
+            
+            if name_col in usa_canada_data.columns:
+                # Try exact match first, then partial match, then parentheses match
+                usa_exact = usa_canada_data[usa_canada_data[name_col].str.lower() == cultivar_name.lower()]
+                usa_partial = usa_canada_data[usa_canada_data[name_col].str.contains(cultivar_name, case=False, na=False)]
+                
+                usa_matches = usa_exact if not usa_exact.empty else usa_partial
+                
+                # If still no match, search within parentheses (old names)
+                if usa_matches.empty:
+                    parentheses_matches = usa_canada_data[usa_canada_data[name_col].str.contains(f'\\({cultivar_name}\\)', case=False, na=False, regex=True)]
+                    usa_matches = parentheses_matches
+                
+                if not usa_matches.empty:
+                    cultivar_found = True
+                    for _, row in usa_matches.iterrows():
+                        pedigree_info = []
+                        # Check both "Pedigree" and "Parentage" columns (they're the same thing)
+                        pedigree_value = row.get('Pedigree', '') or row.get('Parentage', '')
+                        if pd.notna(pedigree_value) and pedigree_value:
+                            pedigree_info.append(f"**Pedigree:** {pedigree_value}")
+                        if pd.notna(row.get('Market Class', '')):
+                            pedigree_info.append(f"**Market Class:** {row.get('Market Class', '')}")
+                        if pd.notna(row.get('Release Year', '')):
+                            pedigree_info.append(f"**Release Year:** {row.get('Release Year', '')}")
+                        if pd.notna(row.get('Breeder and Vendor', '')):
+                            pedigree_info.append(f"**Breeder:** {row.get('Breeder and Vendor', '')}")
+                        
+                        if pedigree_info:
+                            # Show both the main name and any parenthetical name if present
+                            display_name = row.get(name_col, '')
+                            results.append(f"**{display_name}** (USA/Canada Dataset):\n" + "\n".join(pedigree_info))
+                            if "USA/Canada Bean Cultivars Dataset" not in sources:
+                                sources.append("USA/Canada Bean Cultivars Dataset")
+        
+        # If this specific cultivar wasn't found, note it
+        if not cultivar_found:
+            results.append(f"\n**{cultivar_name}**: No pedigree information found in available datasets.")
+    
+    # If no cultivars found at all, provide general guidance
+    if not any("Ontario Dataset" in result or "USA/Canada Dataset" in result for result in results):
+        if cultivar_names and cultivar_names[0]:
+            results.append(f"\nPedigree information is available for cultivars in both the Ontario bean trial dataset and the USA/Canada cultivars database.")
+        else:
+            results.append("Please specify cultivar names to search for pedigree information.")
+        
+    # Combine results
+    if results:
+        response = "## 🧬 **Pedigree Information**\n\n" + "\n\n".join(results)
+        if sources:
+            unique_sources = list(set(sources))
+            response += f"\n\n**Data Sources:** {', '.join(unique_sources)}"
+    else:
+        response = "No pedigree information found. Please specify a cultivar name for pedigree details."
+    
+    return response, response, {}, ""
+
 def handle_non_ontario_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
     """Handle queries specifically about non-Ontario regions (USA, Canada, etc.)"""
     
@@ -213,7 +568,121 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     original_question = args.get('original_question', '').lower()
     non_ontario_regions = ['usa', 'united states', 'america', 'american', 'canada', 'canadian', 'alberta', 'saskatchewan', 'manitoba', 'british columbia', 'quebec', 'nova scotia', 'new brunswick', 'prince edward island', 'newfoundland', 'northwest territories', 'yukon', 'nunavut', 'michigan', 'minnesota', 'north dakota', 'wisconsin', 'nebraska', 'california', 'new york', 'cornell', 'msu', 'ndsu', 'uc davis']
     
+    # Check if this is a pedigree question that should query both datasets
+    is_pedigree_question = any(keyword in original_question for keyword in ['pedigree', 'parentage', 'parent', 'cross', 'breeding line', 'lineage', 'genetic background'])
+    
+    # Check if this is a pedigree ANALYSIS question (asking about patterns across market classes)
+    question_lower = original_question.lower()
+    is_pedigree_analysis = (is_pedigree_question and 
+                           any(analysis_phrase in question_lower for analysis_phrase in ['most common', 'common', 'frequent', 'pattern', 'among all', 'across all']) and
+                           any(market_class in question_lower for market_class in ['kidney', 'navy', 'black', 'pinto', 'cranberry', 'beans']))
+    
+    # Check if this is a name/identification query that should search all columns
+    # Very specific detection - only for direct identification queries, not analysis
+    question_lower = original_question.lower()
+    is_name_query = (
+        # Direct identification patterns
+        any(keyword in question_lower for keyword in ['referring to', 'identify', 'who is', 'called']) or
+        # "what is X" pattern only for specific identifiers, and NOT for analysis questions
+        ('what is' in question_lower and 
+         any(identifier in original_question for identifier in ['P', 'OAC', 'AC ', 'ND']) and
+         not any(analysis_phrase in question_lower for analysis_phrase in ['what is the most', 'what is the best', 'what is the highest', 'what is the common', 'among all', 'tell me what']))
+    )
+    
     is_non_ontario_query = any(region in original_question for region in non_ontario_regions)
+    
+    # For name queries, do comprehensive search through all columns
+    if is_name_query:
+        print(f"🔍 Name/identification query detected - comprehensive search: {original_question}")
+        try:
+            # Load both datasets
+            ontario_data = db_manager.bean_data
+            usa_canada_data = db_manager.usa_canada_data
+            
+            # Extract the search term from the question
+            search_term = ''
+            words = original_question.split()
+            
+            # Define comprehensive exclude list
+            exclude_words = {
+                'what', 'where', 'when', 'why', 'how', 'who', 'which', 
+                'is', 'the', 'a', 'an', 'name', 'of', 'to', 'referring', 
+                'called', 'bred', 'breeder', 'vendor', 'developed', 'created', 
+                'made', 'from', 'by', 'in', 'at', 'with', 'for', 'on', 'as'
+            }
+            
+            # First pass: Look for identifiers that contain numbers or specific patterns (like P16901, OAC123, etc.)
+            for word in words:
+                clean_word = word.strip('.,!?')
+                if (len(clean_word) > 2 and 
+                    any(char.isdigit() for char in clean_word) and 
+                    any(char.isalpha() for char in clean_word) and
+                    clean_word.lower() not in exclude_words):
+                    search_term = clean_word
+                    break
+            
+            # Second pass: Look for capitalized words that might be cultivar names (like Avalanche, Vista, Dynasty)
+            if not search_term:
+                for word in words:
+                    clean_word = word.strip('.,!?')
+                    if (len(clean_word) > 3 and 
+                        clean_word[0].isupper() and 
+                        clean_word.isalpha() and  # Must be alphabetic (cultivar names)
+                        clean_word.lower() not in exclude_words):
+                        search_term = clean_word
+                        break
+            
+            # Third pass: Look for any other potential identifiers
+            if not search_term:
+                for word in words:
+                    clean_word = word.strip('.,!?')
+                    if (len(clean_word) > 3 and 
+                        clean_word.isalnum() and 
+                        clean_word.lower() not in exclude_words):
+                        search_term = clean_word
+                        break
+            
+            if search_term:
+                return handle_comprehensive_search(args, ontario_data, usa_canada_data, original_question, search_term)
+            else:
+                return "Could not identify search term from the question. Please specify what name or identifier you're looking for.", "", {}, ""
+                
+        except Exception as e:
+            print(f"⚠️ Failed to perform comprehensive search: {e}")
+            return f"Error performing comprehensive search: {e}", "", {}, ""
+    
+    # For pedigree ANALYSIS questions (patterns across market classes), handle differently
+    if is_pedigree_analysis:
+        print(f"🧬 Pedigree analysis question detected - analyzing patterns across market class: {original_question}")
+        try:
+            # Load both datasets
+            ontario_data = db_manager.bean_data
+            usa_canada_data = db_manager.usa_canada_data
+            
+            if ontario_data.empty and usa_canada_data.empty:
+                return "No bean data available for this pedigree analysis.", "", {}, ""
+            
+            return handle_pedigree_analysis(args, ontario_data, usa_canada_data, original_question)
+        except Exception as e:
+            print(f"❌ Error in pedigree analysis: {e}")
+            return f"Error loading data for pedigree analysis: {e}", "", {}, ""
+    
+    # For specific cultivar pedigree questions, query both datasets and combine results
+    elif is_pedigree_question:
+        print(f"🧬 Pedigree question detected - querying both Ontario and USA/Canada datasets: {original_question}")
+        try:
+            # Load both datasets
+            ontario_data = db_manager.bean_data
+            usa_canada_data = db_manager.usa_canada_data
+            
+            if ontario_data.empty and usa_canada_data.empty:
+                return "No bean data available for this pedigree query.", "", {}, ""
+            
+            return handle_pedigree_query(args, ontario_data, usa_canada_data, original_question)
+            
+        except Exception as e:
+            print(f"⚠️ Failed to load datasets for pedigree query: {e}")
+            return f"Error loading data for pedigree query: {e}", "", {}, ""
     
     if is_non_ontario_query:
         print(f"🌍 Non-Ontario query detected: {original_question}")
@@ -1218,8 +1687,27 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         market_data = df[df['Market Class'].str.contains(market_class_input, case=False, na=False)]
         cultivar_col = 'Cultivar Name' if 'Cultivar Name' in market_data.columns else 'Name'
         if not market_data.empty and cultivar_col in market_data.columns:
-            # Check if this is a request for ALL cultivars (contains keywords like "all", "list", "complete")
+            # Check if this is a counting question (just wants the number)
             question_lower = original_question.lower()
+            is_count_question = (
+                'how many' in question_lower or
+                'count' in question_lower or  
+                'number of' in question_lower
+            ) and not any(keyword in question_lower for keyword in ['all', 'list', 'show', 'name'])
+            
+            print(f"🔍 DEBUG: is_count_question detected: {is_count_question}")
+            print(f"🔍 DEBUG: question_lower: '{question_lower}'")
+            
+            if is_count_question:
+                # For counting questions, just provide the number
+                all_cultivars = sorted(market_data[cultivar_col].dropna().unique())
+                response += f"**📊 Total {market_class_input} Cultivars:** **{len(all_cultivars)}** cultivars have been released in North America\n\n"
+                response += f"This count includes cultivars from Ontario bean trials and other North American breeding programs.\n\n"
+                response += f"*If you'd like to see the complete list of cultivar names, please ask 'list all {market_class_input} beans'*"
+                
+                return response, response, {}, f"Total {market_class_input} cultivar count: {len(all_cultivars)}"
+            
+            # Check if this is a request for ALL cultivars (contains keywords like "all", "list", "complete")
             is_all_request = (
                 'all' in question_lower or
                 'every' in question_lower or

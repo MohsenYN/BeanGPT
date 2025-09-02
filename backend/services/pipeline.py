@@ -265,10 +265,12 @@ def is_genetics_question(question: str, api_key: str) -> bool:
                         "gene function, protein analysis, genomics, or plant biology research. Respond with only 'true' or 'false'.\n\n"
                         "CLASSIFY AS FALSE (not genetics): Questions about cultivar lists, market classes, yield data, "
                         "performance comparisons, trial results, location data, statistical analysis, 'list all X beans', "
-                        "'cranberry beans in Ontario', 'kidney bean performance', breeding program results, "
+                        "'cranberry beans in Ontario', 'kidney bean performance', basic breeding program results, "
                         "or agricultural data queries should be classified as 'false'.\n\n"
-                        "CLASSIFY AS TRUE (genetics): Only questions specifically about genes, proteins, molecular mechanisms, "
-                        "genetic markers, biological processes, gene expression, DNA, RNA, or molecular research should be classified as 'true'."
+                        "CLASSIFY AS TRUE (genetics): Questions specifically about genes, proteins, molecular mechanisms, "
+                        "genetic markers, biological processes, gene expression, DNA, RNA, molecular research, "
+                        "PEDIGREE (breeding lineage/parentage), genetic heritage, breeding lines, crosses, "
+                        "genetic background, parental lines, or genetic relationships should be classified as 'true'."
                     ),
                 },
                 {"role": "user", "content": question},
@@ -828,18 +830,31 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
     is_genetic = is_genetics_question(question, api_key)
     print(f"🧪 Is this a genetics question? {is_genetic}")
     
+    # Check if this is a pedigree question that should also query bean datasets
+    is_pedigree_question = any(keyword in question.lower() for keyword in ['pedigree', 'parentage', 'parent', 'cross', 'breeding line', 'lineage', 'genetic background'])
+    print(f"🧬 Is this a pedigree question? {is_pedigree_question}")
+    
+    # Check if this is a "name" query that should search datasets comprehensively
+    is_name_query = any(keyword in question.lower() for keyword in ['name', 'referring to', 'what is', 'identify', 'who is', 'called'])
+    print(f"🔍 Is this a name/identification query? {is_name_query}")
+    
     yield {"type": "progress", "data": {"step": "analysis", "detail": "Determining research strategy..."}}
 
     # Flag to determine if we should proceed to literature search
     should_search_literature = is_genetic
 
-    if not is_genetic:
+    # For pedigree questions or name queries, we want to query bean datasets first
+    # Even if they're classified as genetics questions
+    should_query_bean_data_first = is_pedigree_question or is_name_query or not is_genetic
+
+    if should_query_bean_data_first:
         yield {"type": "progress", "data": {"step": "dataset", "detail": "Checking cultivar database"}}
         
         # Check for bean data keywords - broader detection for data analysis
         bean_keywords = ["yield", "maturity", "cultivar", "variety", "performance", "bean", "production", "steam", "lighthouse", "seal", 
                         "cranberry", "kidney", "navy", "black", "pinto", "market class", "list all", "beans in ontario", 
-                        "oac", "ac ", "breeding", "trial", "data", "dataset"]
+                        "oac", "ac ", "breeding", "trial", "data", "dataset", "pedigree", "parentage", "parent", "cross", 
+                        "breeding line", "lineage", "genetic background", "name", "referring to", "what is", "identify", "called"]
         
         # Add location-based keywords for environmental/weather queries at trial locations
         location_keywords = ["auburn", "blyth", "elora", "granton", "kippen", "monkton", "thorndale", "winchester", "woodstock", 
@@ -976,9 +991,8 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             # Return the raw preview data directly without AI processing
                             yield {"type": "progress", "data": {"step": "generation", "detail": "Returning complete dataset listing"}}
 
-                            # Add bypass indicator to the preview
-                            bypass_indicator = f"**🚀 BYPASS MODE:** This response contains the complete raw dataset without AI summarization.\n\n"
-                            full_preview = bypass_indicator + preview
+                            # Use preview as-is without bypass indicator
+                            full_preview = preview
 
                             print(f"📋 DEBUG: Full preview length: {len(full_preview)} characters")
 
@@ -1139,24 +1153,40 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         bean_full_md = full_md
                         bean_data_found = True
                         
-                        # Instead of automatically continuing, send a toggle for user choice
-                        print(f"🚀 Sending bean_complete response with chart_data:")
-                        print(f"  - Chart data type: {type(chart_data)}")
-                        print(f"  - Chart data keys: {list(chart_data.keys()) if isinstance(chart_data, dict) else 'Not a dict'}")
-                        print(f"  - Chart data empty: {not chart_data}")
-                        
-                        yield {
-                            "type": "bean_complete",
-                            "data": {
-                                "sources": [],
-                                "genes": [],
-                                "full_markdown_table": full_md,
-                                "chart_data": chart_data,
-                                "suggested_questions": []
+                        # For pedigree or name questions, continue to literature search even after bean data analysis
+                        if is_pedigree_question or is_name_query:
+                            print(f"🔍 {'Pedigree' if is_pedigree_question else 'Name'} question: continuing to literature search after bean data analysis")
+                            # Store bean data for later metadata but don't stop here
+                            bean_chart_data = chart_data
+                            bean_full_md = full_md  
+                            bean_data_found = True
+                            should_search_literature = True
+                            # Add a transition message for literature search
+                            if is_name_query:
+                                transition_text = "\n\n---\n\n## 📚 **Additional Context from Research Literature**\n\nSearching scientific publications for related information...\n\n"
+                            else:
+                                transition_text = "\n\n---\n\n## 📚 **Related Research Literature**\n\nSearching scientific publications for additional genetic and breeding context...\n\n"
+                            for char in transition_text:
+                                yield {"type": "content", "data": char}
+                        else:
+                            # For non-pedigree questions, send toggle for user choice
+                            print(f"🚀 Sending bean_complete response with chart_data:")
+                            print(f"  - Chart data type: {type(chart_data)}")
+                            print(f"  - Chart data keys: {list(chart_data.keys()) if isinstance(chart_data, dict) else 'Not a dict'}")
+                            print(f"  - Chart data empty: {not chart_data}")
+                            
+                            yield {
+                                "type": "bean_complete",
+                                "data": {
+                                    "sources": [],
+                                    "genes": [],
+                                    "full_markdown_table": full_md,
+                                    "chart_data": chart_data,
+                                    "suggested_questions": []
+                                }
                             }
-                        }
-                        print(f"✅ bean_complete response sent successfully")
-                        return  # Stop here, don't continue to research automatically
+                            print(f"✅ bean_complete response sent successfully")
+                            return  # Stop here, don't continue to research automatically
                     else:
                         # No data found, fall back to literature search
                         yield {"type": "progress", "data": {"step": "fallback", "detail": "No data found, searching literature"}}
@@ -1419,13 +1449,26 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
         api_key=api_key
     )
 
+    # For pedigree questions that had bean data, combine bean data with literature search results
+    final_sources = combined_sources
+    final_chart_data = {}
+    final_full_md = ""
+    
+    if bean_data_found and (is_pedigree_question or is_name_query):
+        print(f"🔍 Combining bean data results with literature search for {'pedigree' if is_pedigree_question else 'name'} question")
+        if bean_full_md and "Error loading data" not in bean_full_md:
+            final_full_md = bean_full_md
+        if bean_chart_data:
+            final_chart_data = bean_chart_data
+        # Bean sources would be included in the content, literature sources in combined_sources
+    
     yield {
-        "type": "metadata",
+        "type": "metadata", 
         "data": {
-            "sources": combined_sources,
+            "sources": final_sources,
             "genes": gene_summaries,
-            "full_markdown_table": "",
-            "chart_data": {},
+            "full_markdown_table": final_full_md,
+            "chart_data": final_chart_data,
             "suggested_questions": suggested_questions
         }
     }

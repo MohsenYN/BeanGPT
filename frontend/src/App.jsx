@@ -1076,6 +1076,171 @@ export default function App() {
             </div>
             
             <div className={`flex items-center ${isMobile ? 'space-x-2' : 'space-x-6'}`}>
+              {/* API Instructions Button */}
+              <button
+                onClick={() => {
+                  const instructions = `
+# How to Get Your OpenAI API Key
+
+## Go to OpenAI's website
+Visit: https://platform.openai.com
+
+Log in (or create a free account if you don't already have one).
+
+## Set up billing
+1. Click on your profile picture (top-right).
+2. Go to **Your Profile** and then from the left panel click on **Billing**.
+3. Add a payment method by clicking on **Payment Methods**.
+4. You only need to add **$5 (USD)** to your account.
+5. This should last about **2 months** of normal usage on BeanGPT.
+
+## Get your API key
+1. Select **"API Keys"** on the left panel
+2. Click **"Create new secret key"** on the top right
+3. Copy the key (it will look like a long string of letters and numbers). 
+   ⚠️ **Make sure not to lose it as it cannot be seen again!**
+
+## Open BeanGPT
+Add the key to BeanGPT
+
+Click **Save**.
+
+## Start using BeanGPT
+Once saved, BeanGPT will automatically use your key.
+
+You're ready to start asking questions!
+`;
+                  const newTab = window.open('', '_blank');
+                  newTab.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <title>BeanGPT - API Key Instructions</title>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <style>
+                        body {
+                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                          line-height: 1.6;
+                          color: #333;
+                          max-width: 800px;
+                          margin: 0 auto;
+                          padding: 20px;
+                          background-color: #f8f9fa;
+                        }
+                        .container {
+                          background: white;
+                          padding: 40px;
+                          border-radius: 12px;
+                          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                        h1 {
+                          color: #2563eb;
+                          border-bottom: 3px solid #2563eb;
+                          padding-bottom: 10px;
+                          margin-bottom: 30px;
+                        }
+                        h2 {
+                          color: #1e40af;
+                          margin-top: 30px;
+                          margin-bottom: 15px;
+                        }
+                        ol, ul {
+                          margin-left: 20px;
+                        }
+                        li {
+                          margin-bottom: 8px;
+                        }
+                        strong {
+                          color: #1f2937;
+                        }
+                        code, .code {
+                          background-color: #f3f4f6;
+                          padding: 2px 6px;
+                          border-radius: 4px;
+                          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                        }
+                        .warning {
+                          background-color: #fef3c7;
+                          border-left: 4px solid #f59e0b;
+                          padding: 15px;
+                          margin: 15px 0;
+                          border-radius: 4px;
+                        }
+                        a {
+                          color: #2563eb;
+                          text-decoration: none;
+                        }
+                        a:hover {
+                          text-decoration: underline;
+                        }
+                        .footer {
+                          margin-top: 40px;
+                          padding-top: 20px;
+                          border-top: 1px solid #e5e7eb;
+                          text-align: center;
+                          color: #6b7280;
+                          font-size: 14px;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="container">
+                        <h1>🔑 How to Get Your OpenAI API Key</h1>
+                        
+                        <h2>1. Go to OpenAI's website</h2>
+                        <p>Visit: <a href="https://platform.openai.com" target="_blank">https://platform.openai.com</a></p>
+                        <p>Log in (or create a free account if you don't already have one).</p>
+                        
+                        <h2>2. Set up billing</h2>
+                        <ol>
+                          <li>Click on your profile picture (top-right).</li>
+                          <li>Go to <strong>Your Profile</strong> and then from the left panel click on <strong>Billing</strong>.</li>
+                          <li>Add a payment method by clicking on <strong>Payment Methods</strong>.</li>
+                          <li>You only need to add <strong>$5 (USD)</strong> to your account.</li>
+                          <li>This should last about <strong>2 months</strong> of normal usage on BeanGPT.</li>
+                        </ol>
+                        
+                        <h2>3. Get your API key</h2>
+                        <ol>
+                          <li>Select <strong>"API Keys"</strong> on the left panel</li>
+                          <li>Click <strong>"Create new secret key"</strong> on the top right</li>
+                          <li>Copy the key (it will look like a long string of letters and numbers).</li>
+                        </ol>
+                        <div class="warning">
+                          <strong>⚠️ Important:</strong> Make sure not to lose it as it cannot be seen again!
+                        </div>
+                        
+                        <h2>4. Add the key to BeanGPT</h2>
+                        <ol>
+                          <li>Return to BeanGPT</li>
+                          <li>Paste your API key in the API key input field</li>
+                          <li>Click <strong>Save</strong></li>
+                        </ol>
+                        
+                        <h2>5. Start using BeanGPT</h2>
+                        <p>Once saved, BeanGPT will automatically use your key.</p>
+                        <p><strong>You're ready to start asking questions!</strong> 🌱</p>
+                        
+                        <div class="footer">
+                          <p>© 2025 BeanGPT. All rights reserved.</p>
+                          <p>Return to <a href="javascript:window.close()">BeanGPT</a></p>
+                        </div>
+                      </div>
+                    </body>
+                    </html>
+                  `);
+                  newTab.document.close();
+                }}
+                className={`flex items-center ${isMobile ? 'px-2 py-1' : 'px-3 py-2'} text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors`}
+                title="API Key Instructions"
+              >
+                <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mr-1`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {!isMobile && <span className="font-medium">API Setup</span>}
+              </button>
+              
               {/* API Key Input - Responsive */}
               <div className={isMobile ? 'hidden' : 'block'}>
               <ApiKeyInput 
@@ -1108,10 +1273,146 @@ export default function App() {
           {/* Mobile API Key Input */}
           {isMobile && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
-              <ApiKeyInput 
-                darkMode={darkMode} 
-                onApiKeyChange={handleApiKeyChange}
-              />
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => {
+                    const newTab = window.open('', '_blank');
+                    newTab.document.write(`
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                        <title>BeanGPT - API Key Instructions</title>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                          body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 800px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background-color: #f8f9fa;
+                          }
+                          .container {
+                            background: white;
+                            padding: 40px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                          }
+                          h1 {
+                            color: #2563eb;
+                            border-bottom: 3px solid #2563eb;
+                            padding-bottom: 10px;
+                            margin-bottom: 30px;
+                          }
+                          h2 {
+                            color: #1e40af;
+                            margin-top: 30px;
+                            margin-bottom: 15px;
+                          }
+                          ol, ul {
+                            margin-left: 20px;
+                          }
+                          li {
+                            margin-bottom: 8px;
+                          }
+                          strong {
+                            color: #1f2937;
+                          }
+                          code, .code {
+                            background-color: #f3f4f6;
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                          }
+                          .warning {
+                            background-color: #fef3c7;
+                            border-left: 4px solid #f59e0b;
+                            padding: 15px;
+                            margin: 15px 0;
+                            border-radius: 4px;
+                          }
+                          a {
+                            color: #2563eb;
+                            text-decoration: none;
+                          }
+                          a:hover {
+                            text-decoration: underline;
+                          }
+                          .footer {
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid #e5e7eb;
+                            text-align: center;
+                            color: #6b7280;
+                            font-size: 14px;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="container">
+                          <h1>🔑 How to Get Your OpenAI API Key</h1>
+                          
+                          <h2>1. Go to OpenAI's website</h2>
+                          <p>Visit: <a href="https://platform.openai.com" target="_blank">https://platform.openai.com</a></p>
+                          <p>Log in (or create a free account if you don't already have one).</p>
+                          
+                          <h2>2. Set up billing</h2>
+                          <ol>
+                            <li>Click on your profile picture (top-right).</li>
+                            <li>Go to <strong>Your Profile</strong> and then from the left panel click on <strong>Billing</strong>.</li>
+                            <li>Add a payment method by clicking on <strong>Payment Methods</strong>.</li>
+                            <li>You only need to add <strong>$5 (USD)</strong> to your account.</li>
+                            <li>This should last about <strong>2 months</strong> of normal usage on BeanGPT.</li>
+                          </ol>
+                          
+                          <h2>3. Get your API key</h2>
+                          <ol>
+                            <li>Select <strong>"API Keys"</strong> on the left panel</li>
+                            <li>Click <strong>"Create new secret key"</strong> on the top right</li>
+                            <li>Copy the key (it will look like a long string of letters and numbers).</li>
+                          </ol>
+                          <div class="warning">
+                            <strong>⚠️ Important:</strong> Make sure not to lose it as it cannot be seen again!
+                          </div>
+                          
+                          <h2>4. Add the key to BeanGPT</h2>
+                          <ol>
+                            <li>Return to BeanGPT</li>
+                            <li>Paste your API key in the API key input field</li>
+                            <li>Click <strong>Save</strong></li>
+                          </ol>
+                          
+                          <h2>5. Start using BeanGPT</h2>
+                          <p>Once saved, BeanGPT will automatically use your key.</p>
+                          <p><strong>You're ready to start asking questions!</strong> 🌱</p>
+                          
+                          <div class="footer">
+                            <p>© 2025 BeanGPT. All rights reserved.</p>
+                            <p>Return to <a href="javascript:window.close()">BeanGPT</a></p>
+                          </div>
+                        </div>
+                      </body>
+                      </html>
+                    `);
+                    newTab.document.close();
+                  }}
+                  className="flex items-center px-3 py-2 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                  title="API Key Instructions"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="font-medium">API Setup</span>
+                </button>
+                <div className="flex-1">
+                  <ApiKeyInput 
+                    darkMode={darkMode} 
+                    onApiKeyChange={handleApiKeyChange}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -1833,8 +2134,16 @@ export default function App() {
               </button>
             </form>
             {!isMobile && (
-            <div className="flex items-center justify-center mt-4 text-xs text-gray-500 dark:text-slate-400">
-              <span>Press Enter to send • Shift+Enter for new line</span>
+            <div className="flex items-center justify-center mt-4 text-xs text-gray-500 dark:text-slate-400 space-x-2">
+              <span>BeanGPT can make mistakes, verify important info</span>
+              <span>•</span>
+              <span>© 2025 BeanGPT. All rights reserved.</span>
+            </div>
+            )}
+            {isMobile && (
+            <div className="flex flex-col items-center justify-center mt-3 text-xs text-gray-500 dark:text-slate-400 space-y-1 text-center">
+              <span>BeanGPT can make mistakes, verify important info</span>
+              <span>© 2025 BeanGPT. All rights reserved.</span>
             </div>
             )}
           </div>
