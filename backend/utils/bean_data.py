@@ -15,6 +15,58 @@ import json
 import numpy as np
 from .simple_plotly import create_smart_chart
 from database.manager import db_manager
+from .openai_client import create_openai_client
+
+def extract_search_term_with_gpt(question: str, api_key: str) -> str:
+    """
+    Use GPT to intelligently extract the cultivar name or identifier from a natural language question.
+    This replaces the brittle keyword-based approach with intelligent understanding.
+    """
+    try:
+        client = create_openai_client(api_key)
+        
+        prompt = f"""You are an expert at identifying bean cultivar names and identifiers from natural language questions.
+
+Your task: Extract the specific cultivar name, variety name, or identifier that the user is asking about.
+
+Rules:
+1. Return ONLY the cultivar/variety name or identifier - nothing else
+2. If there are multiple potential names, return the most likely one
+3. Preserve the original capitalization when possible
+4. If no cultivar name can be identified, return "NONE"
+5. Common cultivar names include: Taurus, Wallace, Charro, Blast, Charm, Vortex, Gallantry, etc.
+6. Identifiers may include codes like: OAC123, P16901, AC Resolute, etc.
+
+Examples:
+- "provide all details about Taurus" → "Taurus"
+- "what is the yield of Wallace beans?" → "Wallace" 
+- "tell me about OAC Speedvale" → "OAC Speedvale"
+- "how does P16901 perform?" → "P16901"
+- "what are the characteristics of navy beans?" → "NONE" (too general)
+- "show me bean varieties" → "NONE" (no specific name)
+
+Question: "{question}"
+
+Cultivar name or identifier:"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # Use mini for faster, cheaper extraction
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,  # Low temperature for consistent extraction
+            max_tokens=50
+        )
+        
+        result = response.choices[0].message.content.strip()
+        print(f"🤖 GPT extracted search term: '{result}' from question: '{question}'")
+        
+        if result == "NONE" or not result:
+            return ""
+        
+        return result
+        
+    except Exception as e:
+        print(f"⚠️ GPT search term extraction failed: {e}")
+        return ""
 
 def extract_site_name(url: str) -> str:
     """Extract clean site name from URL for citation purposes."""
@@ -677,67 +729,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             ontario_data = db_manager.bean_data
             usa_canada_data = db_manager.usa_canada_data
             
-            # Extract the search term from the question
-            search_term = ''
-            words = original_question.split()
-            print(f"🔍 DEBUG: Extracting search term from words: {words}")
-            
-            # Define comprehensive exclude list
-            exclude_words = {
-                'what', 'where', 'when', 'why', 'how', 'who', 'which', 
-                'is', 'the', 'a', 'an', 'name', 'of', 'to', 'referring', 
-                'called', 'bred', 'breeder', 'vendor', 'developed', 'created', 
-                'made', 'from', 'by', 'in', 'at', 'with', 'for', 'on', 'as',
-                'can', 'you', 'tell', 'me', 'about', 'previous', 'old', 'former'
-            }
-            
-            # First pass: Look for identifiers that contain numbers or specific patterns (like P16901, OAC123, etc.)
-            print(f"🔍 DEBUG: First pass - looking for alphanumeric identifiers")
-            for word in words:
-                clean_word = word.strip('.,!?')
-                if (len(clean_word) > 2 and 
-                    any(char.isdigit() for char in clean_word) and 
-                    any(char.isalpha() for char in clean_word) and
-                    clean_word.lower() not in exclude_words):
-                    search_term = clean_word
-                    print(f"🔍 DEBUG: First pass found: '{search_term}'")
-                    break
-            
-            # Second pass: Look for capitalized words that might be cultivar names (like Avalanche, Vista, Dynasty)
-            if not search_term:
-                print(f"🔍 DEBUG: Second pass - looking for capitalized cultivar names")
-                for word in words:
-                    clean_word = word.strip('.,!?')
-                    if (len(clean_word) > 3 and 
-                        clean_word[0].isupper() and 
-                        clean_word.isalpha() and  # Must be alphabetic (cultivar names)
-                        clean_word.lower() not in exclude_words):
-                        search_term = clean_word
-                        print(f"🔍 DEBUG: Second pass found: '{search_term}'")
-                        break
-            
-            # Third pass: Look for lowercase cultivar names (like wallace, charro)
-            if not search_term:
-                print(f"🔍 DEBUG: Third pass - looking for lowercase cultivar names")
-                for word in words:
-                    clean_word = word.strip('.,!?')
-                    print(f"🔍 DEBUG: Checking word '{clean_word}': len={len(clean_word)}, isalpha={clean_word.isalpha()}, excluded={clean_word.lower() in exclude_words}")
-                    if (len(clean_word) > 3 and 
-                        clean_word.isalpha() and  # Must be alphabetic
-                        clean_word.lower() not in exclude_words):
-                        search_term = clean_word
-                        print(f"🔍 DEBUG: Third pass found: '{search_term}'")
-                        break
-            
-            # Fourth pass: Look for any other potential identifiers
-            if not search_term:
-                for word in words:
-                    clean_word = word.strip('.,!?')
-                    if (len(clean_word) > 3 and 
-                        clean_word.isalnum() and 
-                        clean_word.lower() not in exclude_words):
-                        search_term = clean_word
-                        break
+            # Use GPT to intelligently extract the search term from the question
+            api_key = args.get('api_key', '')
+            search_term = extract_search_term_with_gpt(original_question, api_key)
             
             if search_term:
                 return handle_comprehensive_search(args, ontario_data, usa_canada_data, original_question, search_term)
