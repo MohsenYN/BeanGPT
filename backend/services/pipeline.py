@@ -9,8 +9,6 @@ from typing import List, Tuple, Dict, Any
 import json
 import pandas as pd
 import numpy as np
-from pathlib import Path
-import orjson
 import requests
 from sklearn.preprocessing import MinMaxScaler
 
@@ -20,9 +18,6 @@ from utils.ncbi_utils import extract_gene_mentions, map_to_gene_id
 from utils.bean_data import function_schema, answer_bean_query
 from utils.openai_client import create_openai_client
 
-def get_openai_client(api_key: str = None):
-    """Get an OpenAI client instance with the provided API key."""
-    return create_openai_client(api_key)
 
 # Load environment variables
 load_dotenv()

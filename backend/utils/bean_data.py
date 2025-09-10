@@ -34,14 +34,21 @@ Rules:
 2. If there are multiple potential names, return the most likely one
 3. Preserve the original capitalization when possible
 4. If no cultivar name can be identified, return "NONE"
-5. Common cultivar names include: Taurus, Wallace, Charro, Blast, Charm, Vortex, Gallantry, etc.
-6. Identifiers may include codes like: OAC123, P16901, AC Resolute, etc.
+5. Be INCLUSIVE - any proper noun that could be a cultivar name should be extracted
+6. Common cultivar names include: Taurus, Wallace, Charro, Blast, Charm, Vortex, Gallantry, BlackBeard, Black Pearl, etc.
+7. Identifiers may include codes like: OAC123, P16901, AC Resolute, AAC Black Diamond, etc.
+8. Even unusual or creative names should be considered potential cultivars
 
 Examples:
 - "provide all details about Taurus" → "Taurus"
 - "what is the yield of Wallace beans?" → "Wallace" 
 - "tell me about OAC Speedvale" → "OAC Speedvale"
 - "how does P16901 perform?" → "P16901"
+- "tell me about BlackBeard" → "BlackBeard"
+- "what about Black Pearl variety" → "Black Pearl"
+- "old name of BigHorn" → "BigHorn"
+- "new name of ISB-20" → "ISB-20"
+- "former name of Taurus" → "Taurus"
 - "what are the characteristics of navy beans?" → "NONE" (too general)
 - "show me bean varieties" → "NONE" (no specific name)
 
@@ -113,10 +120,95 @@ def extract_site_name(url: str) -> str:
     except Exception:
         return "Source"
 
+def handle_name_conversion_query(args: Dict, usa_canada_data: pd.DataFrame, original_question: str, search_term: str) -> Tuple[str, str, Dict, str]:
+    """Handle old/new name conversion queries using the USA/Canada dataset naming convention"""
+    
+    question_lower = original_question.lower()
+    is_old_name_query = any(phrase in question_lower for phrase in ['old name', 'former name', 'previous name', 'original name'])
+    is_new_name_query = any(phrase in question_lower for phrase in ['new name', 'current name', 'modern name', 'updated name'])
+    
+    if not (is_old_name_query or is_new_name_query):
+        return None  # Not a name conversion query
+    
+    print(f"🔄 Name conversion query detected: {'old' if is_old_name_query else 'new'} name for '{search_term}'")
+    
+    if usa_canada_data.empty or 'Name' not in usa_canada_data.columns:
+        return f"No USA/Canada dataset available to check name conversions for '{search_term}'.", "", {}, ""
+    
+    results = []
+    found_matches = []
+    
+    # Search for the term in the Name column
+    for _, row in usa_canada_data.iterrows():
+        name_field = str(row.get('Name', ''))
+        
+        # Parse the name field: "CurrentName (OldName)" pattern
+        if '(' in name_field and ')' in name_field:
+            # Extract current name (before parentheses) and old name (in parentheses)
+            current_name = name_field.split('(')[0].strip()
+            old_name_part = name_field.split('(')[1].split(')')[0].strip()
+            
+            # Check if the search term matches either name (case-insensitive)
+            if (search_term.lower() in current_name.lower() or 
+                search_term.lower() in old_name_part.lower() or
+                current_name.lower() == search_term.lower() or
+                old_name_part.lower() == search_term.lower()):
+                
+                found_matches.append({
+                    'full_name': name_field,
+                    'current_name': current_name,
+                    'old_name': old_name_part,
+                    'row': row
+                })
+        else:
+            # Handle cases without parentheses - just check if it matches
+            if search_term.lower() in name_field.lower() or name_field.lower() == search_term.lower():
+                found_matches.append({
+                    'full_name': name_field,
+                    'current_name': name_field,
+                    'old_name': 'Not specified',
+                    'row': row
+                })
+    
+    if not found_matches:
+        return f"No cultivar found matching '{search_term}' in the USA/Canada dataset.", "", {}, ""
+    
+    # Build response based on query type
+    if is_old_name_query:
+        results.append(f"## 🔍 **Old Names for '{search_term}'**\n")
+        for match in found_matches:
+            results.append(f"**{match['current_name']}**")
+            results.append(f"  - **Old/Former Name:** {match['old_name']}")
+            if match['row'].get('Market Class'):
+                results.append(f"  - Market Class: {match['row']['Market Class']}")
+            if match['row'].get('Breeder and Vendor'):
+                results.append(f"  - Breeder: {match['row']['Breeder and Vendor']}")
+            results.append("")
+    else:  # new name query
+        results.append(f"## 🔍 **Current Names for '{search_term}'**\n")
+        for match in found_matches:
+            results.append(f"**{match['old_name']}** → **{match['current_name']}**")
+            results.append(f"  - **Current Name:** {match['current_name']}")
+            if match['row'].get('Market Class'):
+                results.append(f"  - Market Class: {match['row']['Market Class']}")
+            if match['row'].get('Breeder and Vendor'):
+                results.append(f"  - Breeder: {match['row']['Breeder and Vendor']}")
+            results.append("")
+    
+    response = "\n".join(results)
+    summary = f"Found {len(found_matches)} name conversion(s) for {search_term}"
+    
+    return response, response, {}, summary
+
 def handle_comprehensive_search(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str, search_term: str) -> Tuple[str, str, Dict, str]:
     """Handle comprehensive search through ALL columns of both datasets for any term"""
     
     print(f"🔍 Comprehensive search for term: '{search_term}' in question: {original_question}")
+    
+    # First check if this is a name conversion query
+    name_conversion_result = handle_name_conversion_query(args, usa_canada_data, original_question, search_term)
+    if name_conversion_result is not None:
+        return name_conversion_result
     
     results = []
     sources = []
@@ -306,7 +398,6 @@ def handle_pedigree_analysis(args: Dict, ontario_df: pd.DataFrame, usa_canada_da
     
     # Parse pedigrees to extract individual parental lines
     from collections import Counter
-    import re
     
     parental_lines = []
     
@@ -358,48 +449,236 @@ def handle_pedigree_analysis(args: Dict, ontario_df: pd.DataFrame, usa_canada_da
     
     return response, response, {}, summary
 
+def handle_reverse_pedigree_search(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
+    """Handle reverse pedigree searches - find cultivars that have a specific parent in their pedigree"""
+    
+    print(f"🔍 Reverse pedigree search: {original_question}")
+    
+    # Extract the parent name from the question using GPT
+    api_key = args.get('api_key', '')
+    parent_name = extract_parent_from_pedigree_question(original_question, api_key)
+    
+    if not parent_name:
+        return "Could not identify the parent name from your question. Please specify which parent you're looking for.", "", {}, ""
+    
+    print(f"🔍 Searching for cultivars with parent: '{parent_name}'")
+    
+    results = []
+    sources = []
+    found_cultivars = []
+    
+    # Search Ontario dataset
+    if not ontario_df.empty and 'Pedigree' in ontario_df.columns:
+        ontario_matches = ontario_df[ontario_df['Pedigree'].astype(str).str.contains(parent_name, case=False, na=False)]
+        
+        if not ontario_matches.empty:
+            results.append("### 📍 **Ontario Dataset Results:**")
+            results.append(f"Found **{len(ontario_matches)} cultivars** with '{parent_name}' in their pedigree:")
+            results.append("")
+            
+            for _, row in ontario_matches.iterrows():
+                cultivar_name = row.get('Cultivar Name', 'Unknown')
+                pedigree = row.get('Pedigree', '')
+                market_class = row.get('Market Class', '')
+                released_year = row.get('Released Year', '')
+                
+                found_cultivars.append(cultivar_name)
+                
+                results.append(f"**{cultivar_name}**")
+                if market_class:
+                    results.append(f"  - Market Class: {market_class}")
+                if released_year:
+                    results.append(f"  - Released: {released_year}")
+                results.append(f"  - Pedigree: {pedigree}")
+                results.append("")
+            
+            sources.append("Ontario Bean Trial Dataset")
+    
+    # Search USA/Canada dataset
+    if not usa_canada_data.empty and 'Parentage' in usa_canada_data.columns:
+        usa_matches = usa_canada_data[usa_canada_data['Parentage'].astype(str).str.contains(parent_name, case=False, na=False)]
+        
+        if not usa_matches.empty:
+            results.append("### 🌍 **USA/Canada Dataset Results:**")
+            results.append(f"Found **{len(usa_matches)} cultivars** with '{parent_name}' in their parentage:")
+            results.append("")
+            
+            for _, row in usa_matches.iterrows():
+                cultivar_name = row.get('Name', 'Unknown')
+                parentage = row.get('Parentage', '')
+                market_class = row.get('Market Class', '')
+                breeder = row.get('Breeder and Vendor', '')
+                
+                found_cultivars.append(cultivar_name)
+                
+                results.append(f"**{cultivar_name}**")
+                if market_class:
+                    results.append(f"  - Market Class: {market_class}")
+                if breeder:
+                    results.append(f"  - Breeder: {breeder}")
+                results.append(f"  - Parentage: {parentage}")
+                results.append("")
+            
+            sources.append("USA/Canada Cultivar Database")
+    
+    if not found_cultivars:
+        return f"No cultivars found with '{parent_name}' in their pedigree across both Ontario and USA/Canada datasets.", "", {}, ""
+    
+    # Build final response
+    response_parts = [f"## 🧬 **Cultivars with '{parent_name}' in Pedigree**"]
+    response_parts.append(f"\n**Summary:** Found **{len(found_cultivars)} cultivars** across both datasets")
+    response_parts.append("")
+    response_parts.extend(results)
+    
+    response = "\n".join(response_parts)
+    return response, response, {}, f"Found {len(found_cultivars)} cultivars with {parent_name} in pedigree"
+
+def extract_parent_from_pedigree_question(question: str, api_key: str) -> str:
+    """Extract the parent name from a pedigree question using GPT"""
+    try:
+        client = create_openai_client(api_key)
+        
+        prompt = f"""You are an expert at extracting parent names from pedigree-related questions about bean breeding.
+
+Your task: Extract the specific parent name that the user is asking about.
+
+Rules:
+1. Return ONLY the parent name - nothing else
+2. Preserve original capitalization when possible
+3. If no parent name can be identified, return "NONE"
+4. Look for words after "including", "containing", "with", "having", etc.
+
+Examples:
+- "show me parental lines including beryl" → "beryl"
+- "find cultivars containing Beryl" → "Beryl"
+- "which varieties have Wallace in their pedigree" → "Wallace"
+- "cultivars with OAC Speedvale as parent" → "OAC Speedvale"
+- "show me all pedigrees" → "NONE" (no specific parent)
+
+Question: "{question}"
+
+Parent name:"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=50
+        )
+        
+        result = response.choices[0].message.content.strip()
+        print(f"🤖 GPT extracted parent name: '{result}' from question: '{question}'")
+        
+        if result == "NONE" or not result:
+            return ""
+        
+        return result
+        
+    except Exception as e:
+        print(f"⚠️ GPT parent extraction failed: {e}")
+        return ""
+
+def extract_cultivars_from_pedigree_question(question: str, api_key: str) -> List[str]:
+    """Extract cultivar names from pedigree-related questions using GPT"""
+    try:
+        client = create_openai_client(api_key)
+        
+        prompt = f"""You are an expert at extracting cultivar names from pedigree-related questions about bean breeding.
+
+Your task: Extract the specific cultivar name(s) that the user is asking about the pedigree of.
+
+Rules:
+1. Return ONLY the cultivar name(s) - nothing else
+2. If multiple cultivars, separate with commas
+3. Preserve original capitalization when possible
+4. If no cultivar name can be identified, return "NONE"
+5. Remove pedigree-related words like "pedigree", "parentage", "lineage", etc.
+
+Examples:
+- "blackbeard pedigree" → "blackbeard"
+- "pedigree of Taurus" → "Taurus"
+- "what is the pedigree of Wallace and Charro" → "Wallace, Charro"
+- "tell me about OAC Speedvale parentage" → "OAC Speedvale"
+- "lineage of BigHorn bean" → "BigHorn"
+- "show me pedigrees" → "NONE" (no specific cultivar)
+
+Question: "{question}"
+
+Cultivar name(s):"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=100
+        )
+        
+        result = response.choices[0].message.content.strip()
+        print(f"🤖 GPT extracted cultivars from pedigree question: '{result}' from question: '{question}'")
+        
+        if result == "NONE" or not result:
+            return []
+        
+        # Split by commas and clean up
+        cultivars = [name.strip() for name in result.split(',') if name.strip()]
+        return cultivars
+        
+    except Exception as e:
+        print(f"⚠️ GPT cultivar extraction failed: {e}")
+        return []
+
 
 def handle_pedigree_query(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
     """Handle pedigree questions by searching both Ontario and USA/Canada datasets"""
     
     print(f"🧬 Handling pedigree query: {original_question}")
     
-    cultivar_names = []
+    # Check if this is a reverse pedigree search (finding cultivars with a specific parent)
+    question_lower = original_question.lower()
+    reverse_search_patterns = ['including', 'containing', 'with', 'that have', 'that contain', 'having']
+    is_reverse_search = any(pattern in question_lower for pattern in reverse_search_patterns)
     
-    # Check if cultivar provided in args - but it might be a comma-separated list!
-    single_cultivar = args.get('cultivar', '')
-    if single_cultivar:
-        # Even if provided in args, it might be "Marker, Epic, and Dynasty" as a single string
-        # So we still need to split it
-        cultivar_text = single_cultivar
-    else:
-        # Extract multiple cultivar names from question
-        # Handle questions like "pedigree of Marker, Epic, and Dynasty"
-        question_lower = original_question.lower()
+    if is_reverse_search:
+        return handle_reverse_pedigree_search(args, ontario_df, usa_canada_data, original_question)
+    
+    # Use GPT to intelligently extract cultivar names from pedigree questions
+    api_key = args.get('api_key', '')
+    cultivar_names = extract_cultivars_from_pedigree_question(original_question, api_key)
+    
+    # Fallback to manual extraction if GPT fails
+    if not cultivar_names:
+        cultivar_names = []
         
-        # Find the part after "of" or "for"
-        cultivar_text = ""
-        if " of " in question_lower:
-            cultivar_text = original_question.split(" of ", 1)[1]
-        elif " for " in question_lower:
-            cultivar_text = original_question.split(" for ", 1)[1]
+        # Check if cultivar provided in args - but it might be a comma-separated list!
+        single_cultivar = args.get('cultivar', '')
+        if single_cultivar:
+            cultivar_text = single_cultivar
         else:
-            # Fallback: look for capitalized words
-            cultivar_text = original_question
+            # Extract multiple cultivar names from question
+            question_lower = original_question.lower()
+            
+            # Find the part after "of" or "for"
+            cultivar_text = ""
+            if " of " in question_lower:
+                cultivar_text = original_question.split(" of ", 1)[1]
+            elif " for " in question_lower:
+                cultivar_text = original_question.split(" for ", 1)[1]
+            else:
+                # For questions like "blackbeard pedigree", extract everything except pedigree-related words
+                words = original_question.split()
+                cultivar_words = [w for w in words if w.lower() not in ['pedigree', 'parentage', 'lineage', 'breeding', 'cross', 'crosses']]
+                cultivar_text = ' '.join(cultivar_words)
 
-    
-    # Now split the cultivar_text regardless of where it came from
-    import re
-    # Split by comma, "and", "or", "aned" (typo), etc.
-    potential_names = re.split(r'[,&]|(?:\s+and\s+)|(?:\s+or\s+)|(?:\s+aned\s+)', cultivar_text)
-    
-    for name in potential_names:
-        clean_name = name.strip('.,!?').strip()
-        # Filter out common words
-        if (len(clean_name) > 2 and 
-            clean_name.lower() not in ['pedigree', 'what', 'the', 'is', 'of', 'for', 'and', 'or', 'aned']):
-            # Preserve original capitalization instead of using .title()
-            cultivar_names.append(clean_name)
+        
+        # Now split the cultivar_text regardless of where it came from
+        potential_names = re.split(r'[,&]|(?:\s+and\s+)|(?:\s+or\s+)|(?:\s+aned\s+)', cultivar_text)
+        
+        for name in potential_names:
+            clean_name = name.strip('.,!?').strip()
+            # Filter out common words
+            if (len(clean_name) > 2 and 
+                clean_name.lower() not in ['pedigree', 'what', 'the', 'is', 'of', 'for', 'and', 'or', 'aned']):
+                cultivar_names.append(clean_name)
     
     if not cultivar_names:
         cultivar_names = ['']  # Fallback to empty search
@@ -732,6 +1011,11 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             # Use GPT to intelligently extract the search term from the question
             api_key = args.get('api_key', '')
             search_term = extract_search_term_with_gpt(original_question, api_key)
+            
+            # Fallback: if GPT didn't find anything, check if pipeline extracted a cultivar
+            if not search_term and args.get('cultivar'):
+                search_term = args.get('cultivar')
+                print(f"🔄 GPT extraction failed, using pipeline cultivar: '{search_term}'")
             
             if search_term:
                 return handle_comprehensive_search(args, ontario_data, usa_canada_data, original_question, search_term)
@@ -1242,7 +1526,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     # Parse multiple cultivars if provided as comma-separated string
     function_call_cultivars = []
     if function_call_cultivar:
-        import re
         # Split by comma, "and", "or", "vs", "with", etc.
         potential_names = re.split(r'[,&]|(?:\s+and\s+)|(?:\s+or\s+)|(?:\s+vs\s+)|(?:\s+with\s+)|(?:\s+versus\s+)', function_call_cultivar)
         
@@ -1358,7 +1641,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
         Detect ambiguous references and attempt to resolve them using context.
         Returns (resolved_entities, needs_clarification, clarification_message)
         """
-        import re  # Import re inside the function to avoid scope issues
+        # Import re inside the function to avoid scope issues
         
         # Detect potential ambiguous patterns dynamically
         ambiguous_patterns = [
@@ -1874,7 +2157,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
 
         # Special handling for kidney bean queries - mention that all kidney types are included
         if market_class_input and 'kidney' in market_class_input.lower():
-            import re  # Import re module for regex operations
             kidney_types = df['Market Class'].str.extract(r'(.*kidney.*)', flags=re.IGNORECASE)[0].dropna().unique()
             if len(kidney_types) > 1:
                 response += f"**📝 Note:** This analysis includes all kidney bean market classes: {', '.join(kidney_types)}\n\n"
@@ -2072,7 +2354,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                 elif 'Characteristics' in cultivar_data.columns and pd.notna(row.get('Characteristics')):
                     # Extract maturity from characteristics if available
                     characteristics = str(row['Characteristics'])
-                    import re
                     maturity_match = re.search(r'(\d+)\s*days', characteristics, re.IGNORECASE)
                     if maturity_match:
                         response += f"- **Maturity:** {maturity_match.group(1)} days\n"
@@ -2197,7 +2478,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
             response += f"**📊 Dataset context:** {len(df)} total records, {year_range}\n"
         
         # Clean up any duplicate dataset context lines
-        import re
         response = re.sub(r'(\*\*📊 Dataset context:\*\* \d+ total records, \d{4}-\d{4}\n)+', 
                          lambda m: m.group(0).split('\n')[0] + '\n', response)
         
@@ -2399,7 +2679,6 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     # Extract days to maturity from characteristics
                     maturity_info = maturity
                     if 'days' in characteristics.lower():
-                        import re
                         days_match = re.search(r'(\d+)\s*days', characteristics)
                         if days_match:
                             maturity_info = f"{days_match.group(1)} days"

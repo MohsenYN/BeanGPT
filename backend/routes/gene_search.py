@@ -8,7 +8,7 @@ import pandas as pd
 from typing import List, Optional
 import os
 import numpy as np
-from services.pipeline import get_openai_client
+from utils.openai_client import create_openai_client
 import json
 
 router = APIRouter()
@@ -89,7 +89,7 @@ def search_bean_databases(query: str):
     return results
 
 def generate_ai_description(query: str, api_key: str):
-    client = get_openai_client(api_key)
+    client = create_openai_client(api_key)
     
     try:
         # First, check if this might be a human gene
