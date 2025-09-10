@@ -8,9 +8,7 @@ from config import settings
 from routes import chat, ping, gene_search
 import os
 
-# Check if running on Lightsail and use appropriate config
-if os.getenv("LIGHTSAIL_DEPLOYMENT", "false").lower() == "true":
-    from lightsail_config import lightsail_settings as settings
+# Note: Using default config settings for all deployments
 
 app = FastAPI(
     title="BeanGPT Main Platform API",
@@ -25,6 +23,7 @@ print(f"🔧 Parsed CORS origins: {settings.cors_origins}")
 # Configure CORS with explicit origins
 cors_origins = [
     "https://kia8804.github.io",
+    "https://beangpt.ca",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173"
@@ -45,6 +44,21 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Add a middleware to log CORS requests for debugging
+@app.middleware("http")
+async def log_cors_requests(request, call_next):
+    origin = request.headers.get("origin")
+    if origin:
+        print(f"🌐 CORS request from origin: {origin}")
+        print(f"🔧 Allowed origins: {cors_origins}")
+        if origin not in cors_origins:
+            print(f"❌ Origin {origin} NOT in allowed origins!")
+        else:
+            print(f"✅ Origin {origin} is allowed")
+    
+    response = await call_next(request)
+    return response
 
 # Include routers
 app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])
