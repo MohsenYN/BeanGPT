@@ -16,14 +16,39 @@ router = APIRouter()
 # Load and cache the gene databases
 def load_gene_databases():
     try:
-        ncbi_data = pd.read_csv('data/NCBI_Filtered_Data_Enriched.csv')
-        uniprot_data = pd.read_csv('data/uniprotkb_Phaseolus_vulgaris.csv')
-        return ncbi_data, uniprot_data
+        # Try multiple possible paths for the data files
+        possible_paths = [
+            ('data/NCBI_Filtered_Data_Enriched.csv', 'data/uniprotkb_Phaseolus_vulgaris.csv'),
+            ('../data/NCBI_Filtered_Data_Enriched.csv', '../data/uniprotkb_Phaseolus_vulgaris.csv'),
+            ('/opt/beangpt/data/NCBI_Filtered_Data_Enriched.csv', '/opt/beangpt/data/uniprotkb_Phaseolus_vulgaris.csv'),
+            ('/opt/beangpt/backend/data/NCBI_Filtered_Data_Enriched.csv', '/opt/beangpt/backend/data/uniprotkb_Phaseolus_vulgaris.csv')
+        ]
+        
+        for ncbi_path, uniprot_path in possible_paths:
+            try:
+                if os.path.exists(ncbi_path) and os.path.exists(uniprot_path):
+                    print(f"✅ Loading gene databases from: {ncbi_path}, {uniprot_path}")
+                    ncbi_data = pd.read_csv(ncbi_path)
+                    uniprot_data = pd.read_csv(uniprot_path)
+                    print(f"✅ Successfully loaded {len(ncbi_data)} NCBI records and {len(uniprot_data)} UniProt records")
+                    return ncbi_data, uniprot_data
+            except Exception as e:
+                print(f"⚠️ Failed to load from {ncbi_path}: {e}")
+                continue
+        
+        print("❌ Could not find gene database files in any expected location")
+        return None, None
+        
     except Exception as e:
-        print(f"Error loading gene databases: {e}")
+        print(f"❌ Error loading gene databases: {e}")
         return None, None
 
+# Load databases on startup
+print("🔄 Initializing gene databases...")
 ncbi_data, uniprot_data = load_gene_databases()
+
+if ncbi_data is None and uniprot_data is None:
+    print("⚠️ WARNING: Gene databases not loaded. Gene search will only work with AI descriptions.")
 
 class GeneSearchRequest(BaseModel):
     query: str
@@ -174,11 +199,19 @@ def generate_ai_description(query: str, api_key: str):
 
 @router.post("/gene-search")
 async def search_genes(request: GeneSearchRequest):
-    if not request.query:
-        raise HTTPException(status_code=400, detail="Search query is required")
-    
-    # Search databases first
-    database_results = search_bean_databases(request.query)
+    try:
+        if not request.query:
+            raise HTTPException(status_code=400, detail="Search query is required")
+        
+        # Search databases first
+        database_results = search_bean_databases(request.query)
+        
+        # If databases aren't loaded, inform the user
+        if ncbi_data is None and uniprot_data is None:
+            print(f"⚠️ Gene databases not available, query: {request.query}")
+    except Exception as e:
+        print(f"❌ Error in gene search endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
     
     # If no results found and API key provided, generate AI description
     if not database_results and request.api_key:
@@ -208,3 +241,15 @@ async def search_genes(request: GeneSearchRequest):
             database_results.append(result_data)
     
     return database_results
+
+@router.get("/gene-search/health")
+async def gene_search_health():
+    """Health check endpoint for gene search functionality"""
+    return {
+        "status": "ok",
+        "ncbi_loaded": ncbi_data is not None,
+        "uniprot_loaded": uniprot_data is not None,
+        "ncbi_records": len(ncbi_data) if ncbi_data is not None else 0,
+        "uniprot_records": len(uniprot_data) if uniprot_data is not None else 0,
+        "message": "Gene search is operational" if (ncbi_data is not None or uniprot_data is not None) else "Gene databases not loaded - only AI search available"
+    }
