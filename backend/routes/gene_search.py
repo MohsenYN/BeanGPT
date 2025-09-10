@@ -200,47 +200,58 @@ def generate_ai_description(query: str, api_key: str):
 @router.post("/gene-search")
 async def search_genes(request: GeneSearchRequest):
     try:
+        print(f"🔍 Gene search request: {request.query}")
+        
         if not request.query:
             raise HTTPException(status_code=400, detail="Search query is required")
         
         # Search databases first
         database_results = search_bean_databases(request.query)
+        print(f"📊 Database search returned {len(database_results)} results")
         
         # If databases aren't loaded, inform the user
         if ncbi_data is None and uniprot_data is None:
             print(f"⚠️ Gene databases not available, query: {request.query}")
+        
+        # If no results found and API key provided, generate AI description
+        if not database_results and request.api_key:
+            print(f"🤖 No database results, trying AI generation for: {request.query}")
+            ai_result = generate_ai_description(request.query, request.api_key)
+            if ai_result:
+                print(f"✅ AI generation successful")
+                # Create a synthetic result from AI description
+                result_data = {
+                    'id': 'ai_generated',
+                    'name': request.query,
+                    'source': 'AI Analysis',
+                    'is_bean_specific': ai_result.get('is_bean_specific', False),
+                    'suggested_bean_genes': ai_result.get('suggested_bean_genes', [])
+                }
+                
+                # Add structured sections if available
+                if 'sections' in ai_result:
+                    result_data['sections'] = ai_result['sections']
+                if 'molecular_details' in ai_result:
+                    result_data['molecular_details'] = ai_result['molecular_details']
+                if 'technical_notes' in ai_result:
+                    result_data['technical_notes'] = ai_result['technical_notes']
+                
+                # Fallback for simple description
+                if 'description' in ai_result and 'sections' not in ai_result:
+                    result_data['description'] = ai_result['description']
+                    
+                database_results.append(result_data)
+            else:
+                print(f"❌ AI generation failed")
+        
+        print(f"📤 Returning {len(database_results)} total results")
+        return database_results
+        
     except Exception as e:
         print(f"❌ Error in gene search endpoint: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-    
-    # If no results found and API key provided, generate AI description
-    if not database_results and request.api_key:
-        ai_result = generate_ai_description(request.query, request.api_key)
-        if ai_result:
-            # Create a synthetic result from AI description
-            result_data = {
-                'id': 'ai_generated',
-                'name': request.query,
-                'source': 'AI Analysis',
-                'is_bean_specific': ai_result.get('is_bean_specific', False),
-                'suggested_bean_genes': ai_result.get('suggested_bean_genes', [])
-            }
-            
-            # Add structured sections if available
-            if 'sections' in ai_result:
-                result_data['sections'] = ai_result['sections']
-            if 'molecular_details' in ai_result:
-                result_data['molecular_details'] = ai_result['molecular_details']
-            if 'technical_notes' in ai_result:
-                result_data['technical_notes'] = ai_result['technical_notes']
-            
-            # Fallback for simple description
-            if 'description' in ai_result and 'sections' not in ai_result:
-                result_data['description'] = ai_result['description']
-                
-            database_results.append(result_data)
-    
-    return database_results
 
 @router.get("/gene-search/health")
 async def gene_search_health():
