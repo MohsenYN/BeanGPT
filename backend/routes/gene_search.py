@@ -245,11 +245,46 @@ async def search_genes(request: GeneSearchRequest):
 @router.get("/gene-search/health")
 async def gene_search_health():
     """Health check endpoint for gene search functionality"""
-    return {
-        "status": "ok",
-        "ncbi_loaded": ncbi_data is not None,
-        "uniprot_loaded": uniprot_data is not None,
-        "ncbi_records": len(ncbi_data) if ncbi_data is not None else 0,
-        "uniprot_records": len(uniprot_data) if uniprot_data is not None else 0,
-        "message": "Gene search is operational" if (ncbi_data is not None or uniprot_data is not None) else "Gene databases not loaded - only AI search available"
-    }
+    try:
+        import pandas as pd
+        import numpy as np
+        pandas_version = pd.__version__
+        numpy_version = np.__version__
+        
+        return {
+            "status": "ok",
+            "pandas_version": pandas_version,
+            "numpy_version": numpy_version,
+            "ncbi_loaded": ncbi_data is not None,
+            "uniprot_loaded": uniprot_data is not None,
+            "ncbi_records": len(ncbi_data) if ncbi_data is not None else 0,
+            "uniprot_records": len(uniprot_data) if uniprot_data is not None else 0,
+            "message": "Gene search is operational" if (ncbi_data is not None or uniprot_data is not None) else "Gene databases not loaded - only AI search available",
+            "current_directory": os.getcwd(),
+            "data_files_exist": {
+                "data/NCBI_Filtered_Data_Enriched.csv": os.path.exists("data/NCBI_Filtered_Data_Enriched.csv"),
+                "../data/NCBI_Filtered_Data_Enriched.csv": os.path.exists("../data/NCBI_Filtered_Data_Enriched.csv"),
+                "/opt/beangpt/data/NCBI_Filtered_Data_Enriched.csv": os.path.exists("/opt/beangpt/data/NCBI_Filtered_Data_Enriched.csv")
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Gene search health check failed"
+        }
+
+@router.get("/gene-search/test")
+async def gene_search_test():
+    """Simple test endpoint to verify gene search is working"""
+    try:
+        return {
+            "status": "ok", 
+            "message": "Gene search endpoint is responding",
+            "test_query_result": "This endpoint is working"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
