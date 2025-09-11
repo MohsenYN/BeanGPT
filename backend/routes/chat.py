@@ -63,7 +63,14 @@ async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
         generate(),
         media_type="text/plain",
-        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+        headers={
+            "Cache-Control": "no-cache", 
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "https://beangpt.ca",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+        }
     )
 
 
@@ -95,5 +102,12 @@ async def continue_research_endpoint(request: ChatRequest):
     return StreamingResponse(
         generate(),
         media_type="text/plain",
-        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+        headers={
+            "Cache-Control": "no-cache", 
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "https://beangpt.ca",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+        }
     ) 
