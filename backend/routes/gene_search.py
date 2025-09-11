@@ -5,7 +5,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import pandas as pd
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import os
 import numpy as np
 from utils.openai_client import create_openai_client
@@ -53,6 +53,7 @@ if ncbi_data is None and uniprot_data is None:
 class GeneSearchRequest(BaseModel):
     query: str
     api_key: Optional[str] = None
+
 
 class GeneReference(BaseModel):
     title: str
@@ -270,17 +271,7 @@ async def search_genes(request: GeneSearchRequest):
                 print(f"❌ AI generation failed")
         
         print(f"📤 Returning {len(database_results)} total results")
-        
-        from fastapi.responses import JSONResponse
-        return JSONResponse(
-            content=database_results,
-            headers={
-                "Access-Control-Allow-Origin": "https://beangpt.ca",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "*"
-            }
-        )
+        return database_results
         
     except Exception as e:
         print(f"❌ Error in gene search endpoint: {e}")
