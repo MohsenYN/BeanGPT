@@ -76,40 +76,60 @@ def search_bean_databases(query: str):
     # Search NCBI database
     if ncbi_data is not None:
         ncbi_matches = ncbi_data[
-            ncbi_data['Gene_Name'].str.lower().str.contains(query_lower, na=False) |
-            ncbi_data['Description'].str.lower().str.contains(query_lower, na=False)
+            ncbi_data['Symbol'].str.lower().str.contains(query_lower, na=False) |
+            ncbi_data['Description'].str.lower().str.contains(query_lower, na=False) |
+            ncbi_data['FullGeneName'].str.lower().str.contains(query_lower, na=False)
         ]
         
         for _, row in ncbi_matches.iterrows():
             results.append({
-                'id': str(row['Gene_ID']),
-                'name': row['Gene_Name'],
+                'id': str(row['GeneID']),
+                'name': row['Symbol'],
                 'source': 'NCBI',
                 'description': row['Description'],
-                'aliases': row.get('Aliases', '').split(';') if pd.notna(row.get('Aliases')) else [],
+                'full_name': row.get('FullGeneName', ''),
+                'aliases': [],  # No aliases column in this format
                 'references': [
-                    {'title': 'View in NCBI', 'url': f"https://www.ncbi.nlm.nih.gov/gene/{row['Gene_ID']}"}
+                    {'title': 'View in NCBI', 'url': f"https://www.ncbi.nlm.nih.gov/gene/{row['GeneID']}"}
                 ]
             })
     
     # Search UniProt database
     if uniprot_data is not None:
-        uniprot_matches = uniprot_data[
-            uniprot_data['Entry'].str.lower().str.contains(query_lower, na=False) |
-            uniprot_data['Protein names'].str.lower().str.contains(query_lower, na=False)
-        ]
+        # Build search conditions for available columns
+        search_conditions = []
         
-        for _, row in uniprot_matches.iterrows():
-            results.append({
-                'id': row['Entry'],
-                'name': row['Entry name'],
-                'source': 'UniProt',
-                'description': row['Protein names'],
-                'functions': [row['Function']] if pd.notna(row.get('Function')) else [],
-                'references': [
-                    {'title': 'View in UniProt', 'url': f"https://www.uniprot.org/uniprot/{row['Entry']}"}
-                ]
-            })
+        # Check which columns exist and build search conditions
+        if 'Entry' in uniprot_data.columns:
+            search_conditions.append(uniprot_data['Entry'].str.lower().str.contains(query_lower, na=False))
+        
+        if 'Protein names' in uniprot_data.columns:
+            search_conditions.append(uniprot_data['Protein names'].str.lower().str.contains(query_lower, na=False))
+        
+        # Search in Gene Names columns
+        for col in ['Gene Names', 'Gene Names (primary)', 'Gene Names (synonym)']:
+            if col in uniprot_data.columns:
+                search_conditions.append(uniprot_data[col].str.lower().str.contains(query_lower, na=False))
+        
+        # Combine all search conditions
+        if search_conditions:
+            combined_condition = search_conditions[0]
+            for condition in search_conditions[1:]:
+                combined_condition = combined_condition | condition
+            
+            uniprot_matches = uniprot_data[combined_condition]
+            
+            for _, row in uniprot_matches.iterrows():
+                results.append({
+                    'id': row.get('Entry', ''),
+                    'name': row.get('Entry Name', row.get('Entry', '')),
+                    'source': 'UniProt',
+                    'description': row.get('Protein names', ''),
+                    'gene_names': row.get('Gene Names', ''),
+                    'references': [
+                        {'title': 'View in UniProt', 'url': f"https://www.uniprot.org/uniprot/{row.get('Entry', '')}"}
+                    ]
+                })
     
     return results
 
@@ -344,13 +364,27 @@ async def gene_search_columns():
             "uniprot_loaded": uniprot_data is not None
         }
         
+        # Safely check NCBI data
         if ncbi_data is not None:
-            result["ncbi_columns"] = list(ncbi_data.columns)
-            result["ncbi_sample"] = ncbi_data.head(2).to_dict('records') if len(ncbi_data) > 0 else []
+            try:
+                result["ncbi_columns"] = list(ncbi_data.columns)
+                result["ncbi_shape"] = ncbi_data.shape
+                result["ncbi_dtypes"] = str(ncbi_data.dtypes.to_dict())
+            except Exception as e:
+                result["ncbi_error"] = str(e)
+        else:
+            result["ncbi_error"] = "NCBI data is None"
         
+        # Safely check UniProt data  
         if uniprot_data is not None:
-            result["uniprot_columns"] = list(uniprot_data.columns)
-            result["uniprot_sample"] = uniprot_data.head(2).to_dict('records') if len(uniprot_data) > 0 else []
+            try:
+                result["uniprot_columns"] = list(uniprot_data.columns)
+                result["uniprot_shape"] = uniprot_data.shape
+                result["uniprot_dtypes"] = str(uniprot_data.dtypes.to_dict())
+            except Exception as e:
+                result["uniprot_error"] = str(e)
+        else:
+            result["uniprot_error"] = "UniProt data is None"
         
         return result
         
