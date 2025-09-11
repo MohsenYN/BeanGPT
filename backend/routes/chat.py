@@ -66,8 +66,7 @@ async def chat_endpoint(request: ChatRequest):
         headers={
             "Cache-Control": "no-cache", 
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "https://beangpt.ca",
-            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "*"
         }
@@ -105,8 +104,7 @@ async def continue_research_endpoint(request: ChatRequest):
         headers={
             "Cache-Control": "no-cache", 
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "https://beangpt.ca",
-            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "*"
         }
