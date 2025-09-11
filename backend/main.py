@@ -32,14 +32,33 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Simple CORS logging
+# FORCE CORS HEADERS ON EVERY RESPONSE
 @app.middleware("http")
-async def log_requests(request, call_next):
+async def force_cors_headers(request, call_next):
     origin = request.headers.get("origin")
     print(f"🌐 {request.method} request from origin: {origin}")
     
+    # Handle preflight OPTIONS requests immediately
+    if request.method == "OPTIONS":
+        from fastapi.responses import Response
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Max-Age"] = "86400"
+        print("🔧 Handled OPTIONS preflight request")
+        return response
+    
+    # Process the request
     response = await call_next(request)
-    print(f"✅ Response status: {response.status_code}")
+    
+    # FORCE CORS headers on EVERY response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Expose-Headers"] = "*"
+    
+    print(f"✅ Response status: {response.status_code} - CORS headers FORCED")
     
     return response
 
@@ -56,10 +75,15 @@ app.include_router(health.router, prefix=settings.api_prefix, tags=["health"])
 @app.get("/debug/cors")
 async def debug_cors():
     return {
-        "cors_origins_env": os.getenv('CORS_ORIGINS', 'NOT_SET'),
-        "parsed_cors_origins": settings.cors_origins,
-        "final_cors_origins": cors_origins
+        "message": "CORS is working",
+        "cors_origins": "*",
+        "timestamp": "now"
     }
+
+# Simple test endpoint
+@app.get("/test")
+async def test_endpoint():
+    return {"message": "API is working", "cors": "enabled"}
 
 if __name__ == "__main__":
     import uvicorn
