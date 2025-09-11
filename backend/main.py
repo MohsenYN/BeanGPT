@@ -24,6 +24,7 @@ print(f"🔧 Parsed CORS origins: {settings.cors_origins}")
 cors_origins = [
     "https://kia8804.github.io",
     "https://beangpt.ca",
+    "https://mohsenyn.github.io",  # Add this explicitly
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173"
