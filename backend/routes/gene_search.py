@@ -270,7 +270,17 @@ async def search_genes(request: GeneSearchRequest):
                 print(f"❌ AI generation failed")
         
         print(f"📤 Returning {len(database_results)} total results")
-        return database_results
+        
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content=database_results,
+            headers={
+                "Access-Control-Allow-Origin": "https://beangpt.ca",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "*"
+            }
+        )
         
     except Exception as e:
         print(f"❌ Error in gene search endpoint: {e}")
