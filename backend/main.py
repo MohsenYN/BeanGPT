@@ -51,16 +51,43 @@ app.add_middleware(
 @app.middleware("http")
 async def log_cors_requests(request, call_next):
     origin = request.headers.get("origin")
+    method = request.method
+    
+    print(f"🌐 {method} request from origin: {origin}")
+    print(f"🔧 Request URL: {request.url}")
+    print(f"🔧 Request headers: {dict(request.headers)}")
+    
     if origin:
-        print(f"🌐 CORS request from origin: {origin}")
         print(f"🔧 Allowed origins: {cors_origins}")
         if origin not in cors_origins:
             print(f"❌ Origin {origin} NOT in allowed origins!")
         else:
             print(f"✅ Origin {origin} is allowed")
     
-    response = await call_next(request)
-    return response
+    # Handle OPTIONS requests explicitly
+    if method == "OPTIONS":
+        print("🔧 Handling OPTIONS preflight request")
+        from fastapi.responses import Response
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = origin if origin in cors_origins else "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
+    
+    try:
+        response = await call_next(request)
+        print(f"✅ Response status: {response.status_code}")
+        
+        # Ensure CORS headers are set on the response
+        if origin and origin in cors_origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+        
+        return response
+    except Exception as e:
+        print(f"❌ Error processing request: {e}")
+        raise
 
 # Include routers
 app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])

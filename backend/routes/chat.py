@@ -24,6 +24,11 @@ class ChatResponse(BaseModel):
     full_markdown_table: Optional[str] = None
     suggested_questions: List[str] | None = None
 
+@router.options("/chat")
+async def chat_options():
+    """Handle CORS preflight requests for chat endpoint"""
+    return {"message": "CORS preflight OK"}
+
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     async def generate():
