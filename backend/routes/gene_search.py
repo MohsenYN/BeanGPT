@@ -333,3 +333,31 @@ async def gene_search_debug(query: str):
             "traceback": error_details,
             "message": "Debug search failed"
         }
+
+@router.get("/gene-search/columns")
+async def gene_search_columns():
+    """Debug endpoint to show what columns exist in the databases"""
+    try:
+        result = {
+            "status": "ok",
+            "ncbi_loaded": ncbi_data is not None,
+            "uniprot_loaded": uniprot_data is not None
+        }
+        
+        if ncbi_data is not None:
+            result["ncbi_columns"] = list(ncbi_data.columns)
+            result["ncbi_sample"] = ncbi_data.head(2).to_dict('records') if len(ncbi_data) > 0 else []
+        
+        if uniprot_data is not None:
+            result["uniprot_columns"] = list(uniprot_data.columns)
+            result["uniprot_sample"] = uniprot_data.head(2).to_dict('records') if len(uniprot_data) > 0 else []
+        
+        return result
+        
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }
