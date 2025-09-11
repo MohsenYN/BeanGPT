@@ -824,7 +824,9 @@ export default function App() {
       icon: FaSearch, 
       label: "Gene Lookup", 
       action: () => setShowGeneSearchModal(true),
-      disabled: false
+      disabled: true,
+      status: "under-repair",
+      tooltip: "Gene Lookup is temporarily under maintenance. We're working to restore this feature soon."
     },
     { icon: FaBook, label: "Resources", action: () => setShowResourcesModal(true) }
   ];
@@ -927,17 +929,37 @@ export default function App() {
                   onClick={action.disabled ? undefined : action.action}
                   disabled={action.disabled}
                   title={action.tooltip || ''}
-                  className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${
+                  className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors text-sm ${
                     action.disabled 
-                      ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-slate-800' 
+                      ? 'cursor-not-allowed bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50' 
                       : 'hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <action.icon className={`text-sm ${action.disabled ? 'text-gray-400' : 'text-blue-500'}`} />
-                  <span className={`${action.disabled ? 'text-gray-500 dark:text-slate-500' : 'text-gray-700 dark:text-slate-300'}`}>
-                    {action.label}
-                    {action.disabled && <span className="ml-2 text-xs">(Coming Soon)</span>}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <action.icon className={`text-sm ${
+                      action.disabled 
+                        ? 'text-amber-500 dark:text-amber-400' 
+                        : 'text-blue-500'
+                    }`} />
+                    <span className={`${
+                      action.disabled 
+                        ? 'text-amber-700 dark:text-amber-300' 
+                        : 'text-gray-700 dark:text-slate-300'
+                    }`}>
+                      {action.label}
+                    </span>
+                  </div>
+                  {action.status === 'under-repair' && (
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        Under Repair
+                      </span>
+                    </div>
+                  )}
+                  {action.disabled && action.status !== 'under-repair' && (
+                    <span className="text-xs text-gray-500 dark:text-slate-500">(Coming Soon)</span>
+                  )}
                 </button>
               ))}
             </div>
