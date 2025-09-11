@@ -291,11 +291,45 @@ async def gene_search_test():
     try:
         return {
             "status": "ok", 
-            "message": "Gene search endpoint is responding",
-            "test_query_result": "This endpoint is working"
+            "message": "Gene search endpoint is responding - UPDATED VERSION",
+            "test_query_result": "This endpoint is working",
+            "timestamp": "2024-12-19",
+            "version": "v2.0"
         }
     except Exception as e:
         return {
             "status": "error",
             "error": str(e)
+        }
+
+@router.get("/gene-search/debug/{query}")
+async def gene_search_debug(query: str):
+    """Debug endpoint to test gene search without POST"""
+    try:
+        print(f"🔍 DEBUG: Gene search request: {query}")
+        
+        # Test the search_bean_databases function directly
+        database_results = search_bean_databases(query)
+        print(f"📊 DEBUG: Database search returned {len(database_results)} results")
+        
+        return {
+            "status": "ok",
+            "query": query,
+            "results_count": len(database_results),
+            "results": database_results[:3] if database_results else [],  # First 3 results only
+            "message": "Debug search completed successfully"
+        }
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ DEBUG ERROR: {e}")
+        print(f"📋 DEBUG TRACEBACK: {error_details}")
+        
+        return {
+            "status": "error",
+            "query": query,
+            "error": str(e),
+            "traceback": error_details,
+            "message": "Debug search failed"
         }
