@@ -217,6 +217,11 @@ def generate_ai_description(query: str, api_key: str):
         print(f"Response content: {response.choices[0].message.content if 'response' in locals() else 'No response'}")
         return None
 
+@router.options("/gene-search")
+async def gene_search_options():
+    """Handle CORS preflight requests"""
+    return {"message": "CORS preflight OK"}
+
 @router.post("/gene-search")
 async def search_genes(request: GeneSearchRequest):
     try:
