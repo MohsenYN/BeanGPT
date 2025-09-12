@@ -522,7 +522,7 @@ export default function App() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-      }, 120000); // 2 minute timeout
+      }, 300000); // 5 minute timeout
 
       const response = await fetch(API_ENDPOINTS.CHAT, {
         method: 'POST',
