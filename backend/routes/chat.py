@@ -24,11 +24,6 @@ class ChatResponse(BaseModel):
     full_markdown_table: Optional[str] = None
     suggested_questions: List[str] | None = None
 
-@router.options("/chat")
-async def chat_options():
-    """Handle CORS preflight requests for chat endpoint"""
-    return {"message": "CORS preflight OK"}
-
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     async def generate():
@@ -65,10 +60,7 @@ async def chat_endpoint(request: ChatRequest):
         media_type="text/plain",
         headers={
             "Cache-Control": "no-cache", 
-            "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*"
+            "Connection": "keep-alive"
         }
     )
 
@@ -103,9 +95,6 @@ async def continue_research_endpoint(request: ChatRequest):
         media_type="text/plain",
         headers={
             "Cache-Control": "no-cache", 
-            "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*"
+            "Connection": "keep-alive"
         }
     ) 
