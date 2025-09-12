@@ -16,14 +16,35 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS
+# Configure CORS - Allow specific domains and all for development
+allowed_origins = [
+    "https://beangpt.ca",
+    "https://www.beangpt.ca", 
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "*"  # Allow all for now, but you can remove this for production security
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language", 
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "DNT",
+        "User-Agent",
+        "If-Modified-Since",
+        "Cache-Control",
+        "Range"
+    ],
+    expose_headers=["Content-Length", "Content-Range"],
 )
 
 # Add middleware to handle connection errors
