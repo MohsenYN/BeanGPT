@@ -1006,8 +1006,11 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             yield {"type": "progress", "data": {"step": "streaming", "detail": "Streaming results..."}}
                             
                             # Stream the content character by character
-                            for char in preview:
-                                yield {"type": "content", "data": char}
+                            # Stream in chunks for better performance
+                            chunk_size = 100
+                            for i in range(0, len(preview), chunk_size):
+                                chunk = preview[i:i + chunk_size]
+                                yield {"type": "content", "data": chunk}
                             
                             # Send final metadata
                             yield {
@@ -1151,13 +1154,13 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
 
                             print(f"📋 DEBUG: Full preview length: {len(full_preview)} characters")
 
-                            # Stream the raw preview data
-                            chars_sent = 0
-                            for char in full_preview:
-                                chars_sent += 1
-                                yield {"type": "content", "data": char}
+                            # Stream the raw preview data in chunks
+                            chunk_size = 100
+                            for i in range(0, len(full_preview), chunk_size):
+                                chunk = full_preview[i:i + chunk_size]
+                                yield {"type": "content", "data": chunk}
 
-                            print(f"📋 DEBUG: Sent {chars_sent} characters in streaming response")
+                            print(f"📋 DEBUG: Sent {len(full_preview)} characters in streaming response")
 
                             # Store bean data for later metadata
                             bean_chart_data = chart_data
@@ -1301,9 +1304,11 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         # Progress update before streaming final answer
                         yield {"type": "progress", "data": {"step": "streaming", "detail": "Streaming research results..."}}
                         
-                        # Stream the complete answer
-                        for char in final_answer:
-                            yield {"type": "content", "data": char}
+                        # Stream the complete answer in chunks for better performance
+                        chunk_size = 100  # Stream in 100-character chunks instead of single characters
+                        for i in range(0, len(final_answer), chunk_size):
+                            chunk = final_answer[i:i + chunk_size]
+                            yield {"type": "content", "data": chunk}
                         
                         # Store bean data for later metadata
                         bean_chart_data = chart_data
@@ -1514,9 +1519,11 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
             
             simple_response = response.choices[0].message.content.strip()
             
-            # Stream the response
-            for char in simple_response:
-                yield {"type": "content", "data": char}
+            # Stream the response in chunks
+            chunk_size = 100
+            for i in range(0, len(simple_response), chunk_size):
+                chunk = simple_response[i:i + chunk_size]
+                yield {"type": "content", "data": chunk}
 
             # Generate context-aware suggested questions
             suggested_questions = generate_suggested_questions(
