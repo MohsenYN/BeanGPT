@@ -32,7 +32,8 @@ app.add_middleware(
 @app.middleware("http")
 async def force_cors_headers(request, call_next):
     origin = request.headers.get("origin")
-    print(f"🌐 {request.method} request from origin: {origin}")
+    path = str(request.url.path)
+    print(f"🌐 {request.method} {path} from origin: {origin}")
     
     # Handle preflight OPTIONS requests immediately
     if request.method == "OPTIONS":
@@ -42,21 +43,36 @@ async def force_cors_headers(request, call_next):
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Max-Age"] = "86400"
-        print("🔧 Handled OPTIONS preflight request")
+        print(f"🔧 Handled OPTIONS preflight request for {path}")
         return response
     
     # Process the request
-    response = await call_next(request)
-    
-    # FORCE CORS headers on EVERY response
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    response.headers["Access-Control-Expose-Headers"] = "*"
-    
-    print(f"✅ Response status: {response.status_code} - CORS headers FORCED")
-    
-    return response
+    try:
+        response = await call_next(request)
+        
+        # FORCE CORS headers on EVERY response
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Expose-Headers"] = "*"
+        
+        print(f"✅ {path} Response status: {response.status_code} - CORS headers FORCED")
+        
+        return response
+    except Exception as e:
+        print(f"❌ Error processing {path}: {e}")
+        # Return a CORS-enabled error response
+        from fastapi.responses import JSONResponse
+        error_response = JSONResponse(
+            status_code=500,
+            content={"error": str(e)},
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "*"
+            }
+        )
+        return error_response
 
 # Include routers
 app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])
@@ -85,6 +101,17 @@ async def test_endpoint():
 @app.post("/test-cors")
 async def test_cors():
     return {"message": "CORS POST test successful", "cors": "working"}
+
+# Global OPTIONS handler for all paths
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    print(f"🔧 Global OPTIONS handler for path: /{full_path}")
+    return {"message": "OPTIONS handled globally"}
+
+# Test the actual chat endpoint path
+@app.get("/api/chat-test")
+async def chat_test():
+    return {"message": "Chat endpoint path is working", "path": "/api/chat"}
 
 if __name__ == "__main__":
     import uvicorn
