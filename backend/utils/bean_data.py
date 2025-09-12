@@ -2754,9 +2754,9 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                     Filtered content:"""
 
                     response_obj = client.chat.completions.create(
-                        model="gpt-4o",
+                        model="gpt-4o-mini",  # Use mini for faster filtering
                         messages=[{"role": "user", "content": filter_prompt}],
-                        max_tokens=1000,
+                        max_tokens=800,  # Reduced tokens for faster processing
                         temperature=0
                     )
                     

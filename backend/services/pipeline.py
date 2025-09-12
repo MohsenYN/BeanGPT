@@ -1192,7 +1192,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         yield {"type": "progress", "data": {"step": "ai_summary", "detail": "Generating research summary..."}}
 
                         summary_response = client.chat.completions.create(
-                            model="gpt-4o",
+                            model="gpt-4o-mini",  # Use mini for faster processing
                             messages=[
                                 {
                                     "role": "system",
@@ -1293,6 +1293,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                 }
                             ],
                             temperature=0.3,
+                            timeout=30  # 30 second timeout for faster processing
                         )
                         
                         final_answer = summary_response.choices[0].message.content.strip()
