@@ -1299,7 +1299,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                             temperature=0.3
                         )
                         
-                        final_answer = summary_response.choices[0].message.content.strip()
+                            final_answer = summary_response.choices[0].message.content.strip()
                         
                         except Exception as e:
                             print(f"❌ AI summary generation failed: {e}")
