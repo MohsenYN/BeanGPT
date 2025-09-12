@@ -26,6 +26,20 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Add middleware to handle connection errors
+@app.middleware("http")
+async def handle_connection_errors(request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        print(f"❌ Connection error: {e}")
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Connection error", "detail": str(e)}
+        )
+
 # Include routers
 app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])
 app.include_router(ping.router, prefix=settings.api_prefix, tags=["health"])

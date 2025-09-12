@@ -27,33 +27,40 @@ class ChatResponse(BaseModel):
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     async def generate():
-        # Require user-provided API key - no fallback to environment
-        api_key = request.api_key
-        if not api_key:
-            yield f"data: {json.dumps({'type': 'error', 'data': 'Please enter your API key in the interface above to continue.'})}\n\n"
-            return
-        
-        # Validate API key format
-        if not api_key.startswith('sk-') or len(api_key) < 20:
-            yield f"data: {json.dumps({'type': 'error', 'data': 'Invalid API key format. Please enter a valid API key.'})}\n\n"
-            return
-        
-        # Stream the answer
-        full_answer = ""
-        async for chunk in answer_question_stream(request.question, request.conversation_history, api_key):
-            if chunk["type"] == "content":
-                full_answer += chunk["data"]
-                yield f"data: {json.dumps(chunk)}\n\n"
-            elif chunk["type"] == "bean_complete":
-                # Bean data analysis is complete, send special message with toggle
-                yield f"data: {json.dumps(chunk)}\n\n"
-                return  # Stop here, wait for user to decide if they want research
-            elif chunk["type"] == "metadata":
-                # Send final metadata (sources, genes, etc.)
-                yield f"data: {json.dumps(chunk)}\n\n"
-        
-        # Signal completion
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        try:
+            # Require user-provided API key - no fallback to environment
+            api_key = request.api_key
+            if not api_key:
+                yield f"data: {json.dumps({'type': 'error', 'data': 'Please enter your API key in the interface above to continue.'})}\n\n"
+                return
+            
+            # Validate API key format
+            if not api_key.startswith('sk-') or len(api_key) < 20:
+                yield f"data: {json.dumps({'type': 'error', 'data': 'Invalid API key format. Please enter a valid API key.'})}\n\n"
+                return
+            
+            # Stream the answer
+            full_answer = ""
+            async for chunk in answer_question_stream(request.question, request.conversation_history, api_key):
+                if chunk["type"] == "content":
+                    full_answer += chunk["data"]
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                elif chunk["type"] == "bean_complete":
+                    # Bean data analysis is complete, send special message with toggle
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                    return  # Stop here, wait for user to decide if they want research
+                elif chunk["type"] == "metadata":
+                    # Send final metadata (sources, genes, etc.)
+                    yield f"data: {json.dumps(chunk)}\n\n"
+            
+            # Signal completion
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            
+        except Exception as e:
+            print(f"❌ Error in chat endpoint: {e}")
+            import traceback
+            traceback.print_exc()
+            yield f"data: {json.dumps({'type': 'error', 'data': f'Server error: {str(e)}'})}\n\n"
     
     return StreamingResponse(
         generate(),
