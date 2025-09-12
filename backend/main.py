@@ -16,12 +16,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Debug CORS configuration
-print(f"🔧 CORS_ORIGINS env var: {os.getenv('CORS_ORIGINS', 'NOT_SET')}")
-print(f"🔧 Parsed CORS origins: {settings.cors_origins}")
-
 # Configure CORS - ALLOW ALL ORIGINS FOR PRODUCTION
-print("🔧 CORS Configuration: ALLOWING ALL ORIGINS")
+print("🔧 CORS Configuration: ALLOWING ALL ORIGINS - NO RESTRICTIONS")
 
 app.add_middleware(
     CORSMiddleware,
@@ -83,7 +79,12 @@ async def debug_cors():
 # Simple test endpoint
 @app.get("/test")
 async def test_endpoint():
-    return {"message": "API is working", "cors": "enabled"}
+    return {"message": "API is working", "cors": "enabled", "timestamp": "2024-01-01"}
+
+# Test CORS specifically
+@app.post("/test-cors")
+async def test_cors():
+    return {"message": "CORS POST test successful", "cors": "working"}
 
 if __name__ == "__main__":
     import uvicorn

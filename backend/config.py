@@ -19,9 +19,9 @@ class Settings:
         # API Keys
         self.openai_api_key = os.getenv("OPENAI_API_KEY", None)  # Optional - users provide via UI
         
-        # Zilliz Configuration
-        self.zilliz_uri = self._get_required_env("ZILLIZ_URI")
-        self.zilliz_token = self._get_required_env("ZILLIZ_TOKEN")
+        # Zilliz Configuration (optional - fallback if not available)
+        self.zilliz_uri = os.getenv("ZILLIZ_URI", None)
+        self.zilliz_token = os.getenv("ZILLIZ_TOKEN", None)
         
         # Model Configuration
         self.openai_embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-large")
