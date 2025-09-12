@@ -1194,12 +1194,13 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                         # Progress update for AI summarization
                         yield {"type": "progress", "data": {"step": "ai_summary", "detail": "Generating research summary..."}}
 
-                        summary_response = client.chat.completions.create(
-                            model="gpt-4o-mini",  # Use mini for faster processing
-                            messages=[
-                                {
-                                    "role": "system",
-                                    "content": (
+                        try:
+                            summary_response = client.chat.completions.create(
+                                model="gpt-4o-mini",  # Use mini for faster processing
+                                messages=[
+                                    {
+                                        "role": "system",
+                                        "content": (
                                         "🚨 CRITICAL USA/CANADA DATA INSTRUCTION: If the dataset response contains '🌍 Bean Cultivars - USA/Canada Database' or mentions USA/Canada cultivar data, this is VALID DATA from a 260-record database. You MUST summarize and present this data fully. NEVER respond with 'Only Ontario research station data is available' when USA/Canada data is present.\n\n"
                                         "🌐 USA/CANADA WEB INTEGRATION: If the response includes '🌐 Additional Research Context' with web search results, you MUST integrate this information with the cultivar data. Highlight performance insights, yield comparisons, and breeding achievements from the web research. Do not just list cultivars - synthesize the web research to identify the best performers.\n\n"
                                         "📝 PREVIOUS NAME EXTRACTION: When asked about 'previous name' or 'old name' of a cultivar, look for the format 'Cultivar Name (Previous-ID)' in the dataset. The text in parentheses is the previous breeding line designation. For example: 'Wallace (773-V98)' means the previous name was '773-V98', 'Charro (P16901)' means the previous name was 'P16901'.\n\n"
@@ -1295,20 +1296,22 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                                     "content": f"Based on the question '{question}', analyze this data:\n\n**MAIN DATASET:**\n{preview}\n\n**HISTORICAL DATA AVAILABLE:**\nHistorical data is also available for additional context and pedigree information. Include relevant historical insights when applicable.\n\n🚨 CRITICAL DATA USAGE RULES:\n• The data above contains the EXACT cultivar names and performance values from the Ontario dataset\n• You MUST use ONLY the cultivar names that appear in the data above - never invent new ones\n• You MUST use ONLY the performance values (yield, maturity, etc.) that appear in the data above\n• If a cultivar name appears in the data above (e.g., 'Red Hawk', 'Dynasty', 'OAC Inferno'), use that EXACT name\n• If performance data appears above (e.g., 'Yield: 3,270 kg/ha'), use that EXACT value\n• NEVER create fake cultivar names like 'OAC Glow', 'OAC Twinkle', 'OAC Shimmer' - these do not exist\n\n🚨 KIDNEY BEAN DATA CONFIRMATION: The dataset DOES contain kidney bean data. Market classes include: Dark Red Kidney, Light Red Kidney, White Kidney, kidney, white kidney. DO NOT say there is no kidney bean data available.\n\n🚨 LIST ALL REQUIREMENT: If the question contains 'list all', 'show all', 'all X beans', or similar phrases asking for complete lists, you MUST show EVERY SINGLE cultivar/variety that appears in the data above. Do NOT summarize or show only top performers - provide the complete numbered list with ALL available data for each item.\n\n🚨 STRICT DATA ADHERENCE: Your response must be based EXCLUSIVELY on the cultivar names and performance data shown in the MAIN DATASET section above. Do not add any cultivars or data not explicitly shown there.\n\n{cultivar_context}"
                                 }
                             ],
-                            temperature=0.3,
-                            timeout=30  # 30 second timeout for faster processing
+                            temperature=0.3
                         )
                         
                         final_answer = summary_response.choices[0].message.content.strip()
                         
+                        except Exception as e:
+                            print(f"❌ AI summary generation failed: {e}")
+                            # Fallback: use the raw preview data as the response
+                            final_answer = f"## Bean Data Analysis Results\n\n{preview}\n\n*Note: AI summarization temporarily unavailable - showing raw data analysis.*"
+                        
                         # Progress update before streaming final answer
                         yield {"type": "progress", "data": {"step": "streaming", "detail": "Streaming research results..."}}
                         
-                        # Stream the complete answer in chunks for better performance
-                        chunk_size = 100  # Stream in 100-character chunks instead of single characters
-                        for i in range(0, len(final_answer), chunk_size):
-                            chunk = final_answer[i:i + chunk_size]
-                            yield {"type": "content", "data": chunk}
+                        # Stream the complete answer
+                        for char in final_answer:
+                            yield {"type": "content", "data": char}
                         
                         # Store bean data for later metadata
                         bean_chart_data = chart_data
