@@ -3,7 +3,8 @@
 
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# CORS middleware removed - handled by nginx in production
+# For local development, you can add it back if needed
 from config import settings
 from routes import chat, ping, gene_search
 import os
@@ -16,36 +17,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS - Allow specific domains and all for development
-allowed_origins = [
-    "https://beangpt.ca",
-    "https://www.beangpt.ca", 
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "*"  # Allow all for now, but you can remove this for production security
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Accept",
-        "Accept-Language", 
-        "Content-Language",
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "DNT",
-        "User-Agent",
-        "If-Modified-Since",
-        "Cache-Control",
-        "Range"
-    ],
-    expose_headers=["Content-Length", "Content-Range"],
-)
+# CORS is handled by nginx in production
+# For local development, you may need to temporarily add CORS middleware
+# or use a proxy/nginx setup locally as well
 
 # Add middleware to handle connection errors
 @app.middleware("http")
