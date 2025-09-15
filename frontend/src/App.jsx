@@ -824,9 +824,8 @@ export default function App() {
       icon: FaSearch, 
       label: "Gene Lookup", 
       action: () => setShowGeneSearchModal(true),
-      disabled: true,
-      status: "under-repair",
-      tooltip: "Gene Lookup is temporarily under maintenance. We're working to restore this feature soon."
+      disabled: false,
+      tooltip: "Search and analyze bean genes using NCBI and UniProt databases"
     },
     { icon: FaBook, label: "Resources", action: () => setShowResourcesModal(true) }
   ];

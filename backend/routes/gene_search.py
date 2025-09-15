@@ -83,15 +83,21 @@ def search_bean_databases(query: str):
         ]
         
         for _, row in ncbi_matches.iterrows():
+            # Convert pandas values to Python native types to avoid JSON serialization issues
+            gene_id = str(row['GeneID']) if pd.notna(row['GeneID']) else ''
+            symbol = str(row['Symbol']) if pd.notna(row['Symbol']) else ''
+            description = str(row['Description']) if pd.notna(row['Description']) else ''
+            full_name = str(row.get('FullGeneName', '')) if pd.notna(row.get('FullGeneName', '')) else ''
+            
             results.append({
-                'id': str(row['GeneID']),
-                'name': row['Symbol'],
+                'id': gene_id,
+                'name': symbol,
                 'source': 'NCBI',
-                'description': row['Description'],
-                'full_name': row.get('FullGeneName', ''),
+                'description': description,
+                'full_name': full_name,
                 'aliases': [],  # No aliases column in this format
                 'references': [
-                    {'title': 'View in NCBI', 'url': f"https://www.ncbi.nlm.nih.gov/gene/{row['GeneID']}"}
+                    {'title': 'View in NCBI', 'url': f"https://www.ncbi.nlm.nih.gov/gene/{gene_id}"}
                 ]
             })
     
@@ -121,14 +127,20 @@ def search_bean_databases(query: str):
             uniprot_matches = uniprot_data[combined_condition]
             
             for _, row in uniprot_matches.iterrows():
+                # Convert pandas values to Python native types to avoid JSON serialization issues
+                entry = str(row.get('Entry', '')) if pd.notna(row.get('Entry', '')) else ''
+                entry_name = str(row.get('Entry Name', entry)) if pd.notna(row.get('Entry Name', entry)) else entry
+                protein_names = str(row.get('Protein names', '')) if pd.notna(row.get('Protein names', '')) else ''
+                gene_names = str(row.get('Gene Names', '')) if pd.notna(row.get('Gene Names', '')) else ''
+                
                 results.append({
-                    'id': row.get('Entry', ''),
-                    'name': row.get('Entry Name', row.get('Entry', '')),
+                    'id': entry,
+                    'name': entry_name,
                     'source': 'UniProt',
-                    'description': row.get('Protein names', ''),
-                    'gene_names': row.get('Gene Names', ''),
+                    'description': protein_names,
+                    'gene_names': gene_names,
                     'references': [
-                        {'title': 'View in UniProt', 'url': f"https://www.uniprot.org/uniprot/{row.get('Entry', '')}"}
+                        {'title': 'View in UniProt', 'url': f"https://www.uniprot.org/uniprot/{entry}"}
                     ]
                 })
     
