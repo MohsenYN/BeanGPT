@@ -1089,7 +1089,7 @@ async def answer_question_stream(question: str, conversation_history: List[Dict]
                 
                 call = choice.message.function_call
                 
-                if call.name == "query_bean_data":
+                if call and call.name == "query_bean_data":
                     args = json.loads(call.arguments)
                     args['original_question'] = question
                     args['api_key'] = api_key
@@ -1736,7 +1736,7 @@ def answer_question(question: str, conversation_history: List[Dict] = None, api_
                 choice = response.choices[0]
                 if choice.finish_reason == "function_call":
                     call = choice.message.function_call
-                    if call.name == "query_bean_data":
+                    if call and call.name == "query_bean_data":
                         args = json.loads(call.arguments)
                         args['original_question'] = question
                         args['api_key'] = api_key
