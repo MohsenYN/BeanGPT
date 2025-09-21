@@ -20,35 +20,35 @@ app = FastAPI(
 )
 #______________________________________________________________________________________________________#
 # UNCOMMENT BELOW ONLY FOR LOCAL DEVELOPMENT!
-allowed_origins = [
-    "https://beangpt.ca",
-    "https://www.beangpt.ca", 
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "*"  # Allow all for now, but you can remove this for production security
-]
+# allowed_origins = [
+#     "https://beangpt.ca",
+#     "https://www.beangpt.ca", 
+#     "http://localhost:5173",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:5173",
+#     "*"  # Allow all for now, but you can remove this for production security
+# ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Accept",
-        "Accept-Language", 
-        "Content-Language",
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "DNT",
-        "User-Agent",
-        "If-Modified-Since",
-        "Cache-Control",
-        "Range"
-    ],
-    expose_headers=["Content-Length", "Content-Range"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=allowed_origins,
+#     allow_credentials=False,
+#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#     allow_headers=[
+#         "Accept",
+#         "Accept-Language", 
+#         "Content-Language",
+#         "Content-Type",
+#         "Authorization",
+#         "X-Requested-With",
+#         "DNT",
+#         "User-Agent",
+#         "If-Modified-Since",
+#         "Cache-Control",
+#         "Range"
+#     ],
+#     expose_headers=["Content-Length", "Content-Range"],
+# )
 
 # CORS is handled by nginx in production
 # For local development, you may need to temporarily add CORS middleware
