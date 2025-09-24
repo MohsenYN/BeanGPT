@@ -6,8 +6,7 @@
 // For development, use local backend
 const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.MODE === 'production' 
-    // ? 'https://api.beangpt.ca'  // HTTPS backend subdomain
-    ? 'https://44.202.233.15'
+    ? 'https://api.beangpt.ca'  // HTTPS backend subdomain
     : 'http://localhost:8000');
 
 export const API_BASE_URL = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
