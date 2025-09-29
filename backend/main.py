@@ -6,7 +6,19 @@ from fastapi import FastAPI
 # CORS middleware removed - handled by nginx in production
 # For local development, you can add it back if needed
 from config import settings
-from routes import chat, ping, gene_search, feedback
+from routes import chat, ping, gene_search
+
+# Try to import feedback module, but don't fail if it's not available
+try:
+    from routes import feedback
+    FEEDBACK_AVAILABLE = True
+    print("✅ Feedback module loaded successfully")
+except ImportError as e:
+    FEEDBACK_AVAILABLE = False
+    print(f"⚠️ Feedback module not available: {e}")
+except Exception as e:
+    FEEDBACK_AVAILABLE = False
+    print(f"❌ Error loading feedback module: {e}")
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -73,7 +85,13 @@ async def handle_connection_errors(request, call_next):
 app.include_router(chat.router, prefix=settings.api_prefix, tags=["chat"])
 app.include_router(ping.router, prefix=settings.api_prefix, tags=["health"])
 app.include_router(gene_search.router, prefix=settings.api_prefix, tags=["gene_search"])
-app.include_router(feedback.router, prefix=settings.api_prefix, tags=["feedback"])
+
+# Only include feedback router if it's available
+if FEEDBACK_AVAILABLE:
+    app.include_router(feedback.router, prefix=settings.api_prefix, tags=["feedback"])
+    print("✅ Feedback routes registered")
+else:
+    print("⚠️ Feedback routes not registered - module not available")
 
 # Add health checks
 from routes import health

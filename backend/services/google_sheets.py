@@ -8,10 +8,16 @@ import asyncio
 from datetime import datetime
 import aiohttp
 import base64
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Try to load environment variables from .env file, but don't fail if dotenv is not available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Environment variables loaded from .env file")
+except ImportError:
+    print("⚠️ python-dotenv not available, using system environment variables only")
+except Exception as e:
+    print(f"⚠️ Could not load .env file: {e}")
 
 class GoogleSheetsService:
     """
