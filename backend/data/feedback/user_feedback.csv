@@ -1,0 +1,17 @@
+timestamp,session_id,message_id,question,response_preview,rating,comment
+"2025-09-29T15:22:34.561696","test_session_001","test_msg_123","What are the best bean cultivars for Ontario?","Based on field trial data, some excellent bean cultivars for Ontario include Navigator, Lighthouse, and Red Hawk. These varieties show strong adaptation to Ontario's climate conditions...","thumbs_up","Very helpful information! The cultivar recommendations were exactly what I needed."
+"2025-09-29T15:44:01.095900","test_session_001","test_msg_123","What are the best bean cultivars for Ontario?","Based on field trial data, some excellent bean cultivars for Ontario include Navigator, Lighthouse, and Red Hawk. These varieties show strong adaptation to Ontario's climate conditions...","thumbs_up","Very helpful information! The cultivar recommendations were exactly what I needed."
+"2025-09-29T15:54:39.860742","test_session_001","test_msg_123","What are the best bean cultivars for Ontario?","Based on field trial data, some excellent bean cultivars for Ontario include Navigator, Lighthouse, and Red Hawk. These varieties show strong adaptation to Ontario's climate conditions...","thumbs_up","Very helpful information! The cultivar recommendations were exactly what I needed."
+"2025-09-29T15:58:41.849361","unknown","test","test","test","thumbs_up",""
+"2025-09-29T20:00:23.568Z","test_frontend_session","test_frontend_1759176023568","Test question from frontend","Test response for feedback","thumbs_up","Test comment from frontend"
+"2025-09-29T20:01:11.405Z","Research Session 1","msg_2_1759176069021","test","Hi there! How can I assist you with your dry bean questions today? 😊","thumbs_up",""
+"2025-09-29T20:01:58.977Z","Research Session 1","msg_4_1759176111348","give me the name of one white bean cultivar in 2024","
+
+---
+
+## 📚 **Additional Research Literature**
+
+Searching scientific publications for additional context...
+
+In 2024, the Instituto Agronômico de Campinas (IAC) in Brazil released the **'IAC 2154'** w...","thumbs_up",""
+"2025-09-29T20:02:28.408Z","Research Session 1","msg_2_1759176145899","hi","Hello! How can I assist you today? 😊","thumbs_down",""

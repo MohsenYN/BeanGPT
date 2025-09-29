@@ -16,6 +16,7 @@ import PlotlyChart from './components/PlotlyChart.jsx';
 import ApiKeyInput from './components/ApiKeyInput.jsx';
 import { API_ENDPOINTS } from './config.js';
 import GeneSearch from './components/GeneSearch.jsx';
+import FeedbackWidget from './components/FeedbackWidget.jsx';
 
 const initialMessages = [
   {
@@ -93,6 +94,30 @@ export default function App() {
   // API key state
   const [userApiKey, setUserApiKey] = useState('');
   const [apiKeyStatus, setApiKeyStatus] = useState('none'); // 'none', 'valid', 'invalid'
+
+  // Feedback submission handler
+  const handleFeedbackSubmit = async (feedbackData) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.FEEDBACK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Feedback submitted successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      throw error;
+    }
+  };
 
   // Handle ESC key for modals
   useEffect(() => {
@@ -1909,6 +1934,18 @@ You're ready to start asking questions!
                       </>
                     ) : (
                       <div className="text-sm">{msg.text}</div>
+                    )}
+
+                    {/* Feedback Widget - Only for assistant messages that are not welcome messages */}
+                    {msg.sender === 'assistant' && !msg.isWelcome && (
+                      <FeedbackWidget
+                        messageId={`msg_${idx}_${Date.now()}`}
+                        question={messages[idx - 1]?.text || 'Unknown question'}
+                        response={msg.text}
+                        onFeedbackSubmit={handleFeedbackSubmit}
+                        sessionId={currentSession}
+                        className="mt-4"
+                      />
                     )}
                   </div>
                 </div>

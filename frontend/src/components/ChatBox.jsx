@@ -4,8 +4,9 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FaPaperPlane } from 'react-icons/fa';
+import FeedbackWidget from './FeedbackWidget';
 
-function ChatBox({ messages, onSendMessage, isLoading }) {
+function ChatBox({ messages, onSendMessage, isLoading, apiEndpoint }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -22,6 +23,29 @@ function ChatBox({ messages, onSendMessage, isLoading }) {
     if (input.trim() && !isLoading) {
       onSendMessage(input.trim());
       setInput('');
+    }
+  };
+
+  const handleFeedbackSubmit = async (feedbackData) => {
+    try {
+      const response = await fetch(`${apiEndpoint}/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Feedback submitted successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      throw error;
     }
   };
 
@@ -121,6 +145,18 @@ function ChatBox({ messages, onSendMessage, isLoading }) {
                     </div>
                   </details>
                 </div>
+              )}
+
+              {/* Feedback Widget - Only for assistant messages */}
+              {msg.role === 'assistant' && !msg.isWelcome && (
+                <FeedbackWidget
+                  messageId={`msg_${idx}_${Date.now()}`}
+                  question={messages[idx - 1]?.content || 'Unknown question'}
+                  response={msg.content}
+                  onFeedbackSubmit={handleFeedbackSubmit}
+                  sessionId="current_session"
+                  className="mt-2"
+                />
               )}
             </div>
           </div>

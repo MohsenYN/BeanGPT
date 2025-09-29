@@ -12,8 +12,10 @@ const rawApiUrl = import.meta.env.VITE_API_BASE_URL ||
 export const API_BASE_URL = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
 
 export const API_ENDPOINTS = {
+  BASE: API_BASE_URL,
   CHAT: `${API_BASE_URL}/api/chat`,
   CONTINUE_RESEARCH: `${API_BASE_URL}/api/continue-research`,
   GENE_SEARCH: `${API_BASE_URL}/api/gene-search`,
-  PING: `${API_BASE_URL}/api/ping`
+  PING: `${API_BASE_URL}/api/ping`,
+  FEEDBACK: `${API_BASE_URL}/api/feedback`
 };
