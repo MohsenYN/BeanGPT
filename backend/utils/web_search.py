@@ -24,7 +24,7 @@ def needs_current_info(question: str) -> bool:
     # Keywords that indicate need for current information
     current_info_keywords = [
         # Time-related
-        "current", "latest", "recent", "now", "today", "this year", "2024", "2023", 
+        "current", "latest", "recent", "now", "today", "this year", "2024", 
         "updated", "new", "modern", "contemporary",
         
         # Statistics and rankings
@@ -45,6 +45,12 @@ def needs_current_info(question: str) -> bool:
     
     # Check if question contains current info indicators
     question_lower = question.lower()
+    
+    # Skip web search for cultivar-specific questions with years (we have local data)
+    cultivar_indicators = ["dynasty", "gallantry", "eclipse", "red hawk", "oac", "majesty", "montcalm", 
+                          "envoy", "jaguar", "maverick", "navigator", "zenith", "cultivar", "plot", "chart", "graph"]
+    if any(cultivar in question_lower for cultivar in cultivar_indicators) and ("2023" in question_lower or "2024" in question_lower):
+        return False  # Use local dataset instead of web search
     
     # Direct current info keywords
     if any(keyword in question_lower for keyword in current_info_keywords):

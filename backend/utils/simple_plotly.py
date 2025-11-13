@@ -82,8 +82,20 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
     system_msg = (
         "CRITICAL INSTRUCTION: Output ONLY executable Python code. No explanations, no text, no markdown formatting, no comments about what you're doing.\n"
         "🚨 SYNTAX REQUIREMENTS: Your code MUST be syntactically correct Python. No duplicate else statements, proper indentation, valid syntax only.\n\n"
+        "🚨 IMPORTANT: MARKET CLASSES vs CULTIVAR NAMES\n"
+        "Market Classes (these are in the 'Market Class' column): Black, Cranberry, Dark Red Kidney, Great Northern, Kintoki, Light Red Kidney, Non-darkening Pinto, Otebo, Pinto, Small Red, White Kidney, White Navy, Yellow\n"
+        "Cultivar Names (these are in the 'Cultivar Name' column): Dynasty, Gallantry, Eclipse, Hooter, Blast, Charro, AC Calmont, OAC Majesty, Red Hawk, etc.\n\n"
+        "🚨 CULTIVAR FILTERING - CRITICAL:\n"
+        "When filtering for specific cultivar names (e.g., Dynasty, OAC Majesty, Red Hawk, Gallantry, Eclipse):\n"
+        "1. ALWAYS filter using the 'Cultivar Name' column: df[df['Cultivar Name'].str.contains('Dynasty', case=False, na=False)]\n"
+        "2. The cultivar column is 'Cultivar Name' (NOT 'Name', NOT 'Market Class')\n"
+        "3. NEVER filter by the 'Market Class' column when looking for cultivar names - Market Class contains values like 'Dark Red Kidney', 'Pinto', etc.\n"
+        "4. Dynasty is a CULTIVAR NAME (found in 'Cultivar Name' column), not a market class\n"
+        "5. If HIGHLIGHT_CULTIVAR context is provided, that is the CULTIVAR NAME to filter by using the 'Cultivar Name' column\n"
+        "6. Example: To get Dynasty data: df[df['Cultivar Name'].str.contains('Dynasty', case=False, na=False)]\n"
+        "7. Example: To get all Dark Red Kidney beans: df[df['Market Class'].str.contains('Dark Red Kidney', case=False, na=False)]\n\n"
         "🚨 MARKET CLASS VISUALIZATION RULES:\n"
-        "When user mentions market classes or comparisons involving market classes:\n"
+        "Only use Market Class filtering when user explicitly mentions market classes:\n"
         "1. ALWAYS show average yield across ALL LOCATIONS for each market class\n"
         "2. Group data by market class (e.g., Dark Red Kidney, Light Red Kidney, White Kidney, etc.)\n"
         "3. Calculate the mean yield for each market class across all locations and years\n"
@@ -100,23 +112,30 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
         "- The `df` variable contains the FULL REAL DATASET with thousands of records - USE IT DIRECTLY\n"
         "- ALWAYS check if columns exist before using them\n"
         "- ALWAYS check if values exist in columns before filtering\n"
-        "- 🚨 CRITICAL COLUMN NAMES: The cultivar column is 'Name' (not 'Cultivar Name'). ALWAYS use df['Name'] for cultivar names. NEVER use df['Cultivar Name']\n"
-        "- 🚨 MANDATORY: Use .groupby('Name') not .groupby('Cultivar Name'). Use df['Name'].values not df['Cultivar Name'].values\n"
+        "- 🚨 CRITICAL COLUMN NAMES: The cultivar column is 'Cultivar Name' (not 'Name'). ALWAYS use df['Cultivar Name'] for cultivar names. NEVER use df['Name']\n"
+        "- 🚨 MANDATORY: Use .groupby('Cultivar Name') not .groupby('Name'). Use df['Cultivar Name'].values not df['Name'].values\n"
         "- If requested data doesn't exist, create a chart with available data and informative title\n"
         "- When user requests global/world/country data but only local data is available, create a clear table showing the data limitation\n"
         "- Creates exactly ONE Plotly figure assigned to variable `fig`\n" 
         "\n"
         "🚨 CRITICAL CHART INTELLIGENCE RULES:\n"
         "- NEVER create single-value charts (1 bar, 1 point, etc.) - they are USELESS\n"
-        "- If user asks about specific cultivars, ALWAYS add comparative context:\n"
-        "  * Compare to other cultivars in same bean type\n"
-        "  * Compare to overall averages\n"
-        "  * Show trends over time if years available\n"
+        "- If user asks about specific cultivars (e.g., Dynasty), ALWAYS add comparative context:\n"
+        "  * Find the target cultivar's market class (e.g., Dynasty is Dark Red Kidney)\n"
+        "  * Show ALL cultivars in that market class for comparison\n"
+        "  * Highlight the target cultivar in RED, others in BLUE\n"
+        "  * If no market class data, show top 10-15 cultivars by yield for comparison\n"
+        "  * Example: For Dynasty, show all Dark Red Kidney cultivars with Dynasty highlighted\n"
         "  * Compare performance across locations\n"
         "- For yield questions: show top performers vs requested cultivars\n"
         "- For single cultivar questions: show it alongside 5-10 similar cultivars\n"
         "- Make charts tell a STORY, not just show isolated data points\n"
         "- Add context like 'vs. average', 'vs. top performers', 'over time'\n"
+        "- 🚨 YEAR FILTERING: When user mentions specific years (e.g., 2023, 2024):\n"
+        "  * ALWAYS filter by the 'Year' column: df[df['Year'] == 2023]\n"
+        "  * If no data for that year, use the closest available years and mention in title\n"
+        "  * Example: df_2023 = df[df['Year'] == 2023] if 2023 in df['Year'].values else df\n"
+        "  * Always show what year(s) the data represents in the chart title\n"
         "- 🚨 MARKET CLASS ANALYSIS: When user mentions market classes or bean types:\n"
         "  * Show comprehensive view of ALL market classes with their average yields across all locations\n"
         "  * Group by market class (Dark Red Kidney, Light Red Kidney, White Kidney, etc.)\n"
@@ -582,7 +601,9 @@ def generate_plotly_code(client, prompt: str, df: pd.DataFrame) -> str:
         {"role": "user", "content": f"User request: {prompt}"},
         {"role": "user", "content": "CRITICAL: Extract any cultivar names mentioned in the user request and use them in your analysis"},
         {"role": "user", "content": "🚨 CROSS-MARKET COMPARISON REQUIREMENT: If user asks to compare 'OAC 23-1' with 'Kidney beans', you MUST show BOTH on the same chart: OAC 23-1 data (RED) AND Kidney beans data (BLUE). Do NOT show only kidney beans - that's incomplete!"},
-        {"role": "user", "content": "🚨 ABSOLUTE RULE: If your chart would only show 1 data point (1 bar, 1 value, etc.), set fig = None instead. Single-value charts are USELESS and FORBIDDEN. Charts with 2+ data points are acceptable."},
+        {"role": "user", "content": "🚨 ABSOLUTE RULE: If your chart would only show 1 data point (1 bar, 1 value, etc.), EXPAND the dataset to include comparative context: For cultivar queries, include all cultivars in the same market class. For market class queries, include all market classes. Only set fig = None if absolutely no meaningful data exists. Single-cultivar charts are FORBIDDEN - always add comparison cultivars."},
+        {"role": "user", "content": "🚨 CULTIVAR COMPARISON RULE: When user asks to compare a specific cultivar (e.g., Dynasty), show that cultivar vs OTHER DIFFERENT cultivars in the same market class. DO NOT show descendants or related cultivars (e.g., if Dynasty is the parent, don't show Gallantry, OAC Jasper, etc.). Show Dynasty vs completely different Dark Red Kidney cultivars like Eclipse, Red Hawk, Montcalm, etc."},
+        {"role": "user", "content": "🚨 YEAR FILTERING PRIORITY: When user specifies a year (e.g., 2023), FIRST try to filter by that year: Check if year exists with 'if 2023 in df[\"Year\"].values', then filter with 'df_filtered = df[df[\"Year\"] == 2023]'. If no data for that year, use all available years and mention in title what year(s) the data represents."},
         {"role": "user", "content": "🔢 COMPLETE DATA RULE: ALWAYS show ALL available data in charts and text responses. NEVER limit, sample, or truncate data. For market class queries (cranberry beans, kidney beans, etc.), show EVERY cultivar in that market class. For 'list all' queries, show the complete list. NO exceptions - use the full dataset without any .head(), .sample(), or limiting operations."},
         {"role": "user", "content": "RESPOND WITH ONLY PYTHON CODE - NO EXPLANATORY TEXT"},
     ]
@@ -825,6 +846,22 @@ def create_smart_chart(df: pd.DataFrame, user_request: str, api_key: str, contex
                 "error": "No data available for visualization",
                 "title": "Chart Generation Error"
             }
+        
+        # DEBUG: Print DataFrame info
+        print(f"🔍 DEBUG: DataFrame columns: {list(df.columns)}")
+        print(f"🔍 DEBUG: DataFrame shape: {df.shape}")
+        if 'Year' in df.columns:
+            print(f"🔍 DEBUG: Available years: {sorted(df['Year'].unique())}")
+        if 'Cultivar Name' in df.columns:
+            dynasty_data = df[df['Cultivar Name'].str.contains('Dynasty', case=False, na=False)]
+            print(f"🔍 DEBUG: Dynasty records: {len(dynasty_data)}")
+            if len(dynasty_data) > 0 and 'Year' in df.columns:
+                print(f"🔍 DEBUG: Dynasty years: {sorted(dynasty_data['Year'].unique())}")
+        elif 'Name' in df.columns:
+            dynasty_data = df[df['Name'].str.contains('Dynasty', case=False, na=False)]
+            print(f"🔍 DEBUG: Dynasty records (Name column): {len(dynasty_data)}")
+            if len(dynasty_data) > 0 and 'Grow Year' in df.columns:
+                print(f"🔍 DEBUG: Dynasty years (Grow Year): {sorted(dynasty_data['Grow Year'].unique())}")
         
         # FIRST: Try direct chart creation for common market class queries
         market_class_terms = ['otebo', 'kidney', 'navy', 'black', 'cranberry', 'pinto', 'white']

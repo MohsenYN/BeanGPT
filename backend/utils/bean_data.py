@@ -337,7 +337,32 @@ def handle_comprehensive_search(args: Dict, ontario_df: pd.DataFrame, usa_canada
         response += "\n\nSearched through all columns in both Ontario bean trial dataset and USA/Canada cultivars database."
         print(f"🔍 DEBUG: No matches found for '{search_term}'")
     
-    return response, response, {}, ""
+    # Check if charts are requested
+    chart_keywords = ['chart', 'graph', 'plot', 'visualize', 'visualization', 'show me', 'display', 'create', 'regression', 'linear regression', 'correlation', 'scatter', 'trend', 'relationship']
+    chart_requested = any(keyword in original_question.lower() for keyword in chart_keywords)
+    api_key = args.get('api_key', '')
+    
+    chart_data = {}
+    if chart_requested and api_key and not ontario_df.empty:
+        print(f"📊 Chart requested for comprehensive search, generating visualization...")
+        try:
+            # Create cultivar context for highlighting
+            cultivar_context = f"HIGHLIGHT_CULTIVAR: {search_term}"
+            chart_data = create_smart_chart(ontario_df, original_question, api_key, cultivar_context)
+            if chart_data:
+                print(f"✅ Chart generated successfully for '{search_term}'")
+            else:
+                print(f"⚠️ Chart generation returned None")
+                chart_data = {}
+        except Exception as e:
+            print(f"❌ Chart generation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            chart_data = {}
+    else:
+        print(f"📊 Chart generation skipped - chart_requested: {chart_requested}, has_api_key: {bool(api_key)}, has_data: {not ontario_df.empty}")
+    
+    return response, response, chart_data, ""
 
 def handle_pedigree_analysis(args: Dict, ontario_df: pd.DataFrame, usa_canada_data: pd.DataFrame, original_question: str) -> Tuple[str, str, Dict, str]:
     """Handle pedigree analysis questions - finding common patterns across market classes"""
@@ -984,14 +1009,40 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     # Check if this is a name/identification query that should search all columns
     # Very specific detection - only for direct identification queries, not analysis
     question_lower = original_question.lower()
+    
+    # Check for cultivar names that should trigger name queries (match pipeline.py list)
+    # Comprehensive list from Ontario Bean Trial Dataset and USA/Canada Dataset
+    cultivar_names = [
+        # Ontario merged dataset cultivars
+        '0319-merlin', 'aac argosy', 'aac shock', 'ac apex', 'ac calmont', 'ac compass', 'ac cruiser', 'ac elk',
+        'ac harblack', 'ac litekid', 'ac mast', 'ac trident', 'alpena', 'amaranto', 'armada', 'au sable',
+        'bannock', 'beacon', 'beluga', 'big red', 'black tails', 'black velvet', 'blackbeard', 'blackjack',
+        'blast', 'blizzard', 'bolt', 'caldera', 'charro', 'cirrus', 'crimson', 'dynasty', 'eclipse',
+        'eiger', 'epic', 'eternal', 'etna', 'fathom', 'gallantry', 'galley', 'hms bounty', 'hms medalist',
+        'hms victory', 'hime', 'hooter',
+        # USA/Canada dataset cultivars (current names)
+        'aac alberta north', 'aac black diamond', 'aac burdett', 'aac cranford', 'aac expedition', 'aac pt600',
+        'aac portage', 'aac scotty', 'aac tundra', 'aac whitestar', 'aac y012', 'aac y015', 'aac y073',
+        'ac redbond', 'adams', 'aries', 'aspen', 'avalanche', 'bellagio', 'baja', 'bandit', 'beka', 'bella',
+        'beryl', 'bighorn', 'black bear', 'black cat', 'black hawk', 'cdc amarilla', 'cdc blackstrap',
+        'cdc floral', 'cdc jet', 'cdc marmot', 'cdc pintium', 'cdc ray',
+        # Common partial names
+        'oac', 'aac', 'cdc', 'red hawk', 'majesty', 'montcalm', 'envoy'
+    ]
+    has_cultivar_name = any(cultivar in question_lower for cultivar in cultivar_names)
+    
     is_name_query = (
         # Direct identification patterns - match pipeline.py keywords
         any(keyword in question_lower for keyword in ['name', 'referring to', 'identify', 'who is', 'called', 'what about', 'tell me about', 'about']) or
         # "what is X" pattern only for specific identifiers, and NOT for analysis questions
         ('what is' in question_lower and 
          any(identifier in original_question for identifier in ['P', 'OAC', 'AC ', 'ND']) and
-         not any(analysis_phrase in question_lower for analysis_phrase in ['what is the most', 'what is the best', 'what is the highest', 'what is the common', 'among all', 'tell me what']))
+         not any(analysis_phrase in question_lower for analysis_phrase in ['what is the most', 'what is the best', 'what is the highest', 'what is the common', 'among all', 'tell me what'])) or
+        # Cultivar name mentions should trigger name query
+        has_cultivar_name
     )
+    
+    print(f"🔍 DEBUG: Bean data is_name_query check - has_cultivar_name: {has_cultivar_name}, is_name_query: {is_name_query}")
     
     # Special handling for "North America" - should include BOTH Ontario and USA/Canada data
     is_north_america_query = 'north america' in original_question or 'north amercia' in original_question  # Handle typo too
@@ -1003,6 +1054,7 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
     # For name queries, do comprehensive search through all columns
     if is_name_query:
         print(f"🔍 Name/identification query detected - comprehensive search: {original_question}")
+        print(f"🔍 DEBUG: Entering comprehensive search path for name query")
         try:
             # Load both datasets
             ontario_data = db_manager.bean_data
@@ -1018,12 +1070,17 @@ def answer_bean_query(args: Dict) -> Tuple[str, str, Dict, str]:
                 print(f"🔄 GPT extraction failed, using pipeline cultivar: '{search_term}'")
             
             if search_term:
-                return handle_comprehensive_search(args, ontario_data, usa_canada_data, original_question, search_term)
+                print(f"🔍 DEBUG: Calling handle_comprehensive_search with search_term='{search_term}'")
+                result = handle_comprehensive_search(args, ontario_data, usa_canada_data, original_question, search_term)
+                print(f"🔍 DEBUG: handle_comprehensive_search returned, chart_data type: {type(result[2])}, has data: {bool(result[2])}")
+                return result
             else:
                 return "Could not identify search term from the question. Please specify what name or identifier you're looking for.", "", {}, ""
                 
         except Exception as e:
             print(f"⚠️ Failed to perform comprehensive search: {e}")
+            import traceback
+            traceback.print_exc()
             return f"Error performing comprehensive search: {e}", "", {}, ""
     
     # For pedigree ANALYSIS questions (patterns across market classes), handle differently
