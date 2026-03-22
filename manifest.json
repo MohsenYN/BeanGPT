@@ -1,0 +1,24 @@
+{
+  "name": "BeanGPT - Dry Bean Research",
+  "short_name": "BeanGPT",
+  "description": "AI-powered research assistant for dry bean genetics and breeding",
+  "start_url": "https://www.beangpt.ca/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
