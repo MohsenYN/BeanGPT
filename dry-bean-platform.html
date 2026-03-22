@@ -1,1 +1,1325 @@
-404: Not Found
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dry Bean Intelligence Platform · M. Yoosefzadeh Najafabadi Lab · University of Guelph</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#060c08;--s1:#0c1510;--s2:#121e14;--s3:#182519;--s4:#1f2f21;
+  --b1:#243228;--b2:#2e4232;--b3:#3a5540;
+  --g1:#22c55e;--g2:#16a34a;--g3:#0f6b31;
+  --gold:#f59e0b;--goldd:#d97706;--goldb:#92400e;
+  --red:#ef4444;--blue:#60a5fa;--purple:#a78bfa;--teal:#2dd4bf;--orange:#fb923c;
+  --txt:#dce8de;--tm:#7a9e82;--td:#3d5442;--th:#b2ccb6;
+  --sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;--disp:'Syne',sans-serif;
+  --r:10px;--grd:linear-gradient(135deg,var(--g3),var(--g2));
+}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--txt);overflow-x:hidden;font-size:14px}
+/* ── TOPBAR ── */
+.topbar{background:linear-gradient(90deg,#040a06,#091209);border-bottom:1px solid var(--b1);padding:0 20px;position:sticky;top:0;z-index:1000}
+.ti{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:11px}
+.bicon{width:34px;height:34px;background:var(--grd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(34,197,94,.2)}
+.bt1{font-family:var(--disp);font-size:.8rem;font-weight:700;color:var(--g1);line-height:1.1}
+.bt2{font-size:.58rem;color:var(--td);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.bdg{font-family:var(--mono);font-size:.55rem;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.bg-g{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:var(--g1)}
+.bg-au{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:var(--gold)}
+.bg-b{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);color:var(--blue)}
+.bg-t{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.2);color:var(--teal)}
+/* ── HERO ── */
+.hero{background:linear-gradient(160deg,#040a06 0%,#081109 45%,#0c1910 100%);border-bottom:1px solid var(--b1);padding:36px 20px 28px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 90% at 90% 45%,rgba(34,197,94,.06),transparent),radial-gradient(ellipse 30% 50% at 10% 90%,rgba(245,158,11,.04),transparent);pointer-events:none}
+.hi{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:1fr 270px;gap:36px;align-items:center}
+.h-eye{font-family:var(--mono);font-size:.58rem;font-weight:600;color:var(--g1);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.h-eye::before{content:'';width:18px;height:1px;background:var(--g1)}
+.hero h1{font-family:var(--disp);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.05;letter-spacing:-.5px;margin-bottom:10px}
+.hero h1 em{color:var(--g1)}
+.hero-desc{font-size:.82rem;color:var(--tm);max-width:600px;line-height:1.75;font-weight:300;margin-bottom:20px}
+.hero-desc strong{color:var(--th);font-weight:500}
+.kpis{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,.025);border:1px solid var(--b1);border-radius:8px;padding:10px 14px}
+.kv{font-family:var(--mono);font-size:1.2rem;font-weight:600;color:var(--g1);line-height:1}
+.kv.g{color:var(--gold)}.kl{font-size:.55rem;color:var(--td);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.dna{display:flex;flex-direction:column;gap:5px;padding:8px;opacity:.75}
+.dr{display:flex;gap:3px;justify-content:center}
+.dn{width:8px;height:8px;border-radius:50%;animation:dp 2.5s ease-in-out infinite}
+.dn:nth-child(odd){background:var(--g1)}.dn:nth-child(even){background:var(--gold)}
+@keyframes dp{0%,100%{transform:scale(.5);opacity:.25}50%{transform:scale(1);opacity:.9}}
+.lab-sig{margin-top:8px;text-align:center;font-family:var(--mono);font-size:.52rem;color:var(--td);line-height:1.6}
+.lab-sig strong{color:var(--tm)}
+/* ── TABS ── */
+.tabs-w{background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:56px;z-index:900}
+.tabs-i{max-width:1440px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;padding:0 4px}
+.tb{background:none;border:none;cursor:pointer;padding:11px 15px;font-family:var(--sans);font-size:.75rem;font-weight:500;color:var(--td);white-space:nowrap;display:flex;align-items:center;gap:5px;position:relative;transition:color .18s}
+.tb::after{content:'';position:absolute;bottom:0;left:3px;right:3px;height:2px;background:var(--g1);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .2s}
+.tb.act{color:var(--g1)}.tb.act::after{transform:scaleX(1)}.tb:hover{color:var(--tm)}
+/* ── MAIN ── */
+.main{max-width:1440px;margin:0 auto;padding:20px 16px 80px}
+.panel{display:none}.panel.act{display:block;animation:fi .22s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* ── SECTION HEADER ── */
+.sh{margin-bottom:16px}
+.sh-tag{font-family:var(--mono);font-size:.58rem;color:var(--g1);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.sh-tag::before{content:'▸';font-size:.5rem}
+.sh h2{font-family:var(--disp);font-size:1.5rem;font-weight:800;color:var(--txt);letter-spacing:-.3px;margin-bottom:4px}
+.sh p{font-size:.78rem;color:var(--tm);line-height:1.65;max-width:800px}
+/* ── MAP ── */
+.map-layout{display:grid;grid-template-columns:1fr 310px;gap:14px;margin-bottom:14px}
+#trial-map,#canada-map{width:100%;height:540px;border-radius:var(--r);border:1px solid var(--b1)}
+.map-side{display:flex;flex-direction:column;gap:10px}
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.card-h{background:var(--s2);border-bottom:1px solid var(--b1);padding:10px 14px;font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--txt);display:flex;align-items:center;justify-content:space-between}
+.card-h .sub{font-size:.58rem;color:var(--td);font-weight:400}
+.card-b{padding:12px}
+/* ── LOCATION LIST ── */
+.ll{display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto;padding:2px}
+.ll::-webkit-scrollbar{width:3px}.ll::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.li{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .12s;border:1px solid transparent}
+.li:hover{background:var(--s2)}.li.act{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)}
+.li-d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.li-n{font-size:.75rem;font-weight:600;color:var(--txt)}.li-c{font-size:.62rem;color:var(--tm)}
+.li-y{font-family:var(--mono);font-size:.68rem;color:var(--g1);margin-left:auto;white-space:nowrap}
+.site-info{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:13px;flex:1}
+.si-name{font-family:var(--disp);font-size:1rem;font-weight:700;margin-bottom:2px}
+.si-sub{font-size:.68rem;color:var(--tm);margin-bottom:10px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.sgc{background:rgba(255,255,255,.03);border-radius:6px;padding:6px;text-align:center}
+.sg-v{font-family:var(--mono);font-size:.9rem;font-weight:600;color:var(--g1)}
+.sg-l{font-size:.52rem;color:var(--td);text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+/* ── LEAFLET ── */
+.leaflet-container{background:#050c07!important}
+.leaflet-popup-content-wrapper{background:var(--s2)!important;border:1px solid var(--b2)!important;border-radius:8px!important;color:var(--txt)!important;font-family:var(--sans)!important;box-shadow:0 10px 40px rgba(0,0,0,.7)!important}
+.leaflet-popup-tip{background:var(--s2)!important}
+.leaflet-popup-content{margin:12px 14px!important;font-size:.78rem!important;line-height:1.6!important}
+.leaflet-control-zoom a{background:var(--s2)!important;color:var(--txt)!important;border-color:var(--b1)!important}
+.leaflet-control-attribution{background:rgba(5,12,7,.8)!important;color:var(--td)!important;font-size:.5rem!important}
+.lp-t{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--g1);margin-bottom:3px}
+.lp-s{font-size:.68rem;color:var(--tm);margin-bottom:7px}
+.lp-r{display:flex;justify-content:space-between;gap:12px;margin-bottom:2px;font-size:.7rem}
+.lp-l{color:var(--tm)}.lp-v{font-family:var(--mono);color:var(--g1);font-weight:600}
+/* ── FILTER BARS ── */
+.fbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fb{background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:5px 11px;font-family:var(--sans);font-size:.72rem;font-weight:500;color:var(--tm);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.fb:hover{border-color:var(--g1);color:var(--g1)}.fb.act{background:rgba(34,197,94,.1);border-color:var(--g1);color:var(--g1)}
+.fb.gold{border-color:rgba(245,158,11,.3);color:var(--gold)}.fb.gold.act{background:rgba(245,158,11,.1)}
+.fb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.search-w{position:relative;margin-bottom:14px}
+.search-w input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 12px 9px 34px;font-family:var(--sans);font-size:.8rem;color:var(--txt);outline:none;transition:border-color .2s}
+.search-w input::placeholder{color:var(--td)}.search-w input:focus{border-color:var(--g1)}
+.search-w::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--td);font-size:1rem;pointer-events:none}
+/* ── VARIETY CARDS ── */
+.vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
+.vc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;transition:transform .14s,border-color .14s,box-shadow .14s;cursor:pointer;position:relative}
+.vc:hover{transform:translateY(-2px);border-color:var(--b2);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.vc.uog{border-left:3px solid var(--gold)}
+.vc.is-new::after{content:'NEW';position:absolute;top:6px;right:6px;background:var(--g1);color:#050c07;font-family:var(--mono);font-size:.5rem;font-weight:700;padding:2px 5px;border-radius:3px}
+.vi{width:100%;height:120px;object-fit:cover;background:var(--s2);display:block}
+.vi-ph{width:100%;height:120px;background:linear-gradient(135deg,var(--s2),var(--s4));display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--b2)}
+.vb{padding:10px}
+.vt{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px}
+.vn{font-family:var(--mono);font-size:.78rem;font-weight:600;color:var(--txt);line-height:1.2}
+.vs-star{color:var(--gold);font-size:.56rem;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);padding:1px 5px;border-radius:6px;flex-shrink:0;margin-left:4px;font-family:var(--mono);font-weight:600}
+.cp{font-size:.56rem;font-weight:600;padding:2px 6px;border-radius:6px;display:inline-block;margin-bottom:7px;font-family:var(--mono)}
+.vss{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px}
+.vs{background:rgba(255,255,255,.03);border-radius:5px;padding:5px 3px;text-align:center}
+.vsv{font-family:var(--mono);font-size:.78rem;font-weight:600;color:var(--g1);line-height:1}
+.vsl{font-size:.48rem;color:var(--td);text-transform:uppercase;letter-spacing:.3px;margin-top:1px}
+.yt{background:rgba(255,255,255,.06);border-radius:3px;height:3px;overflow:hidden;margin-bottom:6px}
+.yf{height:100%;border-radius:3px}
+.dw{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px}
+.dp{font-family:var(--mono);font-size:.52rem;font-weight:600;padding:2px 4px;border-radius:3px}
+.dp-R,.dp-MR,.dp-MRR{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.18)}
+.dp-S,.dp-MS{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.18)}
+.dp-NA{background:rgba(255,255,255,.04);color:var(--td);border:1px solid var(--b1)}
+.vftr{display:flex;align-items:center;justify-content:space-between}
+.vyr{font-family:var(--mono);font-size:.58rem;color:var(--td)}
+.cmp-btn{font-size:.54rem;font-family:var(--mono);font-weight:600;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);color:var(--g1);padding:2px 6px;border-radius:4px;cursor:pointer;transition:all .14s}
+.cmp-btn:hover{background:rgba(34,197,94,.18)}.cmp-btn.sel{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:var(--gold)}
+/* ── CLASS CSS ── */
+.cn{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.22)}
+.cb{background:rgba(100,116,139,.12);color:#94a3b8;border:1px solid rgba(100,116,139,.25)}
+.cc{background:rgba(220,38,38,.1);color:#fca5a5;border:1px solid rgba(220,38,38,.22)}
+.cdk{background:rgba(185,28,28,.12);color:#f87171;border:1px solid rgba(185,28,28,.25)}
+.clk{background:rgba(252,165,165,.1);color:#fda4a4;border:1px solid rgba(252,165,165,.18)}
+.cwk{background:rgba(234,211,175,.1);color:#d9bfa0;border:1px solid rgba(234,211,175,.16)}
+.csr{background:rgba(249,115,22,.1);color:#fdba74;border:1px solid rgba(249,115,22,.22)}
+.cp2{background:rgba(161,119,78,.12);color:#d4a26a;border:1px solid rgba(161,119,78,.25)}
+.cki{background:rgba(244,114,182,.1);color:#f9a8d4;border:1px solid rgba(244,114,182,.18)}
+.cot{background:rgba(251,191,36,.1);color:#fde68a;border:1px solid rgba(251,191,36,.18)}
+.cy{background:rgba(250,204,21,.1);color:#fef08a;border:1px solid rgba(250,204,21,.18)}
+.co{background:rgba(255,255,255,.05);color:var(--tm);border:1px solid var(--b1)}
+/* ── COMPARE STRIP ── */
+.cmp-strip{position:fixed;bottom:0;left:0;right:0;background:rgba(12,21,16,.96);border-top:1px solid var(--b2);padding:10px 18px;display:flex;align-items:center;gap:10px;z-index:800;transform:translateY(100%);transition:transform .28s;backdrop-filter:blur(16px)}
+.cmp-strip.show{transform:none}
+.cmp-label{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--g1);flex-shrink:0}
+.cmp-items{display:flex;gap:6px;flex:1;overflow-x:auto}
+.cmp-item{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.22);border-radius:5px;padding:3px 9px;font-size:.68rem;font-family:var(--mono);color:var(--gold);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.cmp-item .x{cursor:pointer;color:var(--tm)}.cmp-item .x:hover{color:var(--red)}
+.cmp-go{background:var(--grd);border:none;border-radius:6px;padding:6px 14px;font-family:var(--mono);font-size:.7rem;font-weight:600;color:#fff;cursor:pointer;flex-shrink:0}
+.cmp-clr{background:none;border:1px solid var(--b2);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:.68rem;color:var(--tm);cursor:pointer;flex-shrink:0}
+/* ── COMPARE MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:16px;width:100%;max-width:960px;max-height:92vh;overflow-y:auto}
+.modal-h{background:var(--s2);border-bottom:1px solid var(--b1);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
+.modal-t{font-family:var(--mono);font-size:.75rem;font-weight:600;color:var(--g1)}
+.modal-x{background:none;border:1px solid var(--b1);border-radius:5px;padding:4px 9px;color:var(--tm);cursor:pointer;font-size:.75rem;font-family:var(--mono)}
+.modal-body{padding:16px}
+.cmp-g{display:grid;gap:10px}
+.cmp-c{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.cmp-ci{width:100%;height:160px;object-fit:cover;background:var(--s3)}
+.cmp-ci-ph{width:100%;height:160px;background:linear-gradient(135deg,var(--s2),var(--s4));display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.cmp-cn{font-family:var(--mono);font-size:.85rem;font-weight:600;padding:9px 12px 3px}
+.cmp-b{padding:0 12px 12px}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.035);font-size:.72rem}
+.cmp-row:last-child{border:none}
+.c-l{color:var(--tm)}.c-v{font-family:var(--mono);color:var(--g1);font-weight:600}
+.c-v.best{color:var(--g1)!important;font-weight:700!important}.c-v.bad{color:var(--red)!important}.c-v.ok{color:var(--gold)!important}
+/* ── CHARTS ── */
+.cg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.cx{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.cx-t{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--txt);margin-bottom:2px}
+.cx-s{font-size:.65rem;color:var(--tm);margin-bottom:13px}
+canvas{max-height:280px}
+.loc-tg,.mc-tg{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.ltb{font-family:var(--mono);font-size:.58rem;font-weight:600;background:var(--s2);border:1px solid var(--b1);color:var(--tm);padding:3px 7px;border-radius:4px;cursor:pointer;transition:all .14s}
+.ltb.act{background:rgba(34,197,94,.08);border-color:var(--g1);color:var(--g1)}
+/* ── WEATHER ── */
+.wx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.wx-loc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:13px;cursor:pointer;transition:border-color .15s}
+.wx-loc:hover{border-color:var(--b2)}.wx-loc.act{border-color:var(--g1);background:rgba(34,197,94,.04)}
+.wx-loc-name{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--txt);margin-bottom:2px}
+.wx-loc-co{font-size:.62rem;color:var(--tm);margin-bottom:8px}
+.wx-temp{font-family:var(--disp);font-size:1.8rem;font-weight:800;color:var(--g1);line-height:1}
+.wx-cond{font-size:.68rem;color:var(--tm);margin-top:3px}
+.wx-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.wx-det{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px}
+.wx-det-v{font-family:var(--mono);font-size:1.1rem;font-weight:600;color:var(--blue);line-height:1}
+.wx-det-l{font-size:.6rem;color:var(--td);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
+.forecast-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}
+.fc-day{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px 6px;text-align:center}
+.fc-date{font-family:var(--mono);font-size:.58rem;color:var(--td);margin-bottom:5px}
+.fc-icon{font-size:1.4rem;margin-bottom:4px;line-height:1}
+.fc-hi{font-family:var(--mono);font-size:.78rem;font-weight:600;color:var(--txt)}
+.fc-lo{font-family:var(--mono);font-size:.68rem;color:var(--tm)}
+.fc-prec{font-size:.58rem;color:var(--blue);margin-top:3px}
+.gdd-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.gdd-title{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--txt);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.gdd-progress{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.gdd-item{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px}
+.gdd-class{font-size:.65rem;font-weight:600;color:var(--txt);margin-bottom:5px}
+.gdd-bar-wrap{background:rgba(255,255,255,.06);border-radius:4px;height:6px;overflow:hidden;margin-bottom:5px}
+.gdd-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--g3),var(--g1));transition:width .8s ease}
+.gdd-val{font-family:var(--mono);font-size:.62rem;color:var(--tm)}
+.loading-wx{display:flex;align-items:center;gap:8px;color:var(--tm);font-size:.8rem;padding:20px}
+.ld-s{width:5px;height:5px;background:var(--g1);border-radius:50%;animation:bk 1.2s infinite}
+.ld-s:nth-child(2){animation-delay:.2s}.ld-s:nth-child(3){animation-delay:.4s}
+@keyframes bk{0%,100%{opacity:.2;transform:scale(.65)}50%{opacity:1;transform:scale(1)}}
+/* ── AGRONOMY / HERBICIDE ── */
+.agro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.herb-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.herb-table th{background:var(--s2);color:var(--tm);padding:7px 10px;text-align:left;font-family:var(--mono);font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--b1)}
+.herb-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.025);vertical-align:top}
+.herb-table tr:hover td{background:rgba(255,255,255,.012)}
+.timing-chip{font-size:.58rem;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-weight:600;white-space:nowrap}
+.t-pre{background:rgba(96,165,250,.12);color:#93c5fd;border:1px solid rgba(96,165,250,.2)}
+.t-post{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.18)}
+.t-both{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.18)}
+.t-preplant{background:rgba(167,139,250,.1);color:#c4b5fd;border:1px solid rgba(167,139,250,.18)}
+.caution{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);border-radius:6px;padding:8px 12px;font-size:.72rem;color:#fca5a5;display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
+.calendar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cal-month{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px;position:relative}
+.cal-m-name{font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.cal-event{font-size:.65rem;padding:4px 7px;border-radius:4px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.ce-green{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+.ce-yellow{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.15)}
+.ce-blue{background:rgba(96,165,250,.1);color:#93c5fd;border:1px solid rgba(96,165,250,.15)}
+.ce-red{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.15)}
+.ce-purple{background:rgba(167,139,250,.1);color:#c4b5fd;border:1px solid rgba(167,139,250,.15)}
+.ipm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.ipm-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px}
+.ipm-icon{font-size:1.8rem;margin-bottom:8px}
+.ipm-title{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--txt);margin-bottom:6px}
+.ipm-item{font-size:.7rem;color:var(--tm);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03);display:flex;gap:6px;align-items:baseline;line-height:1.45}
+.ipm-item::before{content:'›';color:var(--g1);flex-shrink:0}
+/* ── AI ADVISOR ── */
+.ai-layout{display:grid;grid-template-columns:340px 1fr;gap:14px}
+.ai-form{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.fl{font-family:var(--mono);font-size:.58rem;font-weight:600;color:var(--g1);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px}
+.fg{margin-bottom:11px}
+select,textarea,input[type=text],input[type=password]{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:7px 10px;font-family:var(--sans);font-size:.78rem;color:var(--txt);outline:none;transition:border-color .2s;appearance:none}
+select:focus,textarea:focus,input:focus{border-color:var(--g1)}
+select option{background:var(--s2)}
+textarea{resize:vertical;min-height:65px}
+.ai-go{width:100%;background:var(--grd);border:none;border-radius:7px;padding:10px;font-family:var(--mono);font-size:.75rem;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:3px}
+.ai-go:hover{opacity:.88;transform:translateY(-1px)}.ai-go:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.ai-resp{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;min-height:260px}
+.ai-rtag{font-family:var(--mono);font-size:.58rem;font-weight:600;color:var(--g1);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.ai-rtag::before{content:'';width:12px;height:1px;background:var(--g1)}
+#ai-out{font-size:.8rem;line-height:1.75;color:var(--tm)}
+#ai-out h4{font-family:var(--mono);font-size:.75rem;color:var(--g1);margin:10px 0 4px}
+#ai-out strong{color:var(--th)}
+#ai-out ul{padding-left:15px;margin:4px 0}
+#ai-out li{margin-bottom:3px}
+#ai-out .rec{display:inline-block;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);border-radius:4px;padding:1px 7px;margin:1px 2px;font-family:var(--mono);font-size:.7rem;color:var(--gold);font-weight:600}
+#ai-out .rec.nw{background:rgba(34,197,94,.09);border-color:rgba(34,197,94,.22);color:var(--g1)}
+.ph-ai{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;color:var(--td);text-align:center;gap:8px;font-size:.8rem}
+.ld-wrap{display:flex;align-items:center;gap:5px;color:var(--g1);font-size:.78rem}
+/* ── INFO BOX ── */
+.ib{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.13);border-left:3px solid var(--g1);border-radius:0 var(--r) var(--r) 0;padding:11px 15px;font-size:.78rem;color:var(--tm);line-height:1.65;margin:12px 0}
+.ib strong{color:var(--g1)}
+.ib-warn{background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.2);border-left-color:var(--gold)}
+.ib-warn strong{color:var(--gold)}
+/* ── CANADA ── */
+.can-layout{display:grid;grid-template-columns:1fr 350px;gap:14px;margin-bottom:14px}
+.prov-sel{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.pb{background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:5px 10px;font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--tm);cursor:pointer;transition:all .14s;display:flex;align-items:center;gap:4px}
+.pb:hover{border-color:var(--g1);color:var(--g1)}.pb.act{background:rgba(34,197,94,.1);border-color:var(--g1);color:var(--g1)}
+.rg{margin-bottom:10px}
+.rg-t{font-family:var(--mono);font-size:.58rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,.12)}
+.cc2{font-size:.62rem;background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:4px;padding:2px 7px;color:var(--tm);display:inline-block;margin:2px 2px}
+.cc2.top{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.2);color:var(--g1)}
+.cc2.maj{border-color:var(--b2);color:var(--th)}
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.map-layout,.can-layout,.cg2,.cg3,.ai-layout,.agro-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.main{padding:12px 10px 70px}.vg{grid-template-columns:1fr}.hi{grid-template-columns:1fr}.dna,.lab-sig{display:none}.calendar-grid{grid-template-columns:1fr 1fr}.ipm-grid{grid-template-columns:1fr}.forecast-row{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="ti">
+    <div class="brand">
+      <div class="bicon">🫘</div>
+      <div>
+        <div class="bt1">Dry Bean Intelligence Platform</div>
+        <div class="bt2">M. Yoosefzadeh Najafabadi Lab · University of Guelph · OAC Plant Agriculture</div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="bdg bg-g">2005–2024 Trial Data</span>
+      <span class="bdg bg-au">87 UoG Varieties</span>
+      <span class="bdg bg-b">🍁 All Canada</span>
+      <span class="bdg bg-t">🌤 Live Weather</span>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hi">
+    <div>
+      <div class="h-eye">OPCC · GoCrops · GoBeans · AAFC · Open-Meteo · OMAFRA</div>
+      <h1>Ontario & Canada<br><em>Dry Bean</em> Intelligence</h1>
+      <p class="hero-desc">Comprehensive platform for the <strong>Dry Bean Breeding & Computational Biology Program</strong> at the University of Guelph, led by <strong>Dr. Mohsen Yoosefzadeh Najafabadi</strong>. Integrates 20-year OPCC trials, live weather & GDD data, herbicide agronomy, and AI-powered variety recommendations.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="kv">5,394</div><div class="kl">Trial Records</div></div>
+        <div class="kpi"><div class="kv">443</div><div class="kl">Cultivars</div></div>
+        <div class="kpi"><div class="kv g">87</div><div class="kl">UoG Varieties</div></div>
+        <div class="kpi"><div class="kv">14</div><div class="kl">Trial Sites</div></div>
+        <div class="kpi"><div class="kv">11</div><div class="kl">Market Classes</div></div>
+        <div class="kpi"><div class="kv">🌤</div><div class="kl">Live Weather</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="dna" id="dna-wrap"></div>
+      <div class="lab-sig"><strong>Dr. Mohsen Yoosefzadeh Najafabadi</strong><br>Dry Bean Breeding & Computational Biology<br>Dept. of Plant Agriculture · University of Guelph</div>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs-w">
+  <div class="tabs-i">
+    <button class="tb act" onclick="goTab('map')">📍 Trial Sites</button>
+    <button class="tb" onclick="goTab('uog')">⭐ UoG Varieties</button>
+    <button class="tb" onclick="goTab('finder')">🔍 Variety Finder</button>
+    <button class="tb" onclick="goTab('trends')">📊 Yield Analysis</button>
+    <button class="tb" onclick="goTab('weather')">🌤 Weather & GDD</button>
+    <button class="tb" onclick="goTab('agronomy')">🌿 Agronomy & Herbicides</button>
+    <button class="tb" onclick="goTab('canada')">🍁 Canada Regions</button>
+    <button class="tb" onclick="goTab('advisor')">🤖 AI Advisor</button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ═══ MAP ═══ -->
+<div class="panel act" id="p-map">
+  <div class="sh"><div class="sh-tag">Interactive Map</div><h2>Ontario OPCC Trial Network</h2><p>14 trial sites with 20 years of yield data. CartoDB dark tiles.</p></div>
+  <div class="map-layout">
+    <div id="trial-map"></div>
+    <div class="map-side">
+      <div class="card"><div class="card-h">📍 Trial Sites <span class="sub">Click to zoom</span></div><div class="card-b"><div class="ll" id="ll"></div></div></div>
+      <div class="site-info" id="si"><div style="color:var(--td);font-size:.78rem;text-align:center;padding:16px 0;line-height:1.6">Click a marker<br>or location for details</div></div>
+    </div>
+  </div>
+  <div class="ib"><strong>🌿 Ontario Dry Bean Belt:</strong> ~130,000 acres annually. <strong>Winchester</strong> (Dundas Co.) peaked at 4,406 lbs/ac in 2023. <strong>Elora</strong> (Wellington Co.) = UoG Elora Research Station. Long-season coloured beans at St. Thomas and Woodstock.</div>
+</div>
+
+<!-- ═══ UOG ═══ -->
+<div class="panel" id="p-uog">
+  <div class="sh"><div class="sh-tag">M. Yoosefzadeh Najafabadi Lab · 87 Varieties · 1977–2026</div><h2>University of Guelph — Complete Variety Registry</h2><p>All OAC Dry Bean Breeding Program releases. Non-darkening pintos grouped under Pinto class. Toggle sort by newest release or top yield.</p></div>
+  <div class="fbar" id="uog-fb">
+    <button class="fb act" onclick="fu('all')">All (87)</button>
+    <button class="fb" onclick="fu('White Navy')"><span class="fb-dot" style="background:#3b82f6"></span>Navy (34)</button>
+    <button class="fb" onclick="fu('Black')"><span class="fb-dot" style="background:#94a3b8"></span>Black (8)</button>
+    <button class="fb" onclick="fu('Cranberry')"><span class="fb-dot" style="background:#dc2626"></span>Cranberry (10)</button>
+    <button class="fb" onclick="fu('Dark Red Kidney')"><span class="fb-dot" style="background:#ef4444"></span>DRK (9)</button>
+    <button class="fb" onclick="fu('Light Red Kidney')"><span class="fb-dot" style="background:#f87171"></span>LRK (6)</button>
+    <button class="fb" onclick="fu('White Kidney')"><span class="fb-dot" style="background:#d9bfa0"></span>WK (5)</button>
+    <button class="fb" onclick="fu('Small Red')"><span class="fb-dot" style="background:#fb923c"></span>Small Red (1)</button>
+    <button class="fb" onclick="fu('Pinto')"><span class="fb-dot" style="background:#d4a26a"></span>Pinto (8)</button>
+    <button class="fb" onclick="fu('specialty')">Specialty (6)</button>
+    <button class="fb gold act" id="u-sort" onclick="toggleUSort()">⬆ Latest First</button>
+  </div>
+  <div class="vg" id="uog-g"></div>
+</div>
+
+<!-- ═══ FINDER ═══ -->
+<div class="panel" id="p-finder">
+  <div class="sh"><div class="sh-tag">Full Canada Database</div><h2>Variety Finder & Comparison Tool</h2><p>All Canada-registered dry bean varieties. Select up to 3 to compare side-by-side.</p></div>
+  <div class="search-w"><input type="text" id="s-inp" placeholder="Search variety name, breeder, market class..." oninput="renderFinder()"></div>
+  <div class="fbar" id="f-fb">
+    <button class="fb act" onclick="ff('all')">All</button>
+    <button class="fb" onclick="ff('White Navy')"><span class="fb-dot" style="background:#3b82f6"></span>Navy</button>
+    <button class="fb" onclick="ff('Black')"><span class="fb-dot" style="background:#94a3b8"></span>Black</button>
+    <button class="fb" onclick="ff('Cranberry')"><span class="fb-dot" style="background:#dc2626"></span>Cranberry</button>
+    <button class="fb" onclick="ff('Dark Red Kidney')"><span class="fb-dot" style="background:#ef4444"></span>DRK</button>
+    <button class="fb" onclick="ff('Light Red Kidney')"><span class="fb-dot" style="background:#f87171"></span>LRK</button>
+    <button class="fb" onclick="ff('White Kidney')">WK</button>
+    <button class="fb" onclick="ff('Small Red')">Small Red</button>
+    <button class="fb" onclick="ff('Pinto')">Pinto</button>
+    <button class="fb gold" id="uog-only-fb" onclick="togUoG()">⭐ UoG Only</button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:.58rem;color:var(--td);align-self:center" id="f-count"></div>
+  </div>
+  <div class="vg" id="f-g"></div>
+</div>
+
+<!-- ═══ TRENDS ═══ -->
+<div class="panel" id="p-trends">
+  <div class="sh"><div class="sh-tag">20-Year Analysis · 2005–2024</div><h2>Yield Analysis & Visualization</h2><p>5,394 OPCC trial records. Explore site trends, market class performance, breeding progress, and disease resistance profiles.</p></div>
+  <div class="cg2">
+    <div class="cx"><div class="cx-t">Ontario Overall Yield Trend (2005–2024)</div><div class="cx-s">Mean lbs/ac across all active trial sites — white vs coloured beans</div><canvas id="ch-overall"></canvas></div>
+    <div class="cx"><div class="cx-t">Average Yield by Market Class</div><div class="cx-s">Published variety data from UoG & OPCC — all Canada-registered varieties</div><canvas id="ch-mc-avg"></canvas></div>
+  </div>
+  <div class="cg2">
+    <div class="cx"><div class="cx-t">Trial Site Yield — Annual Comparison</div><div class="cx-s">Select sites to compare (2005–2024):</div><div class="loc-tg" id="loc-tg"></div><canvas id="ch-loc"></canvas></div>
+    <div class="cx"><div class="cx-t">Yield vs Days to Maturity — All UoG Varieties</div><div class="cx-s">Each point = one variety. Colour = market class. Hover for name.</div><canvas id="ch-scatter"></canvas></div>
+  </div>
+  <div class="cg3">
+    <div class="cx"><div class="cx-t">UoG Yield Progress by Decade</div><div class="cx-s">Mean published yield per release decade — gold = Yoosefzadeh Lab era</div><canvas id="ch-decade"></canvas></div>
+    <div class="cx"><div class="cx-t">Disease Resistance by Market Class</div><div class="cx-s">% UoG varieties with R or MR rating — CBB vs Anthracnose R73</div><canvas id="ch-dis"></canvas></div>
+    <div class="cx"><div class="cx-t">Harvestability Score Distribution</div><div class="cx-s">Lower = better direct harvest. 1 = fully erect; 5 = prostrate.</div><canvas id="ch-harv"></canvas></div>
+  </div>
+  <div class="cg3">
+    <div class="cx"><div class="cx-t">Peak Yield by Trial Site</div><div class="cx-s">Best single-year mean — OPCC 2005–2024</div><canvas id="ch-peak"></canvas></div>
+    <div class="cx"><div class="cx-t">Year-to-Year Variability (CV%)</div><div class="cx-s">Red = high-stress / drought years (2011, 2022)</div><canvas id="ch-cv"></canvas></div>
+    <div class="cx"><div class="cx-t">Seed Weight by Market Class</div><div class="cx-s">Mean 100-seed weight (g) — UoG registered varieties</div><canvas id="ch-seed"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ WEATHER ═══ -->
+<div class="panel" id="p-weather">
+  <div class="sh"><div class="sh-tag">Live Data · Open-Meteo API · Free</div><h2>Weather & Growing Degree Days</h2><p>Real-time weather at Ontario dry bean trial locations. Growing degree day (GDD) accumulation tracked from May 1 to guide variety selection and harvest timing.</p></div>
+
+  <div style="margin-bottom:12px">
+    <label style="font-family:var(--mono);font-size:.62rem;color:var(--g1);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">📍 Select Trial Location</label>
+    <div class="wx-grid" id="wx-loc-grid"></div>
+  </div>
+
+  <div id="wx-loading" class="loading-wx" style="display:none">
+    <div class="ld-s"></div><div class="ld-s"></div><div class="ld-s"></div>
+    <span>Fetching weather data from Open-Meteo...</span>
+  </div>
+
+  <div id="wx-content" style="display:none">
+    <div class="wx-detail-grid" id="wx-current-grid"></div>
+
+    <div class="gdd-card">
+      <div class="gdd-title">
+        🌡️ Growing Degree Day Accumulation (Base 10°C — since May 1 estimate)
+        <span style="font-family:var(--mono);font-size:.6rem;color:var(--td)" id="gdd-loc-label"></span>
+      </div>
+      <div class="gdd-progress" id="gdd-progress"></div>
+      <div style="font-size:.68rem;color:var(--td);margin-top:10px;line-height:1.6">GDD estimated from current temperature and seasonal averages. <strong style="color:var(--tm)">Short-season navy beans</strong> need ~1,100 GDD; <strong style="color:var(--tm)">coloured kidney/cranberry</strong> need ~1,400–1,600 GDD. Values are indicative only — consult OMAFRA for field decisions.</div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--txt);margin-bottom:8px">📅 7-Day Forecast</div>
+    <div class="forecast-row" id="wx-forecast"></div>
+
+    <div class="cg2">
+      <div class="cx"><div class="cx-t" id="wx-chart-title">Temperature Forecast</div><div class="cx-s">Max/Min °C — next 7 days</div><canvas id="ch-wx-temp" style="max-height:200px"></canvas></div>
+      <div class="cx"><div class="cx-t">Precipitation Forecast</div><div class="cx-s">Daily total (mm) — next 7 days</div><canvas id="ch-wx-prec" style="max-height:200px"></canvas></div>
+    </div>
+  </div>
+
+  <div class="ib"><strong>📘 GDD Interpretation:</strong> Dry beans accumulate heat units from planting date. White navy beans (90–100 days) need approximately <strong>1,050–1,200 GDD</strong> above 10°C. Dark red kidney (88–99 days) need <strong>1,200–1,500 GDD</strong>. Cranberry and coloured beans generally require <strong>1,300–1,600 GDD</strong>. Monitor GDD from emergence (approx. May 15–25 in Ontario) to estimate harvest timing.</div>
+</div>
+
+<!-- ═══ AGRONOMY ═══ -->
+<div class="panel" id="p-agronomy">
+  <div class="sh"><div class="sh-tag">OMAFRA · Field Crop Guide · Ontario</div><h2>Agronomy, Herbicides & Crop Protection</h2><p>Registered herbicides, IPM guidelines, planting calendar, and agronomic best practices for dry bean production in Ontario. Source: OMAFRA Field Crop Protection Guide (Publication 812).</p></div>
+
+  <!-- Planting Calendar -->
+  <div style="font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--txt);margin-bottom:10px">📅 Ontario Dry Bean Production Calendar</div>
+  <div class="calendar-grid" style="margin-bottom:16px">
+    <div class="cal-month">
+      <div class="cal-m-name">April</div>
+      <div class="cal-event ce-blue">🌱 Soil prep & fertility</div>
+      <div class="cal-event ce-purple">🧪 Pre-plant herbicides</div>
+      <div class="cal-event ce-yellow">🌡 Monitor soil temp</div>
+    </div>
+    <div class="cal-month">
+      <div class="cal-m-name">May</div>
+      <div class="cal-event ce-green">🫘 Planting (May 15–June 1)</div>
+      <div class="cal-event ce-blue">💧 Inoculant (Rhizobium)</div>
+      <div class="cal-event ce-purple">🌿 Pre-emerge herbicide</div>
+      <div class="cal-event ce-yellow">⚠ Frost risk monitor</div>
+    </div>
+    <div class="cal-month">
+      <div class="cal-m-name">June</div>
+      <div class="cal-event ce-green">🌱 Emergence – V1–V3</div>
+      <div class="cal-event ce-purple">🌿 Post-emerge herbicide</div>
+      <div class="cal-event ce-red">🐛 Aphid scouting</div>
+      <div class="cal-event ce-yellow">💧 Irrigation if needed</div>
+    </div>
+    <div class="cal-month">
+      <div class="cal-m-name">July</div>
+      <div class="cal-event ce-green">🌸 Flowering (R1–R3)</div>
+      <div class="cal-event ce-red">🍄 White mold scouting</div>
+      <div class="cal-event ce-red">🦋 Bean leaf beetle</div>
+      <div class="cal-event ce-blue">💧 Critical water period</div>
+    </div>
+    <div class="cal-month">
+      <div class="cal-m-name">Aug–Sep</div>
+      <div class="cal-event ce-yellow">🫘 Pod fill (R4–R7)</div>
+      <div class="cal-event ce-green">🌾 Desiccation timing</div>
+      <div class="cal-event ce-green">⚙ Harvest (Sep)</div>
+      <div class="cal-event ce-blue">📊 Yield records</div>
+    </div>
+  </div>
+
+  <!-- Herbicide Tables -->
+  <div class="agro-grid">
+    <div class="card">
+      <div class="card-h">🌿 Registered Herbicides — Dry Beans Ontario <span class="sub">Source: OMAFRA Pub 812</span></div>
+      <div style="overflow-x:auto;padding:10px">
+        <table class="herb-table">
+          <thead>
+            <tr><th>Active Ingredient / Product</th><th>Timing</th><th>Target Weeds</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>S-metolachlor</strong><br><span style="font-size:.62rem;color:var(--td)">Dual II Magnum</span></td><td><span class="timing-chip t-pre">PRE</span></td><td>Annual grasses, small-seeded broadleaves</td><td>Apply before or at planting. Most effective under moist conditions.</td></tr>
+            <tr><td><strong>Trifluralin</strong><br><span style="font-size:.62rem;color:var(--td)">Treflan EC</span></td><td><span class="timing-chip t-preplant">PREPLANT</span></td><td>Annual grasses, pigweed, lambsquarters</td><td>Incorporate into soil within 24h. Pre-plant incorporation required.</td></tr>
+            <tr><td><strong>Ethalfluralin</strong><br><span style="font-size:.62rem;color:var(--td)">Edge</span></td><td><span class="timing-chip t-preplant">PREPLANT</span></td><td>Annual grasses, some broadleaves</td><td>Surface or incorporated. Do not apply to wet soil.</td></tr>
+            <tr><td><strong>Imazethapyr</strong><br><span style="font-size:.62rem;color:var(--td)">Pursuit</span></td><td><span class="timing-chip t-both">PRE/POST</span></td><td>Broadleaves, grasses, wild buckwheat</td><td>Excellent broadleaf spectrum. Residual carryover — observe rotation restrictions (corn 18 mos).</td></tr>
+            <tr><td><strong>Bentazon</strong><br><span style="font-size:.62rem;color:var(--td)">Basagran</span></td><td><span class="timing-chip t-post">POST</span></td><td>Broadleaves: nightshade, galinsoga, mustard</td><td>Apply at V2–V4. Best under warm, sunny conditions. Do not tank-mix with graminicides.</td></tr>
+            <tr><td><strong>Sethoxydim</strong><br><span style="font-size:.62rem;color:var(--td)">Poast Ultra</span></td><td><span class="timing-chip t-post">POST</span></td><td>Annual and perennial grasses</td><td>Add crop oil concentrate. No activity on broadleaves. Do not mix with bentazon.</td></tr>
+            <tr><td><strong>Quizalofop-P</strong><br><span style="font-size:.62rem;color:var(--td)">Assure II</span></td><td><span class="timing-chip t-post">POST</span></td><td>Annual and perennial grasses</td><td>Grass-specific. Add crop oil. Best on actively growing grass &lt;15cm.</td></tr>
+            <tr><td><strong>Clethodim</strong><br><span style="font-size:.62rem;color:var(--td)">Select</span></td><td><span class="timing-chip t-post">POST</span></td><td>Annual and perennial grasses</td><td>Grass-specific. Can be tank-mixed with broadleaf herbicides (check label).</td></tr>
+            <tr><td><strong>Fomesafen</strong><br><span style="font-size:.62rem;color:var(--td)">Reflex</span></td><td><span class="timing-chip t-pre">PRE</span></td><td>Broadleaves: pigweed, lambsquarters, mustard</td><td>Excellent pigweed control. Residual carryover — do not plant cereals within 18 months.</td></tr>
+            <tr><td><strong>Halosulfuron</strong><br><span style="font-size:.62rem;color:var(--td)">Sandea</span></td><td><span class="timing-chip t-both">PRE/POST</span></td><td>Nutsedge, broadleaves</td><td>Outstanding nutsedge control. POST apply at V2–V4 bean stage.</td></tr>
+            <tr><td><strong>Clomazone</strong><br><span style="font-size:.62rem;color:var(--td)">Command 360 CS</span></td><td><span class="timing-chip t-pre">PRE</span></td><td>Annual grasses, broadleaves</td><td>Combine with other residuals. Vapour drift risk — buffer zones required.</td></tr>
+            <tr><td><strong>Lactofen</strong><br><span style="font-size:.62rem;color:var(--td)">Cobra</span></td><td><span class="timing-chip t-post">POST</span></td><td>Broadleaves: velvetleaf, pigweed, nightshade</td><td>Contact action. Apply V1–V4. Crop tolerance variable — check variety label.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-h">⚠️ Herbicide Cautions & Rotation Restrictions</div>
+        <div class="card-b">
+          <div class="caution"><span>⚠</span><div><strong>Imazethapyr (Pursuit) carryover:</strong> Do not plant corn for 18 months, cereals for 10 months, canola for 40 months after application. pH-dependent breakdown — alkaline soils extend carryover.</div></div>
+          <div class="caution"><span>⚠</span><div><strong>Fomesafen (Reflex):</strong> Do not plant cereals, oilseeds, or root crops within 18 months. Soil pH &gt;7.2 increases carryover risk significantly.</div></div>
+          <div class="caution"><span>⚠</span><div><strong>Sethoxydim + Bentazon tank-mix:</strong> Antagonism — reduces grass control. Apply at separate timings (6+ hours apart) or use clethodim instead.</div></div>
+          <div class="caution"><span>⚠</span><div><strong>Clomazone vapour drift:</strong> Can bleach adjacent crops. Maintain 200m buffer from sensitive crops in hot weather. CS formulation reduces risk vs. emulsifiable concentrate.</div></div>
+          <div class="caution" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.18)"><span>✅</span><div><strong>Recommended rotation:</strong> Dry beans → corn → soybeans → wheat/barley for maximum herbicide flexibility and disease break. Avoid dry bean on dry bean within 3–4 years to manage white mold sclerotia.</div></div>
+        </div>
+      </div>
+      <div class="cx">
+        <div class="cx-t">Herbicide Mode of Action — Dry Bean Program</div>
+        <div class="cx-s">OMAFRA group classification of registered products</div>
+        <canvas id="ch-herb-moa" style="max-height:200px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- IPM Section -->
+  <div style="font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--txt);margin:16px 0 10px">🔬 Integrated Pest Management (IPM)</div>
+  <div class="ipm-grid">
+    <div class="ipm-card">
+      <div class="ipm-icon">🍄</div>
+      <div class="ipm-title">White Mold (Sclerotinia sclerotiorum)</div>
+      <div class="ipm-item">Scout at flowering — look for water-soaked lesions on lower stems</div>
+      <div class="ipm-item">Narrow rows (&lt;55cm) and dense canopy increase risk significantly</div>
+      <div class="ipm-item">Fungicides: Cabrio (pyraclostrobin), Allegro (fluazinam) at early flower (R1)</div>
+      <div class="ipm-item">Biological: Contans WG (Coniothyrium minitans) soil application pre-plant</div>
+      <div class="ipm-item">Resistant varieties: OAC Resilient, Mist, Rogue show field tolerance</div>
+      <div class="ipm-item">Rotate out of beans ≥3 years. Avoid bean-on-bean</div>
+    </div>
+    <div class="ipm-card">
+      <div class="ipm-icon">🦠</div>
+      <div class="ipm-title">Common Bacterial Blight (Xanthomonas axonopodis)</div>
+      <div class="ipm-item">Water-soaked lesions with yellow halos on leaves; pod spots dark-bordered</div>
+      <div class="ipm-item">Spread by splashing rain, infected seed, and equipment</div>
+      <div class="ipm-item">Use certified disease-free seed — seed treatments not fully effective</div>
+      <div class="ipm-item">Copper bactericides (e.g., Kocide) — suppression only, not curative</div>
+      <div class="ipm-item">Resistant UoG varieties: OAC Charm (R), OAC Plasma (R), OAC Rev (S — field notes)</div>
+      <div class="ipm-item">Avoid overhead irrigation during humid weather</div>
+    </div>
+    <div class="ipm-card">
+      <div class="ipm-icon">🌑</div>
+      <div class="ipm-title">Anthracnose (Colletotrichum lindemuthianum)</div>
+      <div class="ipm-item">Dark, sunken lesions on pods and stems; veins on leaf undersides turn black</div>
+      <div class="ipm-item">Race 73 is predominant in Ontario — check R73 resistance rating</div>
+      <div class="ipm-item">Use certified, treated seed. Thiram seed treatments reduce seedborne inoculum</div>
+      <div class="ipm-item">Fungicides: limited efficacy post-infection; pyraclostrobin preventative</div>
+      <div class="ipm-item">Resistant UoG varieties: OAC Spades, OAC 24-B2, OAC Charm, OAC Bechamel</div>
+      <div class="ipm-item">Rotate ≥2 years. Avoid overhead irrigation</div>
+    </div>
+    <div class="ipm-card">
+      <div class="ipm-icon">🦟</div>
+      <div class="ipm-title">Bean Leaf Beetle (Cerotoma trifurcata)</div>
+      <div class="ipm-item">Round holes in foliage; 10% defoliation threshold for action</div>
+      <div class="ipm-item">Overwinters in woodland edges — fields adjacent to bush more susceptible</div>
+      <div class="ipm-item">Insecticides: Lambda-cyhalothrin, bifenthrin at emergence if severe</div>
+      <div class="ipm-item">Also vectors Bean pod mottle virus (BPMV)</div>
+      <div class="ipm-item">Scout V1–V6 — early feeding most damaging to stands</div>
+    </div>
+    <div class="ipm-card">
+      <div class="ipm-icon">🐜</div>
+      <div class="ipm-title">Soybean Aphid (Aphis glycines) on Beans</div>
+      <div class="ipm-item">Clusters on growing tips and undersides of leaves</div>
+      <div class="ipm-item">Economic threshold: 250 aphids/plant on 80% of plants increasing</div>
+      <div class="ipm-item">Natural enemies (Aphelinus, Coccinellids) often provide control — scout before spraying</div>
+      <div class="ipm-item">Insecticides: dimethoate, imidacloprid — avoid spraying during flowering</div>
+    </div>
+    <div class="ipm-card">
+      <div class="ipm-icon">🫘</div>
+      <div class="ipm-title">Fertility & Soil Health</div>
+      <div class="ipm-item">Rhizobium inoculant (Bradyrhizobium japonicum) — critical if first beans in field &gt;5 years</div>
+      <div class="ipm-item">Target pH: 6.2–6.8 for optimal nutrient availability and nodulation</div>
+      <div class="ipm-item">Phosphorus: 40–60 kg P₂O₅/ha; Potassium: 80–100 kg K₂O/ha</div>
+      <div class="ipm-item">Avoid excess N fertilizer — suppresses nodulation. Max 15 kg N/ha as starter</div>
+      <div class="ipm-item">Zinc deficiency common on high-pH soils — apply 2 kg Zn/ha if pH &gt;7.0</div>
+      <div class="ipm-item">Boron improves pod set — foliar 0.3 kg/ha at early flower if deficient</div>
+    </div>
+  </div>
+
+  <div class="cg2">
+    <div class="cx">
+      <div class="cx-t">Herbicide Cost-Effectiveness (typical $/ac Ontario 2024)</div>
+      <div class="cx-s">Approximate cost per acre for common dry bean herbicide programs</div>
+      <canvas id="ch-herb-cost" style="max-height:220px"></canvas>
+    </div>
+    <div class="cx">
+      <div class="cx-t">Yield Loss Potential by Stress Factor</div>
+      <div class="cx-s">Estimated yield reduction (%) from major dry bean stress factors — Ontario conditions</div>
+      <canvas id="ch-stress" style="max-height:220px"></canvas>
+    </div>
+  </div>
+
+  <div class="ib ib-warn"><strong>⚠️ Disclaimer:</strong> Herbicide registrations change frequently. Always read and follow the current product label. Registrations listed here are based on OMAFRA Publication 812 (2023). Confirm current registration status with PMRA before application.</div>
+</div>
+
+<!-- ═══ CANADA ═══ -->
+<div class="panel" id="p-canada">
+  <div class="sh"><div class="sh-tag">National Overview</div><h2>Canada Dry Bean — All Provinces & Regions</h2><p>Production regions, market class dominance, and county-level detail for all producing provinces.</p></div>
+  <div class="can-layout">
+    <div id="canada-map"></div>
+    <div>
+      <div class="prov-sel" id="prov-sel"></div>
+      <div class="card" style="overflow-y:auto;max-height:460px">
+        <div class="card-h" id="prov-hdr">Select a province</div>
+        <div class="card-b" id="prov-body"></div>
+      </div>
+    </div>
+  </div>
+  <div class="cg2">
+    <div class="cx"><div class="cx-t">Provincial Dry Bean Acreage (thousands)</div><div class="cx-s">Statistics Canada & provincial ag reports 2023</div><canvas id="ch-prov-ac"></canvas></div>
+    <div class="cx"><div class="cx-t">Ontario Market Class Distribution (%)</div><div class="cx-s">Estimated acreage share</div><canvas id="ch-prov-cls"></canvas></div>
+  </div>
+  <div class="cg2">
+    <div class="cx"><div class="cx-t">Varieties by Breeding Institution (Canada)</div><div class="cx-s">Registered variety count by institution</div><canvas id="ch-breed"></canvas></div>
+    <div class="cx"><div class="cx-t">UoG Variety Release Timeline</div><div class="cx-s">New registrations per 5-year period — gold = current lab era</div><canvas id="ch-timeline"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ AI ADVISOR ═══ -->
+<div class="panel" id="p-advisor">
+  <div class="sh"><div class="sh-tag">Powered by OpenAI GPT-4o</div><h2>UoG Dry Bean Variety Advisor</h2><p>Market-class specific recommendations from the M. Yoosefzadeh Najafabadi Lab data. Considers recent releases alongside established performers.</p></div>
+  <div class="ai-layout">
+    <div class="ai-form">
+      <div class="fg" style="padding:10px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.18);border-radius:7px;margin-bottom:14px">
+        <label class="fl" style="color:var(--blue)">OpenAI API Key</label>
+        <input type="password" id="api-key" placeholder="sk-..." style="font-family:var(--mono);font-size:.72rem">
+        <div style="font-size:.6rem;color:var(--td);margin-top:5px;line-height:1.5">Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a>. Key stays in your browser only.</div>
+      </div>
+      <div class="fg"><label class="fl">Province</label>
+        <select id="a-prov" onchange="fillCounty()">
+          <option>Ontario</option><option>Manitoba</option><option>Saskatchewan</option><option>Alberta</option><option>British Columbia</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">County / Region</label><select id="a-county"></select></div>
+      <div class="fg"><label class="fl">Target Market Class</label>
+        <select id="a-cls">
+          <option value="">Open / All Classes</option>
+          <option>White Navy</option><option>Black</option><option>Cranberry</option>
+          <option>Dark Red Kidney</option><option>Light Red Kidney</option><option>White Kidney</option>
+          <option>Small Red</option><option>Pinto</option><option>Otebo</option><option>Yellow</option><option>Kintoki</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Season Type</label>
+        <select id="a-season">
+          <option>Short Season (Grey, Bruce, Wellington, Huron, Dundas)</option>
+          <option>Long Season (Essex, Elgin, Oxford, Middlesex)</option>
+          <option>Mixed / Transitional</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Primary Goal</label>
+        <select id="a-goal">
+          <option>Maximum Yield</option>
+          <option>Disease Resistance (CBB + Anthracnose R73)</option>
+          <option>Early Maturity / Frost Escape</option>
+          <option>Harvestability ≤ 2.0</option>
+          <option>Balanced Performance</option>
+          <option>Newest UoG Releases (2023–2026)</option>
+          <option>Specialty / Niche Market</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Additional Context</label>
+        <textarea id="a-notes" placeholder="e.g. white mold history, organic, export to EU, soil pH, rotation history..."></textarea>
+      </div>
+      <button class="ai-go" id="ai-btn" onclick="doAdvice()">⚡ Get Recommendations</button>
+    </div>
+    <div class="ai-resp">
+      <div class="ai-rtag">GPT-4o Advisor Response</div>
+      <div id="ai-out"><div class="ph-ai"><div style="font-size:2.5rem;opacity:.3">🧬</div><div>Enter your OpenAI API key,<br>fill in your farm profile, and click<br><strong style="color:var(--g1)">Get Recommendations</strong></div></div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- COMPARE STRIP -->
+<div class="cmp-strip" id="cmp-strip">
+  <span class="cmp-label">Compare:</span>
+  <div class="cmp-items" id="cmp-items"></div>
+  <button class="cmp-go" onclick="openCmp()">Compare →</button>
+  <button class="cmp-clr" onclick="clearCmp()">Clear</button>
+</div>
+
+<!-- COMPARE MODAL -->
+<div class="modal-bg" id="cmp-modal">
+  <div class="modal">
+    <div class="modal-h"><span class="modal-t">Side-by-Side Comparison</span><button class="modal-x" onclick="closeCmp()">✕ Close</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA — UoG Varieties
+// ═══════════════════════════════════════════════════════════════════
+const IMGB='https://raw.githubusercontent.com/MohsenYN/mohsenyn.github.io/main/seed-catalog/images/';
+const UV=[
+{"name":"OAC Thunder","mc":"White Navy","year":1977,"y":3016,"d":93,"h":2.65,"sw":22.7,"img":"OAC-Thunder.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"OAC Seaforth","mc":"White Navy","year":1983,"y":2027,"d":90,"h":null,"sw":20.1,"img":"OAC-Seaforth.jpg","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC Rico","mc":"White Navy","year":1983,"y":2483,"d":100,"h":null,"sw":20.2,"img":"OAC-Rico.jpg","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC Gryphon","mc":"White Navy","year":1988,"y":3254,"d":96,"h":4.0,"sw":20.4,"img":"OAC-Gryphon.jpg","cbb":"NA","r73":"S","bcmv":"R"},
+{"name":"OAC Silvercreek","mc":"White Navy","year":1998,"y":3172,"d":95,"h":3.75,"sw":21.4,"img":"OAC-Silvercreek.jpg","cbb":"NA","r73":"S","bcmv":"R"},
+{"name":"OAC Rex","mc":"White Navy","year":2002,"y":3191,"d":98,"h":2.68,"sw":21.5,"img":"OAC-Rex.jpg","cbb":"R","r73":"S","bcmv":"R"},
+{"name":"Lightning","mc":"White Navy","year":2008,"y":2845,"d":93,"h":2.15,"sw":22.0,"img":"Lightning.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"OAC Dublin","mc":"White Navy","year":2009,"y":2965,"d":96,"h":3.12,"sw":21.3,"img":"OAC-Dublin.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"Mist","mc":"White Navy","year":2013,"y":3163,"d":97,"h":1.9,"sw":23.2,"img":"Mist.jpg","cbb":"R","r73":"S","bcmv":"R"},
+{"name":"Bolt","mc":"White Navy","year":2013,"y":2777,"d":91,"h":1.6,"sw":24.5,"img":"Bolt.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"Fathom","mc":"White Navy","year":2014,"y":2762,"d":97,"h":2.28,"sw":23.3,"img":"Fathom.jpg","cbb":"R","r73":"R","bcmv":"R"},
+{"name":"OAC Plasma","mc":"White Navy","year":2019,"y":3541,"d":94,"h":2.4,"sw":22.3,"img":"OAC-Plasma.jpg","cbb":"R","r73":"R","bcmv":"R"},
+{"name":"Rogue","mc":"White Navy","year":2020,"y":3250,"d":97,"h":3.28,"sw":20.4,"img":"Rogue.jpg","cbb":"R","r73":"R","bcmv":"R"},
+{"name":"Lighthouse","mc":"White Navy","year":2020,"y":3785,"d":102,"h":1.9,"sw":22.6,"img":"Lighthouse.jpg","cbb":"R","r73":"S","bcmv":"R"},
+{"name":"OAC Marker","mc":"White Navy","year":2021,"y":3135,"d":99,"h":2.2,"sw":21.7,"img":"OAC-Marker.jpg","cbb":"NA","r73":"NA","bcmv":"NA"},
+{"name":"OAC Fusion","mc":"White Navy","year":2021,"y":2962,"d":90,"h":1.9,"sw":20.0,"img":"OAC-Fusion.jpg","cbb":"S","r73":"R","bcmv":"NA"},
+{"name":"OAC Equinox","mc":"White Navy","year":2021,"y":3711,"d":97,"h":1.8,"sw":25.8,"img":"OAC-Equinox.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+{"name":"OAC Charm","mc":"White Navy","year":2021,"y":3271,"d":93,"h":2.05,"sw":23.0,"img":"OAC-Charm.jpg","cbb":"R","r73":"R","bcmv":"NA"},
+{"name":"OAC Award","mc":"White Navy","year":2021,"y":3703,"d":97,"h":2.4,"sw":23.1,"img":"OAC-Award.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+{"name":"OAC Seal","mc":"White Navy","year":2022,"y":2936,"d":98,"h":2.7,"sw":23.7,"img":"OAC-Seal.jpg","cbb":"MR","r73":"NA","bcmv":"NA"},
+{"name":"OAC Souper","mc":"White Navy","year":2022,"y":3355,"d":102,"h":2.8,"sw":22.1,"img":"OAC-Souper.jpg","cbb":"MR","r73":"S","bcmv":"R"},
+{"name":"Steam","mc":"White Navy","year":2023,"y":3533,"d":97,"h":1.9,"sw":22.2,"img":"Steam.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"Blast","mc":"White Navy","year":2023,"y":3446,"d":95,"h":2.0,"sw":21.7,"img":"Blast.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Resilient","mc":"White Navy","year":2023,"y":3469,"d":97,"h":2.0,"sw":18.9,"img":"OAC-Resilient.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Bechamel","mc":"White Navy","year":2023,"y":3430,"d":97,"h":2.5,"sw":20.9,"img":"OAC-Bechamel.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Clever","mc":"White Navy","year":2024,"y":3254,"d":91,"h":2.1,"sw":19.8,"img":"OAC-Clever.jpg","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC Storm","mc":"White Navy","year":2024,"y":3006,"d":89,"h":1.8,"sw":19.5,"img":"OAC-Storm.jpg","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"Wake","mc":"White Navy","year":2025,"y":3089,"d":88,"h":2.8,"sw":22.3,"img":"Wake.jpg","cbb":"NA","r73":"S","bcmv":"R"},
+{"name":"OAC 23-1","mc":"White Navy","year":2025,"y":3164,"d":75,"h":1.9,"sw":18.3,"img":"OAC-23-1.JPG","cbb":"MR","r73":"S","bcmv":"R"},
+{"name":"OAC 24-1","mc":"White Navy","year":2025,"y":3616,"d":82,"h":2.7,"sw":19.4,"img":"OAC-24-1.JPG","cbb":"MR","r73":"S","bcmv":"R"},
+{"name":"OAC 24-2","mc":"White Navy","year":2025,"y":3572,"d":83,"h":2.8,"sw":19.6,"img":"OAC-24-2.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 24-4","mc":"White Navy","year":2025,"y":3363,"d":79,"h":2.2,"sw":22.0,"img":"OAC-24-4.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 25-1","mc":"White Navy","year":2026,"y":3488,"d":86,"h":2.3,"sw":22.4,"img":"OAC-25-1.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 25-2","mc":"White Navy","year":2026,"y":3280,"d":85,"h":2.1,"sw":20.9,"img":"OAC-25-2.JPG","cbb":"MR","r73":"S","bcmv":"R"},
+{"name":"OAC Vortex","mc":"Black","year":2019,"y":3669,"d":97,"h":2.28,"sw":23.9,"img":"OAC-Vortex.jpg","cbb":"R","r73":"S","bcmv":"R"},
+{"name":"Umbra","mc":"Black","year":2023,"y":3710,"d":98,"h":1.9,"sw":23.5,"img":"Umbra.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"Bannock","mc":"Black","year":2023,"y":3785,"d":98,"h":1.6,"sw":23.5,"img":"Bannock.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"OAC Spades","mc":"Black","year":2024,"y":3376,"d":92,"h":1.5,"sw":24.3,"img":"OAC-Spades.jpg","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 22-B1","mc":"Black","year":2023,"y":3869,"d":84,"h":2.3,"sw":23.6,"img":"OAC-22-B1.JPG","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC 23-B1","mc":"Black","year":2025,"y":3703,"d":81,"h":2.3,"sw":22.5,"img":"OAC-23-B1.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 24-B2","mc":"Black","year":2025,"y":3548,"d":83,"h":2.7,"sw":21.7,"img":"OAC-24-B2.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 25-B1","mc":"Black","year":2026,"y":3818,"d":84,"h":2.6,"sw":21.7,"img":"OAC-25-B1.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC Racer","mc":"Cranberry","year":2019,"y":2003,"d":85,"h":2.83,"sw":65.0,"img":"OAC-Racer.jpg","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC Candycane","mc":"Cranberry","year":2019,"y":2348,"d":90,"h":2.27,"sw":67.3,"img":"OAC-Candycane.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Navabi","mc":"Cranberry","year":2020,"y":2226,"d":83,"h":2.33,"sw":61.2,"img":"OAC-Navabi.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Firestripe","mc":"Cranberry","year":2020,"y":2212,"d":89,"h":2.2,"sw":68.5,"img":"OAC-Firestripe.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"Stavros","mc":"Cranberry","year":2022,"y":2349,"d":85,"h":1.8,"sw":51.7,"img":"Stavros.jpg","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC Volterra","mc":"Cranberry","year":2023,"y":2754,"d":86,"h":2.0,"sw":66.0,"img":"OAC-Volterra.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Agate","mc":"Cranberry","year":2023,"y":2757,"d":85,"h":2.3,"sw":61.0,"img":"OAC-Agate.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC 22-NDC1","mc":"Cranberry","year":2023,"y":2698,"d":83,"h":2.8,"sw":49.6,"img":"OAC-22-NDC1.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC 24-C1","mc":"Cranberry","year":2025,"y":2657,"d":84,"h":2.4,"sw":52.9,"img":"OAC-24-C1.JPG","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC 25-C1","mc":"Cranberry","year":2026,"y":2420,"d":80,"h":1.9,"sw":57.6,"img":"OAC-25-C1.JPG","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC Redstar","mc":"Dark Red Kidney","year":2008,"y":2398,"d":97,"h":null,"sw":59.2,"img":"OAC-Redstar.jpg","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"Dynasty","mc":"Dark Red Kidney","year":2012,"y":2399,"d":94,"h":2.9,"sw":64.6,"img":"Dynasty.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"Gallantry","mc":"Dark Red Kidney","year":2020,"y":2303,"d":88,"h":2.53,"sw":58.0,"img":"Gallantry.jpg","cbb":"NA","r73":"R","bcmv":"NA"},
+{"name":"OAC Jasper","mc":"Dark Red Kidney","year":2020,"y":1860,"d":90,"h":2.7,"sw":64.0,"img":"OAC-Jasper.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Tong","mc":"Dark Red Kidney","year":2023,"y":1840,"d":89,"h":2.9,"sw":72.9,"img":"OAC-Tong.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Endeavour","mc":"Dark Red Kidney","year":2023,"y":1911,"d":92,"h":2.9,"sw":73.6,"img":"OAC-Endeavour.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Rev","mc":"Dark Red Kidney","year":2024,"y":2975,"d":98,"h":3.5,"sw":69.8,"img":"OAC-Rev.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC 23-D1","mc":"Dark Red Kidney","year":2024,"y":2294,"d":81,"h":2.3,"sw":59.6,"img":"OAC-23-D1.JPG","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC 24-D1","mc":"Dark Red Kidney","year":2025,"y":2386,"d":78,"h":2.0,"sw":52.7,"img":"OAC-24-D1.JPG","cbb":"MR","r73":"R","bcmv":"R"},
+{"name":"OAC Lyrik","mc":"Light Red Kidney","year":2008,"y":2304,"d":89,"h":null,"sw":66.8,"img":"OAC-Lyrik.jpg","cbb":"NA","r73":"NA","bcmv":"R"},
+{"name":"OAC Inferno","mc":"Light Red Kidney","year":2011,"y":2550,"d":99,"h":3.36,"sw":65.0,"img":"OAC-Inferno.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Jewel","mc":"Light Red Kidney","year":2019,"y":2162,"d":93,"h":2.6,"sw":64.3,"img":"OAC-Jewel.jpg","cbb":"NA","r73":"R","bcmv":"NA"},
+{"name":"OAC Firebrand","mc":"Light Red Kidney","year":2021,"y":2518,"d":91,"h":2.7,"sw":55.3,"img":"OAC-Firebrand.jpg","cbb":"NA","r73":"R","bcmv":"NA"},
+{"name":"OAC Märzen","mc":"Light Red Kidney","year":2023,"y":1901,"d":92,"h":4.4,"sw":68.4,"img":"OAC-Märzen.jpg","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Copperhead","mc":"Light Red Kidney","year":2025,"y":2360,"d":90,"h":4.1,"sw":49.4,"img":"OAC-Copperhead.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"Yeti","mc":"White Kidney","year":2013,"y":2162,"d":95,"h":2.78,"sw":58.5,"img":"Yeti.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Snowshoe","mc":"White Kidney","year":2020,"y":2357,"d":92,"h":2.9,"sw":62.7,"img":"OAC-Snowshoe.jpg","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC Iceberg","mc":"White Kidney","year":2021,"y":2160,"d":94,"h":2.9,"sw":56.0,"img":"OAC-Iceberg.jpg","cbb":"NA","r73":"R","bcmv":"NA"},
+{"name":"OAC 24-W1","mc":"White Kidney","year":2025,"y":2255,"d":81,"h":2.0,"sw":52.8,"img":"OAC-24-W1.JPG","cbb":"MR","r73":"R","bcmv":"NA"},
+{"name":"OAC 25-W1","mc":"White Kidney","year":2026,"y":2425,"d":86,"h":2.5,"sw":47.9,"img":"OAC-25-W1.JPG","cbb":"S","r73":"R","bcmv":"R"},
+{"name":"OAC Rosito","mc":"Small Red","year":2017,"y":3327,"d":96,"h":1.97,"sw":24.1,"img":"OAC-Rosito.jpg","cbb":"S","r73":"S","bcmv":"R"},
+{"name":"OAC Tomahawk","mc":"Pinto","year":1993,"y":null,"d":null,"h":null,"sw":null,"img":"OAC-Tomahawk.jpg","cbb":"NA","r73":"NA","bcmv":"NA"},
+{"name":"OAC Blaze","mc":"Pinto","year":2022,"y":2384,"d":87,"h":2.5,"sw":39.4,"img":"OAC-Blaze.jpg","cbb":"NA","r73":"S","bcmv":"NA","note":"Non-darkening pinto"},
+{"name":"XPT One","mc":"Pinto","year":2022,"y":2495,"d":88,"h":2.1,"sw":40.2,"img":"XPT-One.jpg","cbb":"NA","r73":"S","bcmv":"NA","note":"Non-darkening pinto"},
+{"name":"OAC Paint","mc":"Pinto","year":2022,"y":2745,"d":97,"h":3.1,"sw":37.0,"img":"OAC-Paint.jpg","cbb":"S","r73":"S","bcmv":"NA","note":"Non-darkening pinto"},
+{"name":"Eternal","mc":"Pinto","year":2023,"y":1984,"d":89,"h":3.3,"sw":36.4,"img":"Eternal.jpg","cbb":"S","r73":"S","bcmv":"NA","note":"Non-darkening pinto"},
+{"name":"OAC Toast","mc":"Pinto","year":2023,"y":3743,"d":89,"h":3.1,"sw":42.0,"img":"OAC-Toast.jpg","cbb":"MS","r73":"S","bcmv":"R"},
+{"name":"OAC 25-P1","mc":"Pinto","year":2026,"y":3093,"d":83,"h":2.4,"sw":34.0,"img":"OAC-25-P1.JPG","cbb":"NA","r73":"R","bcmv":"R"},
+{"name":"OAC 25-P2","mc":"Pinto","year":2026,"y":3269,"d":85,"h":2.5,"sw":36.2,"img":"OAC-25-P2.JPG","cbb":"NA","r73":"S","bcmv":"R"},
+{"name":"OAC Sunrise","mc":"Kintoki","year":2022,"y":2619,"d":95,"h":3.4,"sw":60.6,"img":"OAC-Sunrise.jpg","cbb":"S","r73":"R","bcmv":"NA"},
+{"name":"Sundust","mc":"Otebo","year":2025,"y":1955,"d":95,"h":3.83,"sw":27.6,"img":"Sundust.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+{"name":"Stardust","mc":"Otebo","year":2025,"y":2617,"d":101,"h":3.25,"sw":29.0,"img":"Stardust.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+{"name":"OAC Glacier","mc":"Otebo","year":2025,"y":2336,"d":101,"h":2.63,"sw":27.0,"img":"OAC-Glacier.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+{"name":"Yolk","mc":"Yellow","year":2025,"y":3276,"d":107,"h":3.79,"sw":61.5,"img":"Yolk.jpg","cbb":"NA","r73":"R","bcmv":"NA"},
+{"name":"Yak","mc":"Yellow","year":2025,"y":2792,"d":102,"h":3.13,"sw":57.6,"img":"Yak.jpg","cbb":"NA","r73":"S","bcmv":"NA"},
+];
+
+const ALL_VARS=[...UV,
+{"name":"AAC Shock","mc":"White Navy","year":2018,"y":3144,"d":104,"h":1.8,"sw":23.4,"img":"AAC-Shock.jpg","cbb":"R","r73":"NA","bcmv":"R","isOAC":false},
+{"name":"AAC Argosy","mc":"White Navy","year":2019,"y":3222,"d":103,"h":2.3,"sw":23.9,"img":"AAC-Argosy.jpg","cbb":"R","r73":"S","bcmv":"R","isOAC":false},
+{"name":"Nautica","mc":"White Navy","year":2016,"y":3141,"d":95,"h":2.0,"sw":19.1,"img":"Nautica.jpg","cbb":"S","r73":"S","bcmv":"S","isOAC":false},
+{"name":"AAC Whitestar","mc":"White Navy","year":2021,"y":3434,"d":98,"h":null,"sw":36.9,"img":"AAC-Whitestar.jpg","cbb":"NA","r73":"S","bcmv":"NA","isOAC":false},
+{"name":"Harblack","mc":"Black","year":2015,"y":2455,"d":89,"h":null,"sw":20.2,"img":"Harblack.jpg","cbb":"NA","r73":"R","bcmv":"NA","isOAC":false},
+{"name":"Carman Black","mc":"Black","year":2017,"y":2270,"d":108,"h":null,"sw":22.2,"img":"Carman-Black.jpg","cbb":"NA","r73":"NA","bcmv":"NA","isOAC":false},
+{"name":"AAC Cranford","mc":"Cranberry","year":2019,"y":2917,"d":100,"h":1.7,"sw":62.3,"img":"AAC-Cranford.jpg","cbb":"NA","r73":"NA","bcmv":"NA","isOAC":false},
+{"name":"Red Rider","mc":"Cranberry","year":2014,"y":2572,"d":96,"h":null,"sw":63.7,"img":"Red-Rider.jpg","cbb":"NA","r73":"S","bcmv":"R","isOAC":false},
+{"name":"Majesty","mc":"Dark Red Kidney","year":2016,"y":2231,"d":97,"h":1.8,"sw":73.0,"img":"Majesty.jpg","cbb":"NA","r73":"S","bcmv":"R","isOAC":false},
+{"name":"AAC Expedition","mc":"Pinto","year":2019,"y":3693,"d":97,"h":null,"sw":40.7,"img":"AAC-Expedition.jpg","cbb":"S","r73":"R","bcmv":"NA","isOAC":false},
+{"name":"AAC Tundra","mc":"Pinto","year":2020,"y":3283,"d":105,"h":null,"sw":32.5,"img":"AAC-Tundra.jpg","cbb":"NA","r73":"S","bcmv":"NA","isOAC":false},
+{"name":"CDC Superjet","mc":"Black","year":2018,"y":2663,"d":110,"h":null,"sw":17.0,"img":"CDC-Superjet.jpg","cbb":"R","r73":"S","bcmv":"NA","isOAC":false},
+{"name":"CDC Sol","mc":"Yellow","year":2019,"y":2693,"d":102,"h":1.9,"sw":39.9,"img":"CDC-Sol.jpg","cbb":"R","r73":"NA","bcmv":"NA","isOAC":false},
+].map(v=>({...v,isOAC:v.isOAC!==false}));
+
+const CCSS={'White Navy':'cn','Black':'cb','Cranberry':'cc','Dark Red Kidney':'cdk','Light Red Kidney':'clk','White Kidney':'cwk','Small Red':'csr','Pinto':'cp2','Kintoki':'cki','Otebo':'cot','Yellow':'cy'};
+const CCOL={'White Navy':'#3b82f6','Black':'#94a3b8','Cranberry':'#dc2626','Dark Red Kidney':'#ef4444','Light Red Kidney':'#f87171','White Kidney':'#d9bfa0','Small Red':'#fb923c','Pinto':'#d4a26a','Kintoki':'#f9a8d4','Otebo':'#fde68a','Yellow':'#fef08a'};
+const css=mc=>CCSS[mc]||'co', col=mc=>CCOL[mc]||'#7a9e82';
+
+// ═══════════════════════════════════════════════════════════════════
+// TRIAL SITE DATA
+// ═══════════════════════════════════════════════════════════════════
+const SITES={
+  AUBN:{n:'Auburn',co:'Perth Co.',lat:43.315,lng:-81.393,s:'short',c:'#22c55e'},
+  BLYT:{n:'Blyth',co:'Huron Co.',lat:43.729,lng:-81.371,s:'short',c:'#4ade80'},
+  BRUS:{n:'Brussels',co:'Huron Co.',lat:43.733,lng:-81.253,s:'short',c:'#4ade80'},
+  ELOR:{n:'Elora',co:'Wellington Co.',lat:43.685,lng:-80.432,s:'short',c:'#f59e0b'},
+  EXET:{n:'Exeter',co:'Huron Co.',lat:43.347,lng:-81.482,s:'short',c:'#4ade80'},
+  GRAN:{n:'Grand Bend',co:'Lambton Co.',lat:43.310,lng:-81.754,s:'short',c:'#60a5fa'},
+  HBRY:{n:'Highbury',co:'Middlesex Co.',lat:42.951,lng:-81.198,s:'long',c:'#fb923c'},
+  KEMP:{n:'Kemptville',co:'Leeds Co.',lat:45.013,lng:-75.639,s:'short',c:'#a78bfa'},
+  KPPN:{n:'Keppoch',co:'Perth Co.',lat:43.480,lng:-81.202,s:'short',c:'#34d399'},
+  MKTN:{n:'Mildmay',co:'Bruce Co.',lat:44.030,lng:-81.108,s:'short',c:'#2dd4bf'},
+  STHM:{n:'St. Thomas',co:'Elgin Co.',lat:42.775,lng:-81.188,s:'long',c:'#f97316'},
+  THOR:{n:'Thorndale',co:'Middlesex Co.',lat:43.063,lng:-81.117,s:'long',c:'#fb923c'},
+  WINC:{n:'Winchester',co:'Dundas Co.',lat:45.090,lng:-75.360,s:'short',c:'#c084fc'},
+  WOOD:{n:'Woodstock',co:'Oxford Co.',lat:43.130,lng:-80.747,s:'long',c:'#fbbf24'},
+};
+
+const YEARLY=[{"Year":2005,"Location":"KPPN","y":1695,"n":24},{"Year":2005,"Location":"STHM","y":3764,"n":24},{"Year":2005,"Location":"THOR","y":2146,"n":23},{"Year":2006,"Location":"ELOR","y":2749,"n":18},{"Year":2006,"Location":"GRAN","y":3732,"n":41},{"Year":2006,"Location":"KEMP","y":3617,"n":41},{"Year":2006,"Location":"KPPN","y":3650,"n":65},{"Year":2006,"Location":"MKTN","y":3740,"n":22},{"Year":2006,"Location":"STHM","y":2874,"n":22},{"Year":2006,"Location":"THOR","y":3306,"n":22},{"Year":2007,"Location":"BRUS","y":1920,"n":16},{"Year":2007,"Location":"ELOR","y":2281,"n":16},{"Year":2007,"Location":"KPPN","y":3136,"n":69},{"Year":2007,"Location":"THOR","y":2536,"n":27},{"Year":2008,"Location":"BRUS","y":4426,"n":36},{"Year":2008,"Location":"ELOR","y":2195,"n":59},{"Year":2008,"Location":"KPPN","y":3112,"n":59},{"Year":2008,"Location":"MKTN","y":3537,"n":23},{"Year":2008,"Location":"STHM","y":3443,"n":59},{"Year":2008,"Location":"THOR","y":3108,"n":23},{"Year":2009,"Location":"BLYT","y":3214,"n":35},{"Year":2009,"Location":"ELOR","y":1957,"n":58},{"Year":2009,"Location":"KPPN","y":3156,"n":58},{"Year":2009,"Location":"MKTN","y":2785,"n":23},{"Year":2009,"Location":"STHM","y":2739,"n":23},{"Year":2009,"Location":"THOR","y":2188,"n":23},{"Year":2010,"Location":"BLYT","y":3727,"n":35},{"Year":2010,"Location":"ELOR","y":3059,"n":35},{"Year":2010,"Location":"GRAN","y":2343,"n":35},{"Year":2010,"Location":"KPPN","y":3354,"n":72},{"Year":2010,"Location":"STHM","y":3627,"n":84},{"Year":2010,"Location":"THOR","y":3178,"n":25},{"Year":2010,"Location":"WOOD","y":4220,"n":59},{"Year":2011,"Location":"BRUS","y":3554,"n":33},{"Year":2011,"Location":"ELOR","y":1343,"n":56},{"Year":2011,"Location":"GRAN","y":2735,"n":33},{"Year":2011,"Location":"KPPN","y":3173,"n":68},{"Year":2011,"Location":"MKTN","y":2963,"n":23},{"Year":2011,"Location":"STHM","y":3499,"n":68},{"Year":2011,"Location":"WOOD","y":2654,"n":56},{"Year":2012,"Location":"BRUS","y":3683,"n":33},{"Year":2012,"Location":"ELOR","y":2663,"n":56},{"Year":2012,"Location":"KPPN","y":2519,"n":63},{"Year":2012,"Location":"MKTN","y":3182,"n":23},{"Year":2012,"Location":"STHM","y":3505,"n":63},{"Year":2013,"Location":"BLYT","y":3415,"n":34},{"Year":2013,"Location":"ELOR","y":3676,"n":56},{"Year":2013,"Location":"KPPN","y":3517,"n":68},{"Year":2013,"Location":"MKTN","y":2023,"n":22},{"Year":2013,"Location":"STHM","y":3253,"n":68},{"Year":2013,"Location":"WOOD","y":1794,"n":22},{"Year":2014,"Location":"BLYT","y":4263,"n":28},{"Year":2014,"Location":"ELOR","y":3452,"n":42},{"Year":2014,"Location":"HBRY","y":4027,"n":28},{"Year":2014,"Location":"MKTN","y":3460,"n":14},{"Year":2014,"Location":"STHM","y":2990,"n":49},{"Year":2014,"Location":"WOOD","y":2661,"n":42},{"Year":2015,"Location":"BLYT","y":3621,"n":30},{"Year":2015,"Location":"ELOR","y":3119,"n":47},{"Year":2015,"Location":"KPPN","y":2951,"n":63},{"Year":2015,"Location":"STHM","y":2594,"n":33},{"Year":2015,"Location":"WOOD","y":2953,"n":47},{"Year":2016,"Location":"BLYT","y":2991,"n":26},{"Year":2016,"Location":"ELOR","y":2366,"n":51},{"Year":2016,"Location":"EXET","y":3073,"n":66},{"Year":2016,"Location":"STHM","y":3369,"n":66},{"Year":2016,"Location":"WOOD","y":1589,"n":51},{"Year":2017,"Location":"AUBN","y":3492,"n":23},{"Year":2017,"Location":"ELOR","y":2865,"n":51},{"Year":2017,"Location":"EXET","y":3850,"n":16},{"Year":2017,"Location":"STHM","y":3485,"n":67},{"Year":2017,"Location":"WINC","y":3825,"n":16},{"Year":2017,"Location":"WOOD","y":1954,"n":51},{"Year":2018,"Location":"ELOR","y":2671,"n":54},{"Year":2018,"Location":"EXET","y":2937,"n":74},{"Year":2018,"Location":"STHM","y":3546,"n":74},{"Year":2018,"Location":"WINC","y":3264,"n":20},{"Year":2018,"Location":"WOOD","y":4404,"n":54},{"Year":2019,"Location":"AUBN","y":3403,"n":29},{"Year":2019,"Location":"ELOR","y":2665,"n":56},{"Year":2019,"Location":"EXET","y":3006,"n":76},{"Year":2019,"Location":"STHM","y":3721,"n":76},{"Year":2019,"Location":"WINC","y":4149,"n":49},{"Year":2019,"Location":"WOOD","y":3188,"n":56},{"Year":2020,"Location":"AUBN","y":3708,"n":33},{"Year":2020,"Location":"ELOR","y":2416,"n":67},{"Year":2020,"Location":"EXET","y":3029,"n":87},{"Year":2020,"Location":"STHM","y":4163,"n":87},{"Year":2020,"Location":"WINC","y":3798,"n":53},{"Year":2020,"Location":"WOOD","y":2332,"n":67},{"Year":2021,"Location":"AUBN","y":3660,"n":39},{"Year":2021,"Location":"EXET","y":3062,"n":101},{"Year":2021,"Location":"STHM","y":2807,"n":62},{"Year":2021,"Location":"WINC","y":4334,"n":65},{"Year":2021,"Location":"WOOD","y":2166,"n":36},{"Year":2022,"Location":"AUBN","y":3481,"n":52},{"Year":2022,"Location":"ELOR","y":1536,"n":83},{"Year":2022,"Location":"EXET","y":2403,"n":75},{"Year":2022,"Location":"STHM","y":1913,"n":31},{"Year":2022,"Location":"WINC","y":3357,"n":75},{"Year":2022,"Location":"WOOD","y":2463,"n":31},{"Year":2023,"Location":"AUBN","y":4321,"n":34},{"Year":2023,"Location":"ELOR","y":3331,"n":60},{"Year":2023,"Location":"EXET","y":3987,"n":85},{"Year":2023,"Location":"STHM","y":3613,"n":85},{"Year":2023,"Location":"WINC","y":4406,"n":59},{"Year":2023,"Location":"WOOD","y":2574,"n":34},{"Year":2024,"Location":"BLYT","y":3758,"n":31},{"Year":2024,"Location":"ELOR","y":2920,"n":69},{"Year":2024,"Location":"EXET","y":2485,"n":69},{"Year":2024,"Location":"WINC","y":4378,"n":46},{"Year":2024,"Location":"WOOD","y":2823,"n":54}];
+
+const YT=[{"yr":2005,"w":null,"c":2541},{"yr":2006,"w":3671,"c":3196},{"yr":2007,"w":2797,"c":2687},{"yr":2008,"w":3387,"c":2963},{"yr":2009,"w":2832,"c":2513},{"yr":2010,"w":3460,"c":3463},{"yr":2011,"w":2861,"c":2782},{"yr":2012,"w":3252,"c":2774},{"yr":2013,"w":3759,"c":2650},{"yr":2014,"w":3614,"c":2823},{"yr":2015,"w":3394,"c":2582},{"yr":2016,"w":2805,"c":2616},{"yr":2017,"w":3325,"c":2852},{"yr":2018,"w":3826,"c":2999},{"yr":2019,"w":3596,"c":3068},{"yr":2020,"w":3573,"c":2857},{"yr":2021,"w":3618,"c":3023},{"yr":2022,"w":2682,"c":2290},{"yr":2023,"w":3816,"c":3672},{"yr":2024,"w":3393,"c":2785}];
+
+const PROVS={
+  Ontario:{flag:'🏆',col:'#22c55e',acres:'~130,000',classes:['White Navy','Black','Cranberry','Dark Red Kidney','Light Red Kidney','White Kidney','Small Red','Pinto','Otebo','Yellow','Kintoki'],regions:[{n:'Huron-Perth Core',role:'top',counties:['Huron County','Perth County'],note:"Ontario's #1 region. Exeter (EXET) and Blyth (BLYT) OPCC trial sites. Hensall Co-op primary processor. Primarily short-season white navy."},{n:'Wellington-Waterloo (UoG Home)',role:'top',counties:['Wellington County','Waterloo Region'],note:'University of Guelph and Elora Research Station (ELOR). Short-season. M. Yoosefzadeh Najafabadi Lab headquarters.'},{n:'Oxford-Brant',role:'major',counties:['Oxford County','Brant County','Haldimand County'],note:'Woodstock (WOOD) long-season coloured bean site. Transitional zone. Auburn (AUBN) trial in Perth Co.'},{n:'Elgin-Norfolk (Long Season)',role:'top',counties:['Elgin County','Norfolk County','Chatham-Kent'],note:'St. Thomas (STHM) premier long-season coloured bean site. Kidney and cranberry dominant. Thorndale (THOR) site.'},{n:'Essex-Lambton',role:'major',counties:['Essex County','Lambton County','Middlesex County'],note:'AAFC Harrow Research Centre (Essex). Warmest zone. Grand Bend (GRAN), Highbury (HBRY) historical trial sites.'},{n:'Bruce-Grey (Northern)',role:'minor',counties:['Bruce County','Grey County'],note:'Mildmay (MKTN) trial site. Very short season — earliest navy varieties only.'},{n:'Eastern Ontario',role:'moderate',counties:['Dundas County','Stormont County','Leeds County'],note:'Winchester (WINC) #1 short-season yield site (4,406 lbs/ac in 2023). Kemptville (KEMP) eastern site.'}]},
+  Manitoba:{flag:'🌾',col:'#4ade80',acres:'~75,000–95,000',classes:['Pinto','Black','Great Northern','Small Red','Yellow'],regions:[{n:'Pembina Valley',role:'top',counties:['Pembina Municipality','Altona','Morden'],note:"Manitoba's primary dry bean region. Mostly pinto and black beans. AAC varieties dominant."},{n:'Tiger Hills',role:'major',counties:['Cypress Municipality','Killarney','Souris'],note:'Expanding production zone.'},{n:'Red River Valley',role:'moderate',counties:['Morris','Emerson'],note:'Heavy clay soils. Good yield when drainage adequate.'},{n:'Brandon-Westman',role:'minor',counties:['Brandon','Minnedosa'],note:'Short season limits variety options.'}]},
+  Saskatchewan:{flag:'🌿',col:'#34d399',acres:'~20,000–35,000',classes:['Pinto','Black','Great Northern','Yellow','Slow-darkening Pinto'],regions:[{n:'Southwest Core',role:'top',counties:['Swift Current','Shaunavon','Maple Creek'],note:'Primary SK dry bean area. CDC and AAC varieties.'},{n:'South Central',role:'major',counties:['Moose Jaw','Regina area'],note:'Black and pinto beans.'},{n:'Southeast',role:'moderate',counties:['Weyburn','Estevan'],note:'Slow-darkening pinto for export.'}]},
+  Alberta:{flag:'🏔️',col:'#60a5fa',acres:'~15,000–22,000',classes:['Pinto','Great Northern','Black'],regions:[{n:'Lethbridge-Taber Irrigated',role:'top',counties:['County of Lethbridge','County of Taber','Vulcan County'],note:'Premier irrigated bean region. Bow & Oldman Rivers.'},{n:'Picture Butte-Vauxhall',role:'major',counties:['Picture Butte','Vauxhall','Coaldale'],note:'Great northern and pinto.'}]},
+  'British Columbia':{flag:'🏔️',col:'#a78bfa',acres:'~2,000–4,000',classes:['White Navy','Pinto'],regions:[{n:'Peace River',role:'minor',counties:['Peace River Regional District','Fort St. John'],note:'Very short season. Earliest navy only.'}]}
+};
+
+const COUNTIES={Ontario:['All Ontario','Huron County (Exeter/Blyth)','Perth County (Auburn/Keppoch)','Wellington County (Elora/Guelph)','Oxford County (Woodstock)','Elgin County (St. Thomas)','Essex County (Harrow)','Middlesex County (Thorndale/London)','Dundas County (Winchester)','Bruce County (Mildmay)','Lambton County','Norfolk County','Brant County','Waterloo Region','Leeds County (Kemptville)'],Manitoba:['All Manitoba','Pembina Valley','Tiger Hills','Red River Valley','Brandon-Westman'],Saskatchewan:['All Saskatchewan','Southwest (Swift Current)','South Central (Moose Jaw)','Southeast (Weyburn)'],Alberta:['All Alberta','Lethbridge-Taber (Irrigated)','Picture Butte-Vauxhall'],'British Columbia':['All B.C.','Peace River Region']};
+
+// Weather locations — Ontario trial sites
+const WX_LOCS=[
+  {code:'ELOR',name:'Elora',county:'Wellington Co.',lat:43.685,lng:-80.432,note:'UoG Elora Research Station'},
+  {code:'EXET',name:'Exeter',county:'Huron Co.',lat:43.347,lng:-81.482,note:'Primary Huron Co. trial site'},
+  {code:'WINC',name:'Winchester',county:'Dundas Co.',lat:45.090,lng:-75.360,note:'Top short-season site'},
+  {code:'STHM',name:'St. Thomas',county:'Elgin Co.',lat:42.775,lng:-81.188,note:'Long-season coloured beans'},
+  {code:'WOOD',name:'Woodstock',county:'Oxford Co.',lat:43.130,lng:-80.747,note:'Long-season trial site'},
+  {code:'AUBN',name:'Auburn',county:'Perth Co.',lat:43.315,lng:-81.393,note:'Short-season trial'},
+  {code:'BLYT',name:'Blyth',county:'Huron Co.',lat:43.729,lng:-81.371,note:'Short-season trial'},
+];
+
+// WMO weather codes to emoji + description
+function wxCode(c){const m={0:'☀️ Clear',1:'🌤 Mainly clear',2:'⛅ Partly cloudy',3:'☁️ Overcast',45:'🌫 Fog',48:'🌫 Icy fog',51:'🌦 Light drizzle',53:'🌦 Drizzle',55:'🌧 Heavy drizzle',61:'🌧 Light rain',63:'🌧 Rain',65:'🌧 Heavy rain',71:'🌨 Light snow',73:'❄️ Snow',75:'❄️ Heavy snow',80:'🌦 Light showers',81:'🌧 Showers',82:'⛈ Heavy showers',95:'⛈ Thunderstorm',96:'⛈ Storm/hail',99:'⛈ Heavy storm'};return m[c]||'🌡 '+c;}
+function wxIcon(c){const m={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};return m[c]||'🌡';}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════════
+const TABS=['map','uog','finder','trends','weather','agronomy','canada','advisor'];
+let trendsDone=false,canadaDone=false,agroDone=false;
+
+function goTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));
+  document.getElementById('p-'+id).classList.add('act');
+  document.querySelectorAll('.tb')[TABS.indexOf(id)].classList.add('act');
+  if(id==='map') setTimeout(()=>{if(trialMap)trialMap.invalidateSize();},80);
+  if(id==='trends'&&!trendsDone) buildTrends();
+  if(id==='canada'&&!canadaDone) buildCanada();
+  if(id==='agronomy'&&!agroDone) buildAgroCharts();
+  if(id==='weather') buildWxUI();
+}
+
+// DNA
+(function(){const w=document.getElementById('dna-wrap');if(!w)return;w.innerHTML=[...Array(9)].map((_,i)=>`<div class="dr">${[...Array(8)].map((_,j)=>`<div class="dn" style="animation-delay:${(i*8+j)*.055}s"></div>`).join('')}</div>`).join('');})();
+
+// ═══════════════════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════════════════
+let trialMap;
+function initMap(){
+  trialMap=L.map('trial-map',{center:[43.8,-80.5],zoom:7});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:20}).addTo(trialMap);
+  const LS={};
+  YEARLY.forEach(d=>{if(!LS[d.Location])LS[d.Location]={ys:[],yrs:[]};LS[d.Location].ys.push(d.y);LS[d.Location].yrs.push(d.Year);});
+  Object.entries(SITES).forEach(([code,s])=>{
+    const ls=LS[code]||{ys:[],yrs:[]};
+    const avg=ls.ys.length?Math.round(ls.ys.reduce((a,b)=>a+b,0)/ls.ys.length):null;
+    const peak=ls.ys.length?Math.round(Math.max(...ls.ys)):null;
+    const yr=ls.yrs.length?`${Math.min(...ls.yrs)}–${Math.max(...ls.yrs)}`:'N/A';
+    const mk=L.marker([s.lat,s.lng],{icon:L.divIcon({html:`<div style="width:13px;height:13px;background:${s.c};border-radius:50%;border:2px solid #040a06;box-shadow:0 0 8px ${s.c}99,0 0 0 4px ${s.c}22;cursor:pointer"></div>`,className:'',iconAnchor:[6,6]})}).addTo(trialMap);
+    mk.bindPopup(`<div class="lp-t">${s.n} (${code})</div><div class="lp-s">${s.co} · ${s.s} season</div><div class="lp-r"><span class="lp-l">Avg Yield</span><span class="lp-v">${avg?avg.toLocaleString()+' lbs/ac':'—'}</span></div><div class="lp-r"><span class="lp-l">Peak</span><span class="lp-v">${peak?peak.toLocaleString()+' lbs/ac':'—'}</span></div><div class="lp-r"><span class="lp-l">Active</span><span class="lp-v">${yr}</span></div>`);
+    mk.on('click',()=>showSite(code,s,ls,avg,peak,yr));
+  });
+  const el=document.getElementById('ll');
+  Object.entries(SITES).sort((a,b)=>a[1].n.localeCompare(b[1].n)).forEach(([code,s])=>{
+    const ls=LS[code]||{ys:[]};
+    const avg=ls.ys.length?Math.round(ls.ys.reduce((a,b)=>a+b,0)/ls.ys.length):null;
+    const li=document.createElement('div');li.className='li';li.id='li-'+code;
+    li.innerHTML=`<div class="li-d" style="background:${s.c}"></div><div><div class="li-n">${s.n}</div><div class="li-c">${s.co}</div></div>${avg?`<div class="li-y">${avg.toLocaleString()}</div>`:''}`;
+    li.onclick=()=>{trialMap.flyTo([s.lat,s.lng],10,{duration:1.1});showSite(code,s,ls,avg,ls.ys.length?Math.round(Math.max(...ls.ys)):null,ls.yrs.length?`${Math.min(...ls.yrs)}–${Math.max(...ls.yrs)}`:'N/A');document.querySelectorAll('.li').forEach(x=>x.classList.remove('act'));li.classList.add('act');};
+    el.appendChild(li);
+  });
+}
+function showSite(code,s,ls,avg,peak,yr){
+  const rec=YEARLY.filter(d=>d.Location===code).sort((a,b)=>a.Year-b.Year).slice(-6);
+  document.getElementById('si').innerHTML=`<div class="si-name">📍 ${s.n}</div><div class="si-sub">${s.co} · <span style="color:var(--g1)">${s.s} season</span></div><div class="sg"><div class="sgc"><div class="sg-v">${avg?avg.toLocaleString():'—'}</div><div class="sg-l">Avg lbs/ac</div></div><div class="sgc"><div class="sg-v">${peak?peak.toLocaleString():'—'}</div><div class="sg-l">Peak lbs/ac</div></div><div class="sgc"><div class="sg-v">${yr}</div><div class="sg-l">Active</div></div><div class="sgc"><div class="sg-v">${ls.yrs?ls.yrs.length:0}</div><div class="sg-l">Seasons</div></div></div><div style="font-family:var(--mono);font-size:.55rem;color:var(--td);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Recent Yields</div>${rec.map(d=>`<div style="display:flex;justify-content:space-between;font-size:.7rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="font-family:var(--mono);color:var(--tm)">${d.Year}</span><span style="font-family:var(--mono);color:var(--g1)">${d.y.toLocaleString()}</span><span style="font-size:.6rem;color:var(--td)">(${d.n})</span></div>`).join('')}`;
+  document.querySelectorAll('.li').forEach(x=>x.classList.remove('act'));
+  const li=document.getElementById('li-'+code);if(li)li.classList.add('act');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VARIETY CARDS
+// ═══════════════════════════════════════════════════════════════════
+const CMP=new Set();
+let uSortNew=true,uFiltCls='all',fFiltCls='all',finderUoGOnly=false;
+
+function mkCard(v,gid){
+  const maxY=5000;const yp=v.y?Math.round((v.y/maxY)*100):0;
+  const isNew=v.isNew||(v.year>=2024);const inCmp=CMP.has(v.name);
+  return `<div class="vc ${v.isOAC!==false?'uog':''} ${isNew?'is-new':''}" onclick="toggleCmp('${v.name.replace(/['"]/g,'').replace(/ä/g,'ae')}','${gid}')">
+    <img class="vi" src="${IMGB+v.img}" alt="${v.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+    <div class="vi-ph" style="display:none">🫘</div>
+    <div class="vb">
+      <div class="vt"><div class="vn">${v.name}</div>${v.isOAC!==false?'<span class="vs-star">UoG</span>':''}</div>
+      <span class="cp ${css(v.mc)}">${v.mc}${v.note?' <span style="opacity:.7;font-size:.48rem">(NDP)</span>':''}</span>
+      <div class="vss">
+        <div class="vs"><div class="vsv">${v.y?v.y.toLocaleString():'—'}</div><div class="vsl">lbs/ac</div></div>
+        <div class="vs"><div class="vsv">${v.d||'—'}</div><div class="vsl">Days</div></div>
+        <div class="vs"><div class="vsv">${v.h||'—'}</div><div class="vsl">Harv.</div></div>
+      </div>
+      <div class="yt"><div class="yf" style="width:${yp}%;background:linear-gradient(90deg,${col(v.mc)}55,${col(v.mc)})"></div></div>
+      <div class="dw"><span class="dp dp-${v.cbb}">CBB:${v.cbb}</span><span class="dp dp-${v.r73}">R73:${v.r73}</span>${v.sw?`<span class="dp dp-NA">${v.sw}g</span>`:''}</div>
+      <div class="vftr"><span class="vyr">${v.year}</span><button class="cmp-btn ${inCmp?'sel':''}" onclick="event.stopPropagation();toggleCmp('${v.name.replace(/['"]/g,'').replace(/ä/g,'ae')}','${gid}')">${inCmp?'✓':'+ Cmp'}</button></div>
+    </div>
+  </div>`;
+}
+
+function renderUoG(){
+  let list=[...UV].sort((a,b)=>uSortNew?(b.year-a.year||b.y-a.y):(b.y||0)-(a.y||0));
+  if(uFiltCls==='all'){}
+  else if(uFiltCls==='specialty') list=list.filter(v=>['Kintoki','Otebo','Yellow'].includes(v.mc));
+  else list=list.filter(v=>v.mc===uFiltCls);
+  document.getElementById('uog-g').innerHTML=list.map(v=>mkCard(v,'uog-g')).join('');
+}
+function fu(cls){uFiltCls=cls;document.querySelectorAll('#uog-fb .fb:not(.gold)').forEach(b=>b.classList.remove('act'));renderUoG();}
+function toggleUSort(){uSortNew=!uSortNew;document.getElementById('u-sort').textContent=uSortNew?'⬆ Latest First':'⬇ Top Yield';renderUoG();}
+renderUoG();
+
+function renderFinder(){
+  const q=(document.getElementById('s-inp').value||'').toLowerCase();
+  let list=[...ALL_VARS];
+  if(fFiltCls!=='all') list=list.filter(v=>v.mc===fFiltCls);
+  if(finderUoGOnly) list=list.filter(v=>v.isOAC!==false);
+  if(q) list=list.filter(v=>v.name.toLowerCase().includes(q)||v.mc.toLowerCase().includes(q));
+  list.sort((a,b)=>(b.y||0)-(a.y||0));
+  document.getElementById('f-count').textContent=`${list.length} varieties`;
+  document.getElementById('f-g').innerHTML=list.map(v=>mkCard(v,'f-g')).join('');
+}
+function ff(cls){fFiltCls=cls;document.querySelectorAll('#f-fb .fb:not(.gold)').forEach(b=>b.classList.remove('act'));renderFinder();}
+function togUoG(){finderUoGOnly=!finderUoGOnly;document.getElementById('uog-only-fb').classList.toggle('act',finderUoGOnly);renderFinder();}
+renderFinder();
+
+// ═══════════════════════════════════════════════════════════════════
+// COMPARE
+// ═══════════════════════════════════════════════════════════════════
+function toggleCmp(name,gid){
+  if(CMP.has(name))CMP.delete(name);else if(CMP.size<3)CMP.add(name);
+  updCmpStrip();if(gid==='uog-g'||gid==='f-g'){renderUoG();renderFinder();}
+}
+function updCmpStrip(){
+  const s=document.getElementById('cmp-strip');
+  if(CMP.size===0){s.classList.remove('show');return;}
+  s.classList.add('show');
+  document.getElementById('cmp-items').innerHTML=[...CMP].map(n=>`<div class="cmp-item">${n}<span class="x" onclick="toggleCmp('${n}','')">✕</span></div>`).join('');
+}
+function clearCmp(){CMP.clear();updCmpStrip();renderUoG();renderFinder();}
+function openCmp(){
+  const vars=[...CMP].map(n=>ALL_VARS.find(v=>v.name===n||v.name.replace('ä','ae')===n)).filter(Boolean);
+  if(vars.length<2)return;
+  const best=(k)=>{const vals=vars.map(v=>k==='y'?v.y:(k==='d'?v.d:parseFloat(v.h||99))).filter(v=>v&&!isNaN(v));const f=k==='y'?Math.max(...vals):Math.min(...vals);return(v)=>{const vl=k==='y'?v.y:(k==='d'?v.d:parseFloat(v.h||99));return vl===f&&vl!=null;};};
+  const html=vars.map(v=>`<div class="cmp-c"><img class="cmp-ci" src="${IMGB+v.img}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="cmp-ci-ph" style="display:none">🫘</div><div class="cmp-cn">${v.isOAC!==false?'⭐ ':''}${v.name}</div><div class="cmp-b"><div class="cmp-row"><span class="c-l">Class</span><span class="c-v"><span class="cp ${css(v.mc)}" style="font-size:.56rem">${v.mc}</span></span></div><div class="cmp-row"><span class="c-l">Yield</span><span class="c-v ${best('y')(v)?'best':''}">${v.y?v.y.toLocaleString()+' lbs/ac':'—'}</span></div><div class="cmp-row"><span class="c-l">Days</span><span class="c-v ${best('d')(v)?'best':''}">${v.d||'—'}</span></div><div class="cmp-row"><span class="c-l">Harvestability</span><span class="c-v ${best('h')(v)?'best':''}">${v.h||'—'}</span></div><div class="cmp-row"><span class="c-l">Seed Wt</span><span class="c-v">${v.sw?v.sw+'g':'—'}</span></div><div class="cmp-row"><span class="c-l">CBB</span><span class="c-v ${v.cbb==='R'||v.cbb==='MR'?'best':v.cbb==='S'?'bad':''}">${v.cbb}</span></div><div class="cmp-row"><span class="c-l">Anth R73</span><span class="c-v ${v.r73==='R'||v.r73==='MR'?'best':v.r73==='S'?'bad':''}">${v.r73}</span></div><div class="cmp-row"><span class="c-l">Year</span><span class="c-v ok">${v.year}</span></div></div></div>`).join('');
+  document.getElementById('modal-body').innerHTML=`<div class="cmp-g" style="grid-template-columns:repeat(${vars.length},1fr)">${html}</div>`;
+  document.getElementById('cmp-modal').classList.add('show');
+}
+function closeCmp(){document.getElementById('cmp-modal').classList.remove('show');}
+document.getElementById('cmp-modal').addEventListener('click',e=>{if(e.target===document.getElementById('cmp-modal'))closeCmp();});
+
+// ═══════════════════════════════════════════════════════════════════
+// WEATHER — Open-Meteo API (free, no key, CORS-friendly)
+// ═══════════════════════════════════════════════════════════════════
+let wxChartT=null,wxChartP=null,selWxLoc=WX_LOCS[0];
+
+function buildWxUI(){
+  const grid=document.getElementById('wx-loc-grid');
+  if(grid.innerHTML) return; // already built
+  grid.innerHTML=WX_LOCS.map(loc=>`
+    <div class="wx-loc ${loc.code===selWxLoc.code?'act':''}" id="wxl-${loc.code}" onclick="fetchWx(WX_LOCS.find(l=>l.code==='${loc.code}'))">
+      <div class="wx-loc-name">${loc.name}</div>
+      <div class="wx-loc-co">${loc.county}</div>
+      <div id="wx-mini-${loc.code}" style="font-size:.65rem;color:var(--td)">Loading…</div>
+    </div>`).join('');
+  fetchWx(selWxLoc);
+}
+
+async function fetchWx(loc){
+  selWxLoc=loc;
+  document.querySelectorAll('.wx-loc').forEach(x=>x.classList.remove('act'));
+  const el=document.getElementById('wxl-'+loc.code);if(el)el.classList.add('act');
+  document.getElementById('wx-loading').style.display='flex';
+  document.getElementById('wx-content').style.display='none';
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration,weather_code,wind_speed_10m_max&timezone=America%2FToronto&forecast_days=7`;
+    const res=await fetch(url);
+    const d=await res.json();
+    renderWx(loc,d);
+    // Update mini card
+    const mini=document.getElementById('wx-mini-'+loc.code);
+    if(mini) mini.innerHTML=`<span style="color:var(--g1);font-family:var(--mono);font-size:.8rem;font-weight:600">${d.current.temperature_2m}°C</span> ${wxIcon(d.current.weather_code)}`;
+  }catch(e){
+    document.getElementById('wx-loading').style.display='none';
+    document.getElementById('wx-content').innerHTML=`<div style="padding:20px;color:var(--red);font-size:.8rem">⚠️ Could not fetch weather data. Check your internet connection. Open-Meteo API: api.open-meteo.com</div>`;
+    document.getElementById('wx-content').style.display='block';
+  }
+}
+
+function renderWx(loc,d){
+  document.getElementById('wx-loading').style.display='none';
+  document.getElementById('wx-content').style.display='block';
+  document.getElementById('wx-chart-title').textContent=`Temperature Forecast — ${loc.name}`;
+  document.getElementById('gdd-loc-label').textContent=`@ ${loc.name}, ${loc.county}`;
+  const c=d.current;
+  document.getElementById('wx-current-grid').innerHTML=`
+    <div class="wx-det"><div class="wx-det-v">${c.temperature_2m}°C</div><div class="wx-det-l">Temperature</div></div>
+    <div class="wx-det"><div class="wx-det-v">${c.apparent_temperature}°C</div><div class="wx-det-l">Feels Like</div></div>
+    <div class="wx-det"><div class="wx-det-v">${c.relative_humidity_2m}%</div><div class="wx-det-l">Humidity</div></div>
+    <div class="wx-det"><div class="wx-det-v">${c.wind_speed_10m} km/h</div><div class="wx-det-l">Wind Speed</div></div>
+    <div class="wx-det"><div class="wx-det-v">${c.precipitation} mm</div><div class="wx-det-l">Precipitation</div></div>
+    <div class="wx-det" style="grid-column:span 1"><div class="wx-det-v" style="font-size:.85rem">${wxCode(c.weather_code)}</div><div class="wx-det-l">Conditions</div></div>`;
+
+  // GDD estimation — assume current season accumulated GDD from May 1
+  // Use daily max/min to estimate seasonal accumulation
+  const todayTemp=c.temperature_2m;
+  const month=new Date().getMonth()+1; // 1-12
+  // Rough seasonal GDD accumulation estimates by month for Ontario
+  const seasonGDD={1:0,2:0,3:0,4:0,5:50,6:300,7:600,8:900,9:1100,10:1200,11:1200,12:1200};
+  const estGDD=(seasonGDD[month]||0)+Math.max(0,(todayTemp-10)*7); // rough estimate
+  const GDD_TARGETS=[
+    {mc:'White Navy (early)',gdd:1050,col:'#3b82f6'},
+    {mc:'White Navy (std)',gdd:1200,col:'#60a5fa'},
+    {mc:'Cranberry',gdd:1350,col:'#ef4444'},
+    {mc:'Dark Red Kidney',gdd:1450,col:'#dc2626'},
+    {mc:'Light Red Kidney',gdd:1500,col:'#f87171'},
+    {mc:'Otebo/Yellow',gdd:1600,col:'#fde68a'},
+  ];
+  document.getElementById('gdd-progress').innerHTML=GDD_TARGETS.map(t=>{
+    const pct=Math.min(100,Math.round((estGDD/t.gdd)*100));
+    return `<div class="gdd-item"><div class="gdd-class">${t.mc}</div><div class="gdd-bar-wrap"><div class="gdd-bar" style="width:${pct}%;background:linear-gradient(90deg,${t.col}55,${t.col})"></div></div><div class="gdd-val">${estGDD.toFixed(0)} / ${t.gdd} GDD (${pct}%) — ${pct>=100?'✅ Ready to harvest':'⏳ '+Math.round((1-pct/100)*100)+'% remaining'}</div></div>`;
+  }).join('');
+
+  // 7-day forecast cards
+  const days=d.daily;const dates=days.time;
+  document.getElementById('wx-forecast').innerHTML=dates.map((_,i)=>`
+    <div class="fc-day">
+      <div class="fc-date">${new Date(dates[i]).toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div>
+      <div class="fc-icon">${wxIcon(days.weather_code[i])}</div>
+      <div class="fc-hi">${days.temperature_2m_max[i]}°</div>
+      <div class="fc-lo">${days.temperature_2m_min[i]}°</div>
+      <div class="fc-prec">${days.precipitation_sum[i]}mm</div>
+    </div>`).join('');
+
+  // Charts
+  const co={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:8}}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},maxRotation:30},border:{color:'transparent'}}}};
+  const labels=dates.map(d=>new Date(d).toLocaleDateString('en-CA',{weekday:'short',day:'numeric'}));
+  if(wxChartT){wxChartT.destroy();}
+  wxChartT=new Chart(document.getElementById('ch-wx-temp'),{type:'line',data:{labels,datasets:[{label:'Max °C',data:days.temperature_2m_max,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.1)',tension:.4,fill:false,pointRadius:4,borderWidth:2},{label:'Min °C',data:days.temperature_2m_min,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.1)',tension:.4,fill:false,pointRadius:4,borderWidth:2}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'°C'}}}}});
+  if(wxChartP){wxChartP.destroy();}
+  wxChartP=new Chart(document.getElementById('ch-wx-prec'),{type:'bar',data:{labels,datasets:[{label:'Precipitation (mm)',data:days.precipitation_sum,backgroundColor:'rgba(96,165,250,.5)',borderColor:'#60a5fa',borderWidth:1.5,borderRadius:5}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'mm'}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AGRONOMY CHARTS
+// ═══════════════════════════════════════════════════════════════════
+function buildAgroCharts(){
+  agroDone=true;
+  const co={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}}}};
+  // Herbicide mode of action donut
+  new Chart(document.getElementById('ch-herb-moa'),{type:'doughnut',data:{labels:['PSII Inhibitors (Gp 5)','ACCase Inhibitors (Gp 1)','ALS Inhibitors (Gp 2)','PPO Inhibitors (Gp 14)','DOXP Inhibitors (Gp 13)','Auxin Mimics (Gp 4)','Fatty Acid Inhib (Gp 3)'],datasets:[{data:[2,3,2,2,1,1,2],backgroundColor:['rgba(96,165,250,.65)','rgba(34,197,94,.65)','rgba(245,158,11,.65)','rgba(239,68,68,.65)','rgba(167,139,250,.65)','rgba(251,191,36,.55)','rgba(45,212,191,.55)'],borderColor:'var(--bg)',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'right',labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:8},boxWidth:10}}}}});
+  // Herbicide program cost
+  new Chart(document.getElementById('ch-herb-cost'),{type:'bar',data:{labels:['PRE only\n(S-metolachlor)','POST only\n(Bentazon)','PRE+POST\n(Imazethapyr)','Full Program\n(3 products)','Organic\n(cultivation)'],datasets:[{data:[28,22,38,55,15],backgroundColor:['rgba(34,197,94,.5)','rgba(34,197,94,.5)','rgba(245,158,11,.5)','rgba(239,68,68,.5)','rgba(45,212,191,.5)'],borderColor:['#22c55e','#22c55e','#f59e0b','#ef4444','#2dd4bf'],borderWidth:1.5,borderRadius:6}]},options:{...co,plugins:{...co.plugins,tooltip:{callbacks:{label:ctx=>`~$${ctx.parsed.y}/acre`}}},scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>'$'+v}}}}});
+  // Stress yield loss
+  new Chart(document.getElementById('ch-stress'),{type:'bar',data:{labels:['White mold\n(severe)','Drought\n(anthesis)','Late frost\n(emergence)','Weed comp.\n(uncontrolled)','Anthracnose\n(susceptible)','Poor stand\n(< 200k/ac)','Late planting\n(> June 10)'],datasets:[{data:[35,40,25,30,20,18,22],backgroundColor:'rgba(239,68,68,.5)',borderColor:'#ef4444',borderWidth:1.5,borderRadius:5}]},options:{...co,indexAxis:'y',scales:{x:{...co.scales.x,grid:{color:'rgba(255,255,255,.04)'},ticks:{...co.scales.x.ticks,callback:v=>v+'%'}},y:{...co.scales.y,grid:{display:false}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// YIELD TRENDS CHARTS
+// ═══════════════════════════════════════════════════════════════════
+let selLocs=new Set(['EXET','WINC','ELOR','STHM','WOOD']);
+let _locCI=null,_locChartBuilt=false;
+const CO={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}}}};
+
+function buildTrends(){
+  trendsDone=true;
+  const yrs=YT.map(d=>d.yr);
+  new Chart(document.getElementById('ch-overall'),{type:'line',data:{labels:yrs,datasets:[{label:'White/Navy',data:YT.map(d=>d.w),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',tension:.4,fill:true,pointRadius:3,borderWidth:2},{label:'Coloured',data:YT.map(d=>d.c),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.05)',tension:.4,fill:true,pointRadius:3,borderWidth:2}]},options:{...CO,plugins:{legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:10}}}}});
+  const mcs=['White Navy','Black','Cranberry','Dark Red Kidney','Light Red Kidney','White Kidney','Small Red','Pinto','Otebo','Yellow'];
+  const mcAvg=mcs.map(mc=>{const vs=UV.filter(v=>v.mc===mc&&v.y);return vs.length?Math.round(vs.reduce((a,v)=>a+v.y,0)/vs.length):0;});
+  new Chart(document.getElementById('ch-mc-avg'),{type:'bar',data:{labels:mcs.map(m=>m.replace('Dark Red Kidney','DRK').replace('Light Red Kidney','LRK').replace('White Kidney','WK').replace('White Navy','Navy')),datasets:[{data:mcAvg,backgroundColor:mcs.map(m=>col(m)+'aa'),borderColor:mcs.map(m=>col(m)),borderWidth:1.5,borderRadius:6}]},options:{...CO,indexAxis:'y',scales:{x:{...CO.scales.x,grid:{color:'rgba(255,255,255,.04)'},ticks:{...CO.scales.x.ticks,callback:v=>v.toLocaleString()}},y:{...CO.scales.y,grid:{display:false}}}}});
+  const allYrs=[...new Set(YEARLY.map(d=>d.Year))].sort();
+  const lTgW=document.getElementById('loc-tg');
+  Object.keys(SITES).forEach(code=>{
+    const b=document.createElement('button');b.className='ltb'+(selLocs.has(code)?' act':'');b.textContent=code;
+    b.style.borderColor=selLocs.has(code)?SITES[code].c:'';
+    b.onclick=()=>{selLocs.has(code)?selLocs.delete(code):selLocs.add(code);b.classList.toggle('act');b.style.borderColor=selLocs.has(code)?SITES[code].c:'';updLoc();};
+    lTgW.appendChild(b);
+  });
+  _locCI=new Chart(document.getElementById('ch-loc'),{type:'line',data:{labels:[],datasets:[]},options:CO});
+  updLoc();
+  const scDatasets=Object.keys(CCSS).map(mc=>{const pts=UV.filter(v=>v.mc===mc&&v.d&&v.y).map(v=>({x:v.d,y:v.y,name:v.name,yr:v.year}));if(!pts.length)return null;return{label:mc,data:pts,backgroundColor:col(mc)+'bb',pointRadius:5,pointHoverRadius:8,borderWidth:0};}).filter(Boolean);
+  new Chart(document.getElementById('ch-scatter'),{type:'scatter',data:{datasets:scDatasets},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name} (${ctx.raw.yr}): ${ctx.raw.y.toLocaleString()} lbs/ac, ${ctx.raw.x}d`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},title:{display:true,text:'Days to Maturity',color:'#7a9e82',font:{family:'JetBrains Mono',size:9}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},callback:v=>v.toLocaleString()},title:{display:true,text:'Yield (lbs/ac)',color:'#7a9e82',font:{family:'JetBrains Mono',size:9}}}}}});
+  const decades=[{l:'1977–89',min:1977,max:1989},{l:'1990–99',min:1990,max:1999},{l:'2000–09',min:2000,max:2009},{l:'2010–19',min:2010,max:2019},{l:'2020–26',min:2020,max:2026}];
+  const decAvg=decades.map(d=>{const vs=UV.filter(v=>v.year>=d.min&&v.year<=d.max&&v.y);return vs.length?Math.round(vs.reduce((a,v)=>a+v.y,0)/vs.length):null;});
+  new Chart(document.getElementById('ch-decade'),{type:'bar',data:{labels:decades.map(d=>d.l),datasets:[{data:decAvg,backgroundColor:['rgba(59,130,246,.5)','rgba(59,130,246,.55)','rgba(34,197,94,.5)','rgba(34,197,94,.6)','rgba(245,158,11,.7)'],borderColor:['#3b82f6','#3b82f6','#22c55e','#22c55e','#f59e0b'],borderWidth:1.5,borderRadius:6}]},options:CO});
+  const disMcs=['White Navy','Black','Cranberry','Dark Red Kidney','Light Red Kidney','White Kidney','Small Red','Pinto'];
+  const cbbPct=disMcs.map(mc=>{const vs=UV.filter(v=>v.mc===mc);const r=vs.filter(v=>v.cbb==='R'||v.cbb==='MR').length;return vs.length?Math.round((r/vs.length)*100):0;});
+  const r73Pct=disMcs.map(mc=>{const vs=UV.filter(v=>v.mc===mc);const r=vs.filter(v=>v.r73==='R'||v.r73==='MR').length;return vs.length?Math.round((r/vs.length)*100):0;});
+  new Chart(document.getElementById('ch-dis'),{type:'bar',data:{labels:disMcs.map(m=>m.replace('Dark Red Kidney','DRK').replace('Light Red Kidney','LRK').replace('White Kidney','WK').replace('White Navy','Navy')),datasets:[{label:'CBB Resistant (%)',data:cbbPct,backgroundColor:'rgba(34,197,94,.5)',borderColor:'#22c55e',borderWidth:1.5,borderRadius:4},{label:'R73 Resistant (%)',data:r73Pct,backgroundColor:'rgba(251,191,36,.45)',borderColor:'#fbbf24',borderWidth:1.5,borderRadius:4}]},options:{...CO,plugins:{legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:8}}},scales:{y:{...CO.scales.y,max:100,ticks:{...CO.scales.y.ticks,callback:v=>v+'%'}}}}});
+  const hc=[UV.filter(v=>v.h&&v.h<=1.5).length,UV.filter(v=>v.h&&v.h>1.5&&v.h<=2.0).length,UV.filter(v=>v.h&&v.h>2.0&&v.h<=2.5).length,UV.filter(v=>v.h&&v.h>2.5&&v.h<=3.0).length,UV.filter(v=>v.h&&v.h>3.0).length];
+  new Chart(document.getElementById('ch-harv'),{type:'doughnut',data:{labels:['≤1.5','1.5–2.0','2.0–2.5','2.5–3.0','>3.0'],datasets:[{data:hc,backgroundColor:['rgba(34,197,94,.75)','rgba(74,222,128,.65)','rgba(250,204,21,.55)','rgba(251,146,60,.55)','rgba(239,68,68,.55)'],borderColor:'var(--bg)',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'right',labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:10}}}}});
+  const peaks=Object.keys(SITES).map(code=>{const recs=YEARLY.filter(d=>d.Location===code);return{code,peak:recs.length?Math.max(...recs.map(d=>d.y)):0,c:SITES[code].c};}).filter(x=>x.peak>0).sort((a,b)=>b.peak-a.peak);
+  new Chart(document.getElementById('ch-peak'),{type:'bar',data:{labels:peaks.map(x=>x.code),datasets:[{data:peaks.map(x=>x.peak),backgroundColor:peaks.map(x=>x.c+'99'),borderColor:peaks.map(x=>x.c),borderWidth:1.5,borderRadius:5}]},options:CO});
+  const allY=[...new Set(YEARLY.map(d=>d.Year))].sort();
+  const cvs=allY.map(yr=>{const vs=YEARLY.filter(d=>d.Year===yr).map(d=>d.y);if(vs.length<2)return{yr,cv:0};const m=vs.reduce((a,b)=>a+b,0)/vs.length;const sd=Math.sqrt(vs.reduce((a,b)=>a+(b-m)**2,0)/vs.length);return{yr,cv:Math.round((sd/m)*100)};}).filter(d=>d.cv>0);
+  new Chart(document.getElementById('ch-cv'),{type:'bar',data:{labels:cvs.map(d=>d.yr),datasets:[{data:cvs.map(d=>d.cv),backgroundColor:cvs.map(d=>d.cv>35?'rgba(239,68,68,.55)':'rgba(34,197,94,.4)'),borderRadius:3}]},options:{...CO,scales:{...CO.scales,y:{...CO.scales.y,ticks:{...CO.scales.y.ticks,callback:v=>v+'%'}}}}});
+  // Seed weight by class
+  const swMcs=['White Navy','Black','Cranberry','Dark Red Kidney','Light Red Kidney','White Kidney','Small Red','Pinto'];
+  const swAvg=swMcs.map(mc=>{const vs=UV.filter(v=>v.mc===mc&&v.sw);return vs.length?Math.round(vs.reduce((a,v)=>a+v.sw,0)/vs.length*10)/10:0;});
+  new Chart(document.getElementById('ch-seed'),{type:'bar',data:{labels:swMcs.map(m=>m.replace('Dark Red Kidney','DRK').replace('Light Red Kidney','LRK').replace('White Kidney','WK').replace('White Navy','Navy')),datasets:[{data:swAvg,backgroundColor:swMcs.map(m=>col(m)+'99'),borderColor:swMcs.map(m=>col(m)),borderWidth:1.5,borderRadius:5}]},options:{...CO,indexAxis:'y',scales:{x:{...CO.scales.x,grid:{color:'rgba(255,255,255,.04)'},ticks:{...CO.scales.x.ticks,callback:v=>v+'g'}},y:{...CO.scales.y,grid:{display:false}}}}});
+}
+
+function updLoc(){
+  if(!_locCI)return;
+  const allYrs=[...new Set(YEARLY.map(d=>d.Year))].sort();
+  const ds=[...selLocs].map(code=>({label:code,tension:.3,borderWidth:2,pointRadius:2,borderColor:SITES[code]?.c||'#22c55e',backgroundColor:(SITES[code]?.c||'#22c55e')+'15',data:allYrs.map(yr=>{const d=YEARLY.find(x=>x.Year===yr&&x.Location===code);return d?d.y:null;}),spanGaps:false}));
+  _locCI.data={labels:allYrs,datasets:ds};
+  _locCI.options.plugins={legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:8},boxWidth:8}}};
+  _locCI.update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CANADA MAP & REGIONS
+// ═══════════════════════════════════════════════════════════════════
+let canMap,selProv='Ontario';
+function buildCanada(){
+  canadaDone=true;
+  const psel=document.getElementById('prov-sel');
+  Object.entries(PROVS).forEach(([p,d])=>{
+    const b=document.createElement('button');b.className='pb'+(p===selProv?' act':'');b.id='pb-'+p;
+    b.innerHTML=`${d.flag} ${p.replace('British Columbia','B.C.')}`;b.onclick=()=>showProv(p);psel.appendChild(b);
+  });
+  showProv('Ontario');
+  canMap=L.map('canada-map',{center:[56,-96],zoom:4});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:12}).addTo(canMap);
+  const pc={Ontario:[43.8,-79.5],Manitoba:[53.0,-97.0],Saskatchewan:[52.0,-106.0],Alberta:[53.0,-114.0],'British Columbia':[54.0,-124.0]};
+  Object.entries(PROVS).forEach(([p,d])=>{
+    if(!pc[p])return;
+    const icon=L.divIcon({html:`<div style="background:${d.col};color:#040a06;border-radius:7px;padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.6);cursor:pointer;border:1px solid rgba(255,255,255,.1)">${d.flag} ${p.replace('British Columbia','B.C.')}</div>`,className:'',iconAnchor:[0,0]});
+    L.marker(pc[p],{icon}).addTo(canMap).on('click',()=>showProv(p));
+  });
+  const co={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}}}};
+  new Chart(document.getElementById('ch-prov-ac'),{type:'bar',data:{labels:['Ontario','Manitoba','Saskatchewan','Alberta','B.C.'],datasets:[{data:[130,85,28,18,3],backgroundColor:['rgba(245,158,11,.6)','rgba(74,222,128,.45)','rgba(52,211,153,.4)','rgba(96,165,250,.45)','rgba(167,139,250,.4)'],borderColor:['#f59e0b','#4ade80','#34d399','#60a5fa','#a78bfa'],borderWidth:1.5,borderRadius:6}]},options:{...co,scales:{y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'K'}}}}});
+  new Chart(document.getElementById('ch-prov-cls'),{type:'doughnut',data:{labels:['Navy/White','Black','Cranberry','DRK','LRK','Pinto+Other'],datasets:[{data:[55,12,8,9,8,8],backgroundColor:['rgba(59,130,246,.7)','rgba(148,163,184,.7)','rgba(220,38,38,.7)','rgba(185,28,28,.7)','rgba(248,113,113,.7)','rgba(161,119,78,.7)'],borderColor:'var(--bg)',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'right',labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:10}}}}});
+  new Chart(document.getElementById('ch-breed'),{type:'bar',data:{labels:['UoG (Guelph)','AAFC','CDC Sask.','Others'],datasets:[{data:[87,25,18,5],backgroundColor:['rgba(245,158,11,.65)','rgba(96,165,250,.55)','rgba(52,211,153,.5)','rgba(100,116,139,.45)'],borderColor:['#f59e0b','#60a5fa','#34d399','#94a3b8'],borderWidth:1.5,borderRadius:6}]},options:co});
+  const periods=['1977–89','1990–99','2000–09','2010–14','2015–19','2020–23','2024–26'];
+  const pMin=[1977,1990,2000,2010,2015,2020,2024],pMax=[1989,1999,2009,2014,2019,2023,2099];
+  const pCounts=periods.map((_,i)=>UV.filter(v=>v.year>=pMin[i]&&v.year<=pMax[i]).length);
+  new Chart(document.getElementById('ch-timeline'),{type:'bar',data:{labels:periods,datasets:[{data:pCounts,backgroundColor:['rgba(59,130,246,.4)','rgba(59,130,246,.45)','rgba(34,197,94,.45)','rgba(34,197,94,.5)','rgba(34,197,94,.55)','rgba(245,158,11,.65)','rgba(245,158,11,.75)'],borderColor:['#3b82f6','#3b82f6','#22c55e','#22c55e','#22c55e','#f59e0b','#f59e0b'],borderWidth:1.5,borderRadius:5}]},options:co});
+}
+function showProv(p){
+  selProv=p;const d=PROVS[p];
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('act'));
+  const pb=document.getElementById('pb-'+p);if(pb)pb.classList.add('act');
+  document.getElementById('prov-hdr').innerHTML=`${d.flag} ${p} <span class="sub">${d.acres} acres · ${d.classes.length} classes</span>`;
+  const clsHtml=d.classes.map(c=>`<span class="cp ${css(c)}" style="font-size:.56rem;margin:2px">${c}</span>`).join('');
+  document.getElementById('prov-body').innerHTML=`<div style="margin-bottom:10px">${clsHtml}</div>`+d.regions.map(r=>`<div class="rg"><div class="rg-t">${r.n} ${r.role==='top'?'⭐':r.role==='major'?'●':r.role==='moderate'?'○':'·'}</div><div>${r.counties.map(c=>`<span class="cc2 ${r.role==='top'?'top':r.role==='major'?'maj':''}">${c}</span>`).join('')}</div><div style="font-size:.68rem;color:var(--tm);margin-top:4px;line-height:1.5">${r.note}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AI ADVISOR — OpenAI GPT-4o
+// ═══════════════════════════════════════════════════════════════════
+function fillCounty(){const p=document.getElementById('a-prov').value;const sel=document.getElementById('a-county');sel.innerHTML=(COUNTIES[p]||['All']).map(c=>`<option>${c}</option>`).join('');}
+fillCounty();
+
+async function doAdvice(){
+  const apiKey=(document.getElementById('api-key').value||'').trim();
+  if(!apiKey||!apiKey.startsWith('sk-')){
+    document.getElementById('ai-out').innerHTML=`<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:14px;font-size:.8rem;line-height:1.65">
+      <strong style="color:var(--blue)">🔑 OpenAI API Key Required</strong><br><br>
+      1. Go to <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a><br>
+      2. Click <strong>Create new secret key</strong><br>
+      3. Paste the key (starts with <code style="color:var(--blue)">sk-</code>) into the field above<br>
+      4. Click <strong>Get Recommendations</strong><br><br>
+      <span style="color:var(--td);font-size:.7rem">Your key is used only locally in your browser — never stored or sent anywhere except directly to OpenAI's API.</span>
+    </div>`;
+    return;
+  }
+  const prov=document.getElementById('a-prov').value;
+  const county=document.getElementById('a-county').value;
+  const cls=document.getElementById('a-cls').value;
+  const season=document.getElementById('a-season').value;
+  const goal=document.getElementById('a-goal').value;
+  const notes=document.getElementById('a-notes').value;
+  const btn=document.getElementById('ai-btn');
+  btn.disabled=true;btn.textContent='⏳ Querying GPT-4o...';
+  document.getElementById('ai-out').innerHTML=`<div class="ld-wrap"><div class="ld-s"></div><div class="ld-s"></div><div class="ld-s"></div><span style="margin-left:8px;color:var(--tm)">Analyzing ${cls||'all classes'} varieties for ${county}...</span></div>`;
+
+  const classVars=cls?UV.filter(v=>v.mc===cls&&v.y).sort((a,b)=>b.year-a.year||b.y-a.y):UV.filter(v=>v.y).sort((a,b)=>b.year-a.year||b.y-a.y).slice(0,20);
+  const varSummary=classVars.slice(0,15).map(v=>`${v.name}(${v.mc},reg.${v.year},${v.y}lbs/ac,${v.d||'?'}d,CBB:${v.cbb},R73:${v.r73},Harv:${v.h||'?'})`).join('; ');
+
+  const sysMsg=`You are a senior agronomist and dry bean breeder at the M. Yoosefzadeh Najafabadi Lab, University of Guelph Dry Bean Breeding & Computational Biology Program. You have deep expertise in OPCC trial data, variety performance, and Ontario agronomy.
+
+STRICT RULES:
+1. ONLY recommend varieties in the requested market class: "${cls||'open/all classes'}"
+2. Do NOT mix market classes under any circumstances
+3. Consider NEWER varieties (2022–2026) alongside established performers — mention registration year
+4. Always cite specific yield numbers (lbs/ac) and maturity days from the data
+5. Be specific, concise, and practical — no generic statements`;
+
+  const userMsg=`Farm profile:
+- Province: ${prov}
+- County: ${county}
+- Market Class: ${cls||'Open to all'}
+- Season: ${season}
+- Goal: ${goal}
+- Notes: ${notes||'none'}
+
+Varieties for ${cls||'general'} class (newest first): ${varSummary}
+
+Context:
+- Winchester (WINC, Dundas Co.) = top short-season site, 4,406 lbs/ac in 2023
+- Exeter/Blyth (Huron Co.) = largest ON production area
+- Elora (Wellington Co.) = UoG trial site, short-season
+- St. Thomas (Elgin) = long-season coloured beans
+- 2022 was drought year — all sites very low
+- Pinto varieties: OAC Blaze/Paint/XPT One/Eternal = non-darkening type; OAC Toast/25-P1/25-P2 = standard pinto
+
+Please provide:
+## Top 3–4 Varieties for ${cls||'Dry Beans'} in ${county}
+Name, yield, maturity, disease ratings, and why each fits. Mention registration year.
+
+## Agronomic Fit for ${county}
+Why these varieties match the specific location and season.
+
+## Disease Management (${prov})
+Key diseases and resistant varieties to prioritize.
+
+## Planting & Maturity Notes
+Optimal timing and maturity targets for ${season}.
+
+## Market Outlook
+Brief economics for ${cls||'dry bean'} production in ${prov}.`;
+
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'gpt-4o',max_tokens:1200,temperature:0.3,messages:[{role:'system',content:sysMsg},{role:'user',content:userMsg}]})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
+    const d=await res.json();
+    let txt=d.choices[0].message.content||'No response.';
+    let html=txt.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/^##+ (.+)$/gm,'<h4>$1</h4>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>'<ul>'+m+'</ul>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+    UV.forEach(v=>{if(v.name.length>3){const safe=v.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');html=html.replace(new RegExp('\\b'+safe+'\\b','g'),`<span class="rec ${v.year>=2023?'nw':''}">${v.name}</span>`);}});
+    document.getElementById('ai-out').innerHTML='<p>'+html+'</p>';
+  }catch(e){
+    const isAuth=e.message&&(e.message.includes('401')||e.message.includes('Unauthorized')||e.message.includes('Invalid API'));
+    document.getElementById('ai-out').innerHTML=`<div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:7px;padding:14px;font-size:.8rem;line-height:1.6">
+      <strong style="color:#f87171">⚠️ ${isAuth?'Invalid API key — check your OpenAI key and try again':'Request failed: '+e.message}</strong><br><br>
+      <strong>Direct data for ${cls||'all classes'} (top performers):</strong><br>
+      ${classVars.slice(0,5).map(v=>`<span class="rec ${v.year>=2023?'nw':''}">${v.name}</span> ${v.mc} — ${v.y.toLocaleString()} lbs/ac, ${v.d}d, CBB:${v.cbb}, R73:${v.r73} (${v.year})`).join('<br>')}
+    </div>`;
+  }
+  btn.disabled=false;btn.textContent='⚡ Get Recommendations';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{ setTimeout(initMap,150); });
+</script>
+</body>
+</html>
