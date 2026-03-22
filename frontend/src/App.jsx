@@ -76,6 +76,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+  const [activeView, setActiveView] = useState('chat');
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   
   // Session and UI state
@@ -990,6 +991,42 @@ export default function App() {
           </div>
         )}
 
+
+
+        {/* Data Platform */}
+
+        {(!sidebarCollapsed || (isMobile || isTablet)) && (
+
+          <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Platform</h3>
+
+            <div className="space-y-2">
+
+              <button onClick={() => setActiveView('chat')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'chat' ? 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300'}`}>
+
+                <FaMicroscope className="text-blue-500 text-sm" />
+
+                <span>BeanGPT Chat</span>
+
+              </button>
+
+              <button onClick={() => setActiveView('platform')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'platform' ? 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300'}`}>
+
+                <FaDatabase className="text-blue-500 text-sm" />
+
+                <span>Data Platform</span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        )}
+
+
+
         {/* About Us Section */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
           <div className="p-4 flex-1">
@@ -1034,6 +1071,7 @@ export default function App() {
                       Currently under review
                     </p>
                   </div>
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700"><p className="text-xs text-gray-500 dark:text-slate-500 leading-relaxed">Thanks to the Research Innovation Office at the University of Guelph for supporting this initiative.</p></div>
                 </div>
               </div>
             </div>
@@ -1095,7 +1133,8 @@ export default function App() {
       </div>
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col min-h-0 ${isMobile || isTablet ? 'w-full' : ''}`}>
+      <div className={`flex-1 flex flex-col min-h-0 ${isMobile || isTablet ? 'w-full' : ''}`} style={{position:"relative"}}>
+        {activeView === "platform" && <iframe src="/dry-bean-platform.html" title="Data Platform" style={{position:"absolute",inset:0,width:"100%",height:"100%",border:"none",zIndex:10}} />}
         {/* Header */}
         <div className={`flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'} border-b ${darkMode ? 'border-slate-800 bg-slate-900/50' : 'border-gray-200 bg-white/80'} backdrop-blur-sm`}>
           <div className="flex items-center justify-between">
