@@ -225,6 +225,48 @@ canvas{max-height:280px}
 .ld-s{width:5px;height:5px;background:var(--g1);border-radius:50%;animation:bk 1.2s infinite}
 .ld-s:nth-child(2){animation-delay:.2s}.ld-s:nth-child(3){animation-delay:.4s}
 @keyframes bk{0%,100%{opacity:.2;transform:scale(.65)}50%{opacity:1;transform:scale(1)}}
+/* ── PLANTING DATE / GDD CALCULATOR ── */
+.plant-calc{background:linear-gradient(135deg,rgba(34,197,94,.05),rgba(245,158,11,.03));border:1px solid var(--b2);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.plant-calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.pc-field{display:flex;flex-direction:column;gap:5px}
+.pc-label{font-family:var(--mono);font-size:.58rem;font-weight:600;color:var(--g1);text-transform:uppercase;letter-spacing:.8px}
+.pc-input{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:.78rem;color:var(--txt);outline:none;transition:border-color .2s;width:100%}
+.pc-input:focus{border-color:var(--g1)}
+.mat-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.mat-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px;position:relative;overflow:hidden;transition:border-color .2s}
+.mat-card.ready{border-color:var(--g1);background:rgba(34,197,94,.06)}
+.mat-card.close{border-color:var(--gold);background:rgba(245,158,11,.04)}
+.mat-card-name{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--txt);margin-bottom:3px}
+.mat-card-stat{font-size:.65rem;color:var(--tm);margin-bottom:3px;display:flex;justify-content:space-between}
+.mat-card-stat .v{font-family:var(--mono);color:var(--g1);font-weight:600}
+.mat-status{font-family:var(--mono);font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:12px;display:inline-block;margin-top:5px}
+.mat-status.ready{background:rgba(34,197,94,.15);color:var(--g1);border:1px solid rgba(34,197,94,.3)}
+.mat-status.close{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.mat-status.far{background:rgba(255,255,255,.05);color:var(--td);border:1px solid var(--b1)}
+.gdd-hero{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.gdd-kpi{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px;text-align:center}
+.gdd-kpi .v{font-family:var(--disp);font-size:1.6rem;font-weight:800;line-height:1;color:var(--g1)}
+.gdd-kpi .v.gold{color:var(--gold)}.gdd-kpi .v.blue{color:var(--blue)}.gdd-kpi .v.orange{color:var(--orange)}
+.gdd-kpi .l{font-size:.58rem;color:var(--td);text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+.gdd-kpi .sub{font-size:.62rem;color:var(--tm);margin-top:2px}
+.stage-timeline{display:flex;gap:0;margin-bottom:16px;overflow-x:auto;border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.stage-seg{flex:1;min-width:80px;padding:12px 6px;text-align:center;position:relative;cursor:default;border-right:1px solid var(--b1)}
+.stage-seg:last-child{border-right:none}
+.stage-seg.past{background:rgba(34,197,94,.08)}
+.stage-seg.current{background:rgba(245,158,11,.1)}
+.stage-seg.future{background:var(--s1)}
+.stage-seg-icon{font-size:1.2rem;margin-bottom:4px}
+.stage-seg-name{font-family:var(--mono);font-size:.58rem;font-weight:600;color:var(--txt);margin-bottom:2px}
+.stage-seg-gdd{font-size:.55rem;color:var(--tm)}
+.frost-risk-row{display:flex;gap:6px;margin-bottom:16px}
+.frost-day{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 4px;text-align:center}
+.frost-day.risk-low{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.04)}
+.frost-day.risk-high{border-color:rgba(239,68,68,.6);background:rgba(239,68,68,.07)}
+.frost-day-date{font-family:var(--mono);font-size:.52rem;color:var(--td);margin-bottom:3px}
+.frost-day-temp{font-family:var(--mono);font-size:.85rem;font-weight:700;line-height:1}
+.frost-day-label{font-size:.48rem;text-transform:uppercase;letter-spacing:.3px;margin-top:3px}
+.wx-section-title{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--txt);margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.wx-section-title::before{content:'';width:3px;height:14px;background:var(--g1);border-radius:2px;display:inline-block}
 /* ── AGRONOMY / HERBICIDE ── */
 .agro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .herb-table{width:100%;border-collapse:collapse;font-size:.72rem}
@@ -311,6 +353,55 @@ textarea{resize:vertical;min-height:65px}
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){.map-layout,.can-layout,.cg2,.cg3,.ai-layout,.agro-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.main{padding:12px 10px 70px}.vg{grid-template-columns:1fr}.hi{grid-template-columns:1fr}.dna,.lab-sig{display:none}.calendar-grid{grid-template-columns:1fr 1fr}.ipm-grid{grid-template-columns:1fr}.forecast-row{grid-template-columns:repeat(4,1fr)}}
+
+/* ── ENHANCED FINDER ── */
+.finder-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.fh-stat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;text-align:center}
+.fh-stat .fh-n{font-size:1.7rem;font-weight:800;font-family:var(--sans);color:var(--g1);line-height:1}
+.fh-stat .fh-l{font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:var(--td);margin-top:3px}
+.finder-viz{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.fv-box{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:14px}
+.fv-box .fv-t{font-size:.68rem;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.finder-top-bar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.ftab{display:flex;background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.ftab button{border:none;background:none;color:var(--td);font-size:.7rem;font-weight:600;padding:7px 13px;cursor:pointer;transition:.15s;border-right:1px solid var(--b1);font-family:var(--sans)}
+.ftab button:last-child{border-right:none}
+.ftab button.act{background:var(--g1);color:#000}
+.ftab button.act.usa-act{background:#3b82f6;color:#fff}
+.ftab button.act.can-act{background:#dc2626;color:#fff}
+.fv-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .18s,transform .15s;position:relative}
+.fv-card:hover{border-color:var(--g1);transform:translateY(-2px)}
+.fv-card.selected{border-color:var(--g1);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+.fv-card .fc-header{padding:12px 12px 8px;display:flex;gap:8px;align-items:flex-start}
+.fv-card .fc-icon{font-size:1.5rem;line-height:1;flex-shrink:0}
+.fv-card .fc-name{font-size:.82rem;font-weight:700;color:var(--tm);line-height:1.3;flex:1}
+.fv-card .fc-badges{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:3px}
+.fv-card .fc-body{padding:0 12px 10px}
+.fv-card .fc-breeder{font-size:.62rem;color:var(--td);margin-bottom:6px;line-height:1.4}
+.fv-card .fc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px}
+.fv-card .fcs{background:rgba(255,255,255,.03);border-radius:6px;padding:5px 4px;text-align:center}
+.fv-card .fcs-v{font-size:.78rem;font-weight:700;color:var(--tm)}
+.fv-card .fcs-l{font-size:.52rem;color:var(--td);line-height:1.2;margin-top:1px}
+.fv-card .fc-bar{height:3px;background:var(--b1);border-radius:2px;margin-bottom:7px;overflow:hidden}
+.fv-card .fc-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.fv-card .fc-resist{font-size:.6rem;color:var(--td);line-height:1.5;border-top:1px solid var(--b1);padding-top:6px}
+.fv-card .fc-resist strong{color:var(--g1)}
+.fv-card .fc-foot{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-top:1px solid var(--b1)}
+.fv-card .fc-country{font-size:.58rem;padding:2px 6px;border-radius:8px;font-weight:700}
+.fc-country.usa{background:rgba(59,130,246,.15);color:#60a5fa}
+.fc-country.can{background:rgba(220,38,38,.15);color:#f87171}
+.fc-cmp-btn{background:none;border:1px solid var(--b1);color:var(--td);font-size:.6rem;padding:3px 8px;border-radius:6px;cursor:pointer;transition:.15s;font-family:var(--sans)}
+.fc-cmp-btn:hover{border-color:var(--g1);color:var(--g1)}
+.fc-cmp-btn.sel{background:var(--g1);border-color:var(--g1);color:#000}
+.badge-uog{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:var(--g1);font-size:.52rem;padding:2px 5px;border-radius:8px;font-weight:700}
+.badge-pvp{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:var(--gold);font-size:.52rem;padding:2px 5px;border-radius:8px}
+.finder-grid-new{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.fv-search-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.fv-search-row input{flex:1;background:var(--s1);border:1px solid var(--b1);color:var(--tm);padding:9px 14px;border-radius:8px;font-size:.78rem;font-family:var(--sans)}
+.fv-search-row input:focus{outline:none;border-color:var(--g1)}
+.fv-sort-sel{background:var(--s1);border:1px solid var(--b1);color:var(--td);padding:8px 10px;border-radius:8px;font-size:.68rem;font-family:var(--sans)}
+.finder-mc-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+@media(max-width:700px){.finder-hero{grid-template-columns:1fr 1fr}.finder-viz{grid-template-columns:1fr}.finder-grid-new{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -452,7 +543,7 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- ═══ UOG ═══ -->
 <div class="panel" id="p-uog">
-  <div class="sh"><div class="sh-tag">M. Yoosefzadeh Najafabadi Lab · 87 Varieties · 1977–2026</div><h2>University of Guelph — Complete Variety Registry</h2><p>All OAC Dry Bean Breeding Program releases. Non-darkening pintos grouped under Pinto class. Toggle sort by newest release or top yield.</p></div>
+  <div class="sh"><div class="sh-tag">87 Varieties · 1977–2026</div><h2>University of Guelph — Complete Variety Registry</h2><p>All OAC Dry Bean Breeding Program releases. Non-darkening pintos grouped under Pinto class. Toggle sort by newest release or top yield.</p></div>
   <div class="fbar" id="uog-fb">
     <button class="fb act" onclick="fu('all')">All (87)</button>
     <button class="fb" onclick="fu('White Navy')"><span class="fb-dot" style="background:#3b82f6"></span>Navy (34)</button>
@@ -471,22 +562,75 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- ═══ FINDER ═══ -->
 <div class="panel" id="p-finder">
-  <div class="sh"><div class="sh-tag">Full Canada Database</div><h2>Variety Finder & Comparison Tool</h2><p>All Canada-registered dry bean varieties. Select up to 3 to compare side-by-side.</p></div>
-  <div class="search-w"><input type="text" id="s-inp" placeholder="Search variety name, breeder, market class..." oninput="renderFinder()"></div>
-  <div class="fbar" id="f-fb">
-    <button class="fb act" onclick="ff('all')">All</button>
-    <button class="fb" onclick="ff('White Navy')"><span class="fb-dot" style="background:#3b82f6"></span>Navy</button>
-    <button class="fb" onclick="ff('Black')"><span class="fb-dot" style="background:#94a3b8"></span>Black</button>
-    <button class="fb" onclick="ff('Cranberry')"><span class="fb-dot" style="background:#dc2626"></span>Cranberry</button>
-    <button class="fb" onclick="ff('Dark Red Kidney')"><span class="fb-dot" style="background:#ef4444"></span>DRK</button>
-    <button class="fb" onclick="ff('Light Red Kidney')"><span class="fb-dot" style="background:#f87171"></span>LRK</button>
-    <button class="fb" onclick="ff('White Kidney')">WK</button>
-    <button class="fb" onclick="ff('Small Red')">Small Red</button>
-    <button class="fb" onclick="ff('Pinto')">Pinto</button>
-    <button class="fb gold" id="uog-only-fb" onclick="togUoG()">⭐ UoG Only</button>
-    <div style="margin-left:auto;font-family:var(--mono);font-size:.58rem;color:var(--td);align-self:center" id="f-count"></div>
+  <div class="sh"><div class="sh-tag">USA · Canada · 260 Varieties</div><h2>Variety Finder & Comparison Tool</h2><p>Full North American dry bean variety database — UoG-bred, Canadian, and US cultivars. Filter, search, visualize, and compare side-by-side.</p></div>
+
+  <!-- Stats Hero -->
+  <div class="finder-hero">
+    <div class="fh-stat"><div class="fh-n" id="fn-total">260</div><div class="fh-l">Total Varieties</div></div>
+    <div class="fh-stat"><div class="fh-n" style="color:#f87171" id="fn-uog">68</div><div class="fh-l">UoG Bred</div></div>
+    <div class="fh-stat"><div class="fh-n" style="color:#60a5fa" id="fn-usa">143</div><div class="fh-l">USA Varieties</div></div>
+    <div class="fh-stat"><div class="fh-n" style="color:#fb923c">21</div><div class="fh-l">Market Classes</div></div>
   </div>
-  <div class="vg" id="f-g"></div>
+
+  <!-- Visualizations -->
+  <div class="finder-viz">
+    <div class="fv-box">
+      <div class="fv-t">🫘 Varieties by Market Class</div>
+      <canvas id="fv-ch-mc" style="max-height:200px"></canvas>
+    </div>
+    <div class="fv-box">
+      <div class="fv-t">📅 Maturity vs Seed Weight</div>
+      <canvas id="fv-ch-scatter" style="max-height:200px"></canvas>
+    </div>
+    <div class="fv-box">
+      <div class="fv-t">🌎 Country & Breeder Breakdown</div>
+      <canvas id="fv-ch-country" style="max-height:200px"></canvas>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="finder-top-bar">
+    <div class="ftab" id="fv-source-tabs">
+      <button class="act" onclick="fvSource('all',this)">All (260)</button>
+      <button onclick="fvSource('uog',this)" style="">⭐ UoG Only</button>
+      <button class="can-act-btn" onclick="fvSource('canada',this)">🍁 Canada</button>
+      <button class="usa-act-btn" onclick="fvSource('usa',this)">🇺🇸 USA</button>
+    </div>
+    <select class="fv-sort-sel" id="fv-sort" onchange="renderFinderNew()">
+      <option value="alpha">A–Z Name</option>
+      <option value="mat">Maturity (↑)</option>
+      <option value="sw">Seed Weight (↑)</option>
+      <option value="dh">Harvestability (↓)</option>
+    </select>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--td)" id="fv-count">260 varieties</div>
+  </div>
+
+  <!-- Market class filter -->
+  <div class="finder-mc-row" id="fv-mc-row">
+    <button class="fb act" onclick="fvMC('all',this)">All Classes</button>
+    <button class="fb" onclick="fvMC('White Navy',this)"><span class="fb-dot" style="background:#3b82f6"></span>White Navy</button>
+    <button class="fb" onclick="fvMC('Navy',this)">Navy</button>
+    <button class="fb" onclick="fvMC('Black',this)"><span class="fb-dot" style="background:#475569"></span>Black</button>
+    <button class="fb" onclick="fvMC('Cranberry',this)"><span class="fb-dot" style="background:#dc2626"></span>Cranberry</button>
+    <button class="fb" onclick="fvMC('Dark Red Kidney',this)"><span class="fb-dot" style="background:#b91c1c"></span>DRK</button>
+    <button class="fb" onclick="fvMC('Light Red Kidney',this)"><span class="fb-dot" style="background:#f87171"></span>LRK</button>
+    <button class="fb" onclick="fvMC('White Kidney',this)">WK</button>
+    <button class="fb" onclick="fvMC('Pinto',this)"><span class="fb-dot" style="background:#a16207"></span>Pinto</button>
+    <button class="fb" onclick="fvMC('Slow Darkening Pinto',this)">SDP</button>
+    <button class="fb" onclick="fvMC('Great Northern',this)">GN</button>
+    <button class="fb" onclick="fvMC('Yellow',this)"><span class="fb-dot" style="background:#ca8a04"></span>Yellow</button>
+    <button class="fb" onclick="fvMC('Small Red',this)">Small Red</button>
+    <button class="fb" onclick="fvMC('Otebo',this)">Otebo</button>
+    <button class="fb" onclick="fvMC('Kintoki',this)">Kintoki</button>
+  </div>
+
+  <!-- Search -->
+  <div class="fv-search-row">
+    <input type="text" id="fv-search" placeholder="Search name, breeder, parentage, resistance..." oninput="renderFinderNew()">
+  </div>
+
+  <!-- Card grid -->
+  <div class="finder-grid-new" id="fv-grid"></div>
 </div>
 
 <!-- ═══ TRENDS ═══ -->
@@ -514,10 +658,72 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- ═══ WEATHER ═══ -->
 <div class="panel" id="p-weather">
-  <div class="sh"><div class="sh-tag">Live Data · Open-Meteo API · Free</div><h2>Weather & Growing Degree Days</h2><p>Real-time weather at Ontario dry bean trial locations. Growing degree day (GDD) accumulation tracked from May 1 to guide variety selection and harvest timing.</p></div>
+  <div class="sh"><div class="sh-tag">Live Data · Open-Meteo API · Free</div><h2>Weather & Growing Degree Days</h2><p>Real-time weather at Ontario dry bean trial locations. Select your <strong>planting date</strong> and <strong>variety</strong> to track GDD accumulation, estimate maturity date, and visualize crop progress.</p></div>
 
+  <!-- ── PLANTING DATE & VARIETY CALCULATOR ── -->
+  <div class="plant-calc">
+    <div style="font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--g1);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+      🌱 Planting Date & Variety GDD Tracker
+      <span style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--gold);font-size:.58rem;padding:2px 7px;border-radius:10px">Interactive Tool</span>
+    </div>
+    <div style="font-size:.72rem;color:var(--tm);margin-bottom:14px">Enter your planting date and select varieties you are growing — the tool will calculate accumulated GDD, estimate days to maturity, and predict harvest date based on each variety's data.</div>
+    <div class="plant-calc-grid">
+      <div class="pc-field">
+        <label class="pc-label">📅 Planting Date</label>
+        <input type="date" id="pc-plant-date" class="pc-input" oninput="updateGDDCalc()">
+      </div>
+      <div class="pc-field">
+        <label class="pc-label">🌿 Market Class</label>
+        <select id="pc-mc" class="pc-input" onchange="updateVarietyList();updateGDDCalc()">
+          <option value="">All Classes</option>
+          <option value="White Navy">White Navy</option>
+          <option value="Black">Black</option>
+          <option value="Cranberry">Cranberry</option>
+          <option value="Dark Red Kidney">Dark Red Kidney</option>
+          <option value="Light Red Kidney">Light Red Kidney</option>
+          <option value="White Kidney">White Kidney</option>
+          <option value="Pinto">Pinto</option>
+          <option value="Small Red">Small Red</option>
+          <option value="Otebo">Otebo</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Kintoki">Kintoki</option>
+        </select>
+      </div>
+      <div class="pc-field">
+        <label class="pc-label">🫘 Select Variety</label>
+        <select id="pc-variety" class="pc-input" onchange="updateGDDCalc()">
+          <option value="">All varieties in class</option>
+        </select>
+      </div>
+    </div>
+    <!-- KPI Row -->
+    <div class="gdd-hero" id="gdd-kpi-row" style="display:none">
+      <div class="gdd-kpi"><div class="v" id="gkpi-dap">—</div><div class="l">Days Since Planting</div><div class="sub" id="gkpi-plant-info">—</div></div>
+      <div class="gdd-kpi"><div class="v gold" id="gkpi-gdd">—</div><div class="l">GDD Accumulated (Base 10°C)</div><div class="sub" id="gkpi-gdd-sub">—</div></div>
+      <div class="gdd-kpi"><div class="v blue" id="gkpi-target">—</div><div class="l">GDD Target for Maturity</div><div class="sub" id="gkpi-target-sub">—</div></div>
+      <div class="gdd-kpi"><div class="v orange" id="gkpi-dtr">—</div><div class="l">Est. Days to Harvest</div><div class="sub" id="gkpi-harvest-date">—</div></div>
+    </div>
+    <!-- Crop stage timeline -->
+    <div id="gdd-stage-wrap" style="display:none">
+      <div class="wx-section-title">Crop Development Stage</div>
+      <div class="stage-timeline" id="gdd-stage-tl"></div>
+    </div>
+    <!-- Variety Maturity Board -->
+    <div id="mat-board-wrap" style="display:none">
+      <div class="wx-section-title" id="mat-board-title">Variety Maturity Status</div>
+      <div class="mat-board" id="mat-board-grid"></div>
+    </div>
+    <!-- GDD Timeline Chart -->
+    <div id="gdd-timeline-wrap" style="display:none">
+      <div class="wx-section-title">GDD Accumulation Timeline</div>
+      <div class="cx" style="margin-bottom:0"><div class="cx-t" id="gdd-chart-title">Cumulative GDD from Planting</div><div class="cx-s">Estimated from planting to projected maturity — shaded area = forecast window</div><canvas id="ch-gdd-timeline" style="max-height:220px"></canvas></div>
+    </div>
+    <div style="font-size:.65rem;color:var(--td);margin-top:12px;line-height:1.6">GDD calculation: <strong style="color:var(--tm)">Base 10°C</strong> · Daily GDD = max(0, (Tmax+Tmin)/2 − 10) · Historical + forecast data from <strong style="color:var(--tm)">Open-Meteo API</strong> · Values are indicative — field confirmation required.</div>
+  </div>
+
+  <!-- ── LOCATION SELECTOR ── -->
   <div style="margin-bottom:12px">
-    <label style="font-family:var(--mono);font-size:.62rem;color:var(--g1);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">📍 Select Trial Location</label>
+    <label style="font-family:var(--mono);font-size:.62rem;color:var(--g1);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">📍 Select Trial Location for Live Weather</label>
     <div class="wx-grid" id="wx-loc-grid"></div>
   </div>
 
@@ -529,21 +735,43 @@ textarea{resize:vertical;min-height:65px}
   <div id="wx-content" style="display:none">
     <div class="wx-detail-grid" id="wx-current-grid"></div>
 
+    <!-- GDD progress bars (legacy — still shown) -->
     <div class="gdd-card">
       <div class="gdd-title">
-        🌡️ Growing Degree Day Accumulation (Base 10°C — since May 1 estimate)
+        🌡️ Growing Degree Day Accumulation (Base 10°C — seasonal estimate)
         <span style="font-family:var(--mono);font-size:.6rem;color:var(--td)" id="gdd-loc-label"></span>
       </div>
       <div class="gdd-progress" id="gdd-progress"></div>
-      <div style="font-size:.68rem;color:var(--td);margin-top:10px;line-height:1.6">GDD estimated from current temperature and seasonal averages. <strong style="color:var(--tm)">Short-season navy beans</strong> need ~1,100 GDD; <strong style="color:var(--tm)">coloured kidney/cranberry</strong> need ~1,400–1,600 GDD. Values are indicative only — consult OMAFRA for field decisions.</div>
+      <div style="font-size:.68rem;color:var(--td);margin-top:10px;line-height:1.6">GDD estimated from current temperature and seasonal averages. <strong style="color:var(--tm)">Short-season navy beans</strong> need ~1,100 GDD; <strong style="color:var(--tm)">coloured kidney/cranberry</strong> need ~1,400–1,600 GDD.</div>
     </div>
 
-    <div style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--txt);margin-bottom:8px">📅 7-Day Forecast</div>
+    <!-- Frost Risk Panel -->
+    <div id="frost-panel" style="margin-bottom:14px">
+      <div class="wx-section-title">🥶 7-Day Frost Risk Assessment</div>
+      <div class="frost-risk-row" id="frost-risk-row"></div>
+      <div id="frost-alert" style="font-size:.72rem;margin-top:4px"></div>
+    </div>
+
+    <!-- ET Deficit -->
+    <div class="cx" style="margin-bottom:14px">
+      <div class="cx-t">💧 Evapotranspiration vs Precipitation (7-Day)</div>
+      <div class="cx-s">Water deficit/surplus indicator — ET₀ vs rainfall for drought stress assessment</div>
+      <canvas id="ch-wx-et" style="max-height:180px"></canvas>
+    </div>
+
+    <div class="wx-section-title">📅 7-Day Forecast</div>
     <div class="forecast-row" id="wx-forecast"></div>
 
     <div class="cg2">
       <div class="cx"><div class="cx-t" id="wx-chart-title">Temperature Forecast</div><div class="cx-s">Max/Min °C — next 7 days</div><canvas id="ch-wx-temp" style="max-height:200px"></canvas></div>
       <div class="cx"><div class="cx-t">Precipitation Forecast</div><div class="cx-s">Daily total (mm) — next 7 days</div><canvas id="ch-wx-prec" style="max-height:200px"></canvas></div>
+    </div>
+
+    <!-- Daily GDD Chart for current season -->
+    <div class="cx" style="margin-bottom:14px">
+      <div class="cx-t">📈 Daily GDD Accumulation — Forecast Week</div>
+      <div class="cx-s">Growing degree days per day (Base 10°C) — current location</div>
+      <canvas id="ch-wx-gdd-daily" style="max-height:180px"></canvas>
     </div>
   </div>
 
@@ -1347,6 +1575,7 @@ function goTab(id){
   if(id==='canada'&&!canadaDone) buildCanada();
   if(id==='agronomy'&&!agroDone) buildAgroCharts();
   if(id==='weather') buildWxUI();
+  if(id==='finder') setTimeout(renderFinderNew,50);
 }
 
 // DNA
@@ -1426,19 +1655,199 @@ function fu(cls){uFiltCls=cls;document.querySelectorAll('#uog-fb .fb:not(.gold)'
 function toggleUSort(){uSortNew=!uSortNew;document.getElementById('u-sort').textContent=uSortNew?'⬆ Latest First':'⬇ Top Yield';renderUoG();}
 renderUoG();
 
-function renderFinder(){
-  const q=(document.getElementById('s-inp').value||'').toLowerCase();
-  let list=[...ALL_VARS];
-  if(fFiltCls!=='all') list=list.filter(v=>v.mc===fFiltCls);
-  if(finderUoGOnly) list=list.filter(v=>v.isOAC!==false);
-  if(q) list=list.filter(v=>v.name.toLowerCase().includes(q)||v.mc.toLowerCase().includes(q));
-  list.sort((a,b)=>(b.y||0)-(a.y||0));
-  document.getElementById('f-count').textContent=`${list.length} varieties`;
-  document.getElementById('f-g').innerHTML=list.map(v=>mkCard(v,'f-g')).join('');
-}
+function renderFinder(){renderFinderNew();}
 function ff(cls){fFiltCls=cls;document.querySelectorAll('#f-fb .fb:not(.gold)').forEach(b=>b.classList.remove('act'));renderFinder();}
-function togUoG(){finderUoGOnly=!finderUoGOnly;document.getElementById('uog-only-fb').classList.toggle('act',finderUoGOnly);renderFinder();}
-renderFinder();
+function togUoG(){finderUoGOnly=!finderUoGOnly;document.getElementById('uog-only-fb')&&document.getElementById('uog-only-fb').classList.toggle('act',finderUoGOnly);renderFinder();}
+
+const CULTIVARS_DB=[{"country":"USA","name":"0863 PER (EX 08560863)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"Myocoba/2//Peruano/Etna","chars":"1a growth habit-bush-determinate, Mid-season maturity, days to maturity-95, days to flowering-55 (50% bloom)","resistance":"Bean common mosaic (I gene resistant)","susceptibility":"","tolerant":"","pvp":"200900276","mc":"Peruano","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Adams (B18504)","breeder":"Michigan State University","parentage":"Zenith/X12018","chars":"Medium maturity (96 days) /3a Vine-indeterminate, short guides with no ability to climb, 45 days to 50% bloom","resistance":"Bean common mosaic virus (NL3), anthracnose (Race 73 &109)","susceptibility":"common bacterial blight","tolerant":"","pvp":"","mc":"Black","source":"Journal of Plant Registrations 2021, 15(2): 253-259","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Alpena (N11283)","breeder":"Michigan State University","parentage":"Medalist/N08003","chars":"Medium maturity (99 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean Common Mosaic Virus (non-necrotic strains)","susceptibility":"Bean Common Mosaic Virus (BV1, NL4, Mexican, NY15, and Florida Type)","tolerant":"","pvp":"201700007","mc":"Navy","source":"Journal of Plant Registrations 2015, 9(1): 10-14","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Aries (05106)","breeder":"ProVita, Inc","parentage":"Matterhorn/NE94-75","chars":"Early maturity (88 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest","resistance":"","susceptibility":"","tolerant":"","pvp":"201200165","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Aspen (ISB 565)","breeder":"Idaho Seed Bean Co","parentage":"Midnight Black Turtle/ISB 456","chars":"Medium maturity (90-100), days to maturity-91, 2a growth habit-erect, indeterminate, guides short or not developed, days to flowering-50 (50% bloom)","resistance":"Bean common mosaic virus (All)","susceptibility":"common bacterial blight","tolerant":"halo blight, Rhizoctonia root rot, rust","pvp":"9600251","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Avalanche (NDO12103)","breeder":"NDSU Research Foundation","parentage":"96-177-01-01//Voyager/Black Knight","chars":"2a growth habit- erect indeterminate, late-season maturity, days to maturity-103, days to flowering-55 (50% bloom)","resistance":"Bean common mosaic virus (All races of necrotic strain), rust (40-42, 52-57, 59-61), air pollution","susceptibility":"white mold, anthracnose 7 & 73","tolerant":"","pvp":"200900222","mc":"Navy","source":"Journal of Plant Registrations 2011, 5(2): 170-176","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Baja (99204)","breeder":"ProVita Inc","parentage":"Winchester/85312","chars":"Early season maturity (80-90), 2b growth habit- erect, indeterminate, guides medium to long with no ability to climb, days to maturity-84, days to flowering-45 (50% bloom)","resistance":"Bean common mosaic virus (NY 15, NL 8)/rust","susceptibility":"","tolerant":"","pvp":"200700298","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Bandit (B210237)","breeder":"Archer-Daniels-Midland Co","parentage":"T39/Midnight","chars":"Medium maturity (90 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 53 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"white mold","pvp":"200700089","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Bella (PR1217-16)","breeder":"University of Puerto Rico Agricultural Experiment Station and the USDA-ARS","parentage":"\u2018Verano\u2019//PR0003-124/\u2018Raven\u2019","chars":"multiple disease\u2013resistant, early maturity, erect plant architecture, and good pod-set cultivar adapted to the humid tropics","resistance":"Bean common mosaic virus (BCMV),","susceptibility":"","tolerant":"","pvp":"","mc":"Navy","source":"Journal of Plant Registrations 2008, 2(3): 187-189","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"BELLAGIO (C06808)","breeder":"Michigan State University","parentage":"101800/C03129","chars":"Medium maturity (96 days), 3a vine-indeterminate, short guides with no ability to climb, not adapted to direct harvest, 43 days to 50% bloom","resistance":"anthracnose (Race 73), Bean common mosaic virus (All strains), rust (Michigan Isolates)","susceptibility":"Bean common mosaic necrosis virus (All strains), common bacterial blight (Michigan Isolates), white mold (Michigan Isolates)","tolerant":"","pvp":"201100450","mc":"Cranberry","source":"Journal of Plant Registrations 2010, 4(3): 171-174","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Beryl R (RDG689)","breeder":"Syngenta Seeds, Inc","parentage":"BelMiNeb-RMR-3/Beryl","chars":"Early maturity (81 days), 3a vine-indeterminate, short guides with no ability to climb, not adapted to direct harvest, 42 days to 50% bloom","resistance":"rust (All known races except 108), Bean common mosaic virus (Races controlled by the \"I\" gene)","susceptibility":"","tolerant":"","pvp":"200600224","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Big Red (09351)","breeder":"ProVita, Inc","parentage":"CELRK/Foxfire","chars":"Medium maturity (92 days), 1a bush-determinate, strong and erect stem, and branches, adapted to direct harvest, 42 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400392","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"BigHorn (ISB-20)","breeder":"Idaho Seed Bean Company","parentage":"selected from USWA 12","chars":"Medium maturity (91 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest","resistance":"Bean common mosaic virus, Curly Top, NY-15 Bean Mosaic, Bean mosaic virus 4","susceptibility":"yellow bean mosaic virus, Fusarium root rot","tolerant":"","pvp":"200200214","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Black Bear (12576)","breeder":"ProVita, Cooperative Elevator Company & ATM","parentage":"05222/Jaguar","chars":"late maturity (103 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 54 days to 50% bloom","resistance":"Bean common mosaic virus (I gene)","susceptibility":"rust","tolerant":"","pvp":"201800186","mc":"Black","source":"Journal of Plant Registrations 2021, 15(2): 253-259","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Black Cat (06252)","breeder":"ADM Edible Bean Specialties, Inc","parentage":"Raven/99077","chars":"Medium maturity (94 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest","resistance":"anthracnose (Race 7)","susceptibility":"anthracnose (Race 73)","tolerant":"","pvp":"201400412","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Black Tails (13489)","breeder":"ProVita, Cooperative Elevator Company & ATM","parentage":"Vigilant/Eclipse","chars":"Medium maturity (98 days), 2b erect growth habit-indeterminate, guides medium to long with no ability to climb, adapted to direct harvest, 47 days to 50% bloom","resistance":"rust /Bean common mosaic virus (I gene)","susceptibility":"","tolerant":"","pvp":"201700205","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Blackhawk (B83302)","breeder":"Michigan State University","parentage":"Tuscola/CN49-242//Black Magic/3/Midnight","chars":"late maturity (101 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest, 51 days to 50% bloom","resistance":"anthracnose (Alpha, Beta, Gamma, Delta, Epsilon, Lambda), Bean common mosaic virus (All strains)","susceptibility":"","tolerant":"Rust (Michigan Isolates)","pvp":"9000107","mc":"Black","source":"Crop Science 1990, 30(3): 744-745","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Blackjack (GTS 0886)","breeder":"Gen-Tec Seeds, Limited","parentage":"T39/8/T39/PI 326418","chars":"Medium maturity (94 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, not adapted to direct harvest, 41 days to 50% bloom","resistance":"Bean common mosaic virus (1, 15), anthracnose (Alpha, Beta, Gamma, Delta)","susceptibility":"bacterial blight (common & fuscans), white mold","tolerant":"","pvp":"9200164","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Blizzard (08072)","breeder":"ProVita, Cooperative Elevator Company & ATM","parentage":"Vista/HMS Medalist","chars":"Medium maturity (94 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 48 days to 50% bloom","resistance":"Bean common mosaic virus (I gene)","susceptibility":"","tolerant":"","pvp":"201700206","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Canario 707 (UC Canario 707)","breeder":"University of California","parentage":"84 VA-909/PAD 2","chars":"late maturity (105 days), 1a bush-determinate, strong and erect stem and branches, not adapted to direct harvest, 42 days to 50% bloom","resistance":"Bean common mosaic virus (All strains)","susceptibility":"","tolerant":"","pvp":"200300257","mc":"Yellow","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Capri (C99833)","breeder":"Michigan State University","parentage":"Cardinal/K94803","chars":"Mid-season maturity, days to maturity-97, 1a growth habit- bush, determinate with strong and erected stem and branches, days to flowering-37 (50% bloom)","resistance":"rust (Michigan isolates), Bean common mosaic virus (All Strains)","susceptibility":"Bean common mosaic necrosis virus, common bacterial blight","tolerant":"","pvp":"200700411","mc":"Cranberry","source":"Crop Science 2006, 46(6): 2706-2707","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Cayenne (R12844)","breeder":"Michigan State University","parentage":"SR9-5/R09508","chars":"Medium maturity (97 days), 3a vine-indeterminate, short guides with no ability to climb, 45 days to 50% bloom","resistance":"Bean common mosaic virus, common bacterial blight","susceptibility":"anthracnose (Race 73), rust (22:2)","tolerant":"","pvp":"","mc":"Small Red","source":"Journal of Plant Registrations 2018, 12(2): 194-198","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Centennial (CO 91212-4)","breeder":"Colorado State University","parentage":"Croissant/La Paz","chars":"Type 2b growth habit, mid-season maturity (90-100), days to maturity- 98, days to flowering 47 (50% bloom)","resistance":"rust resistance (Ur3), Bean common mosaic virus (NL3)","susceptibility":"","tolerant":"","pvp":"201600259","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Chaparral (07323)","breeder":"ProVita Inc","parentage":"Emperor/Red Kanner","chars":"Type 1a growth habit, days to maturity-93, mid-season maturity (90-100), days to flowering 42 (50% bloom)","resistance":"","susceptibility":"anthracnose (Race 6), halo blight (Race 6)","tolerant":"","pvp":"201600139","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Charro (P16901)","breeder":"Michigan State University","parentage":"Eldorado/P11519","chars":"medium maturity (97 days), 3a vine-indeterminate, short guides with no ability to climb, 46 days to 50% bloom","resistance":"","susceptibility":"anthracnose (Race 73), common bacterial blight","tolerant":"","pvp":"","mc":"Pinto","source":"Journal of Plant Registrations 2012, 15(2): 260-264","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Cisco (PT 84354)","breeder":"Rogers NK Seed Co","parentage":"Amber/Ivory","chars":"Medium maturity (95 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 48 days to 50% bloom","resistance":"Bean common mosaic virus (NY15 & BV1), curly top","susceptibility":"rust, white mold","tolerant":"brown spot, common bacterial blight","pvp":"9100026","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Clouseau (EX 08530714)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"Pink Panther/ZAA3MntAAK","chars":"Medium maturity (93 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 55 days to 50% bloom","resistance":"Bean common mosaic virus (\"I\" gene resistance to all races), Aphanomyces root rot (All known)","susceptibility":"","tolerant":"","pvp":"200700158","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Coho (K15601)","breeder":"Michigan State University","parentage":"Red Cedar/K11916","chars":"Medium maturity (99 days), 1a bush-determinate, strong and erect stem, and branches, 39 days to 50% bloom","resistance":"Bean common mosaic virus, common bacterial blight, anthracnose (Race 73)","susceptibility":"Bean common mosaic virus (NL3 & NL8), anthracnose (Race 7)","tolerant":"root rot","pvp":"","mc":"Light Red Kidney","source":"Journal of Plant Registrations 2020, 14(2): 134-138","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Condor (B00101)","breeder":"Michigan State University","parentage":"Phantom/Black Jack","chars":"Medium maturity (95 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 49 days to 50% bloom","resistance":"anthracnose (7, 73), Bean common mosaic virus (All strains), rust (Michigan isolates)","susceptibility":"Bean common mosaic necrosis virus (All strains)","tolerant":"white mold (Michigan isolates)","pvp":"200500291","mc":"Black","source":"Crop Science 2005, 45(2): 795-796","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Cowboy (11278)","breeder":"ProVita, Edible Bean Specialties, Inc","parentage":"La Paz/Sinaloa","chars":"Medium maturity (93 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 54 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201600321","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Coyne (NE1-06-12)","breeder":"University of Nebraska-Lincoln, Farmers Bean LLC","parentage":"G95023/Weihing//BelMiNeb-RMR-11)","chars":"2b growth habit-upright indeterminate, mid-season maturity (90-100), days to maturity-92, days to flowering-46 (50% bloom)","resistance":"bean common rust (41, 44, 47, 53, 73, 108), common bacterial blight (Nebraska Isolates, SC-4A, and LB-72), Bean common mosaic virus","susceptibility":"","tolerant":"","pvp":"200900303","mc":"Great Northern","source":"Journal of Plant Registrations 2009, 3(3): 219-222","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Cran 09 (bush Cran 09)","breeder":"GenTec, Inc","parentage":"UI 50/Taylor Hort","chars":"Early maturity (86 days), 1a bush-determinate, strong and erect stem, and branches, not adapted to direct harvest, 41 days to 50% bloom","resistance":"Bean common mosaic virus (15)","susceptibility":"Bean common mosaic virus (1), anthracnose (Alpha, Beta, Gamma, Delta), common blight (phaseoli and fuscans), white mold","tolerant":"","pvp":"9200176","mc":"Cranberry","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Croissant (CO 23704)","breeder":"Colorado State University","parentage":"BelDakMi-RR-3/CO07010-2//WM2-93-5","chars":"Mid-season maturity (90-100), days to maturity-104, 2b growth habit-erect, indeterminate, days to flowering-51 (50% bloom)","resistance":"rust, Bean common mosaic virus (NL3)","susceptibility":"white mold, anthracnose (73, Alpha & Delta)","tolerant":"common bacterial blight","pvp":"200900274","mc":"Pinto","source":"Journal of Plant Registrations 2011, 5(3): 299-303","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"D83043 (D83043)","breeder":"Rogers NK Seed Co","parentage":"W-95-4/7383-2-3-1","chars":"Medium maturity (97 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 52 days to 50% bloom","resistance":"Bean common mosaic virus (NY 15, BV 1), rust (44)","susceptibility":"anthracnose (Delta), rust (40, 46, 49, 51, 53, 58, 67)","tolerant":"Fusarium root rot, white mold","pvp":"8900190","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Desert Song (R11801)","breeder":"Michigan State University","parentage":"X07712/X07721","chars":"late maturity (100 days), 4a Indeterminate climbing, pods distributed throughout the plant, 41 days to 50% bloom","resistance":"Bean common mosaic virus (NL3)","susceptibility":"anthracnose (Race 73), common bacterial blight, white mold","tolerant":"","pvp":"","mc":"Flor de Junio","source":"Journal of Plant Registrations 2015, 9(2): 133-137","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Draco (06107)","breeder":"ProVita, Inc","parentage":"Matterhorn/Winchester","chars":"Medium maturity (90 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 50 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400414","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Drake (XP B279)","breeder":"Seminis Vegetable Seeds Inc","parentage":"backcross I gene to Charlevoix","chars":"Early maturity (89 days), 1a bush- determinate, strong and erect stem and branches adapted to machine harvest, 47 days to 50% bloom","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"9300225","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Durango (99230)","breeder":"ProVita Inc","parentage":"Winchester/Chase","chars":"Early Season maturity (80-90), days to maturity-84, 2b growth habit-erect, indeterminate, days to flowering-45 (50% bloom)","resistance":"Bean common mosaic virus (I), rust (Ur3)","susceptibility":"","tolerant":"","pvp":"200700299","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Eclipse (ND9902621-2)","breeder":"NDSU Research Foundation","parentage":"Tacaragua/Nighthawk//Navigator","chars":"Medium maturity (95 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest/45 days to 50% bloom","resistance":"Rust (82-84, 89-92, 95, 99, 40-42, 52-57, 59-61, 76, 79), Bean common mosaic virus(I), air pollution","susceptibility":"anthracnose (73), common blight, cold drought","tolerant":"Heat","pvp":"200500293","mc":"Black","source":"Bean Improvement Cooperative 2009, 52:175","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Eiger (G16351)","breeder":"Michigan State University","parentage":"Eldorado/G13467","chars":"Medium maturity (98 days), 3a vine-indeterminate, short guides with no ability to climb, 44 days to 50% bloom","resistance":"Bean common mosaic virus (NL3), anthracnose (Race 73 &109)","susceptibility":"common bacterial blight","tolerant":"","pvp":"","mc":"Great Northern","source":"Journal of Plant Registrations 2021, 15(2): 271-277","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Eldorado (P07863)","breeder":"Michigan State University","parentage":"AN-37/P02630","chars":"Medium maturity (98 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 42 days to 50% bloom","resistance":"Bean common mosaic virus (All strains)","susceptibility":"anthracnose (Races 7 and 73), Bean common mosaic necrosis virus (All strains), common bacterial blight (Michigan Isolate), rust (Michigan 22:2)","tolerant":"white mold (Michigan isolates)","pvp":"201500008","mc":"Pinto","source":"Journal of Plant Registrations 2012, 6(3): 233-237","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Ember (D79144)","breeder":"Rogers NK Seed Co","parentage":"Limelight/UI 37","chars":"Early maturity (84 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 47 days to 50% bloom","resistance":"Bean common mosaic virus (NY15 & BV1)","susceptibility":"","tolerant":"","pvp":"9000234","mc":"Small Red","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Ensign (ROG 372)","breeder":"Novartis Seeds, Inc","parentage":"Crestwood/D80024","chars":"Medium maturity (91 days)/IIb erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 51 days to 50% bloom","resistance":"Bean common mosaic virus (NL3, NL8, NY15)","susceptibility":"anthracnose (Alpha), common bacterial blight","tolerant":"anthracnose (73)","pvp":"9900273","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Epic (09430)","breeder":"ProVita Inc","parentage":"02-2668/Red Hawk","chars":"Type 1a growth habit, days to maturity-94, mid-season maturity (90-100), days to flowering- 39 (50% bloom)","resistance":"","susceptibility":"anthracnose Race 6, halo blight Race 6","tolerant":"","pvp":"201600108","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Felspar","breeder":"Rogers Brothers Seed Co","parentage":"D80/ UI 114","chars":"Early Season (80-90), days to maturity-88, 3a growth habit- vine-indeterminate, short guides with no ability to climb","resistance":"Bean common mosaic virus (BV & NY15)","susceptibility":"common bacterial blight","tolerant":"","pvp":"8600089","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Floyd (ROG312R)","breeder":"Syngenta Seeds, Inc","parentage":"Pk 771912-5/Sutter","chars":"Early maturity (84 days), 2a vine-indeterminate, short guides with no ability to climb, adapted to direct harvest, 44 days to 50% bloom","resistance":"rust (All except race 108)","susceptibility":"Bean common mosaic virus","tolerant":"","pvp":"200500211","mc":"Pink","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Galeena (99195MR)","breeder":"ProVita Inc","parentage":"Winchester/NE 94-75","chars":"Early maturity (88 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 44 days to 50% bloom","resistance":"rust (Nebraska, Colorado, Kansas), Bean common mosaic virus (NY15)","susceptibility":"","tolerant":"","pvp":"201100006","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Gemini (99131 NS)","breeder":"ProVita, Kelley Bean Co","parentage":"Beryl/Winchester","chars":"Early maturity (87 days), 3a vine- indeterminate, short guides with no ability to climb, not adapted to direct harvest, 39 days to 50% bloom","resistance":"Bean common mosaic virus (I-gene)","susceptibility":"rust (All)","tolerant":"","pvp":"200900463","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Grand Mesa (CO 75511)","breeder":"Colorado State University","parentage":"34596-1/RNK-178","chars":"Medium maturity (92 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 51 days to 50% bloom","resistance":"Rust (Races 41, 53, 54), Bean common mosaic virus (Pathogroups I, II, III, IV, V, VI)","susceptibility":"","tolerant":"Fusarium root rot","pvp":"200200156","mc":"Pinto","source":"Crop Science 2005, 45(1): 413","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"GTS 900 (GTS 900)","breeder":"Gen-Tec Seeds Limited","parentage":"Earliray/Sierra","chars":"Medium maturity (91 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 41 days to 50% bloom","resistance":"Bean common mosaic virus (1, 15)/anthracnose (Alpha, Beta, Gamma, Delta)","susceptibility":"common bacterial blight (phaseoli and fuscans)","tolerant":"","pvp":"9900252","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Guardian (D83353)","breeder":"Rogers NK Seed Co","parentage":"Red Kloud-4/Montcalm","chars":"Medium maturity (95 days), 1a bush- determinate, strong and erect stem and branches adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus (NY 15, BV 1)","susceptibility":"","tolerant":"","pvp":"8900192","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Gypsy Rose (R11806)","breeder":"Michigan State University","parentage":"X07710/X07714","chars":"late maturity (105 days), 4a indeterminate climbing, pods distributed throughout the plant, 49 days to 50% bloom","resistance":"Bean common mosaic virus (NL3)","susceptibility":"anthracnose (Race 73), common bacterial blight, white mold","tolerant":"","pvp":"","mc":"Flor de Mayo","source":"Journal of Plant Registrations 2015, 9(2): 133-137","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Hatton (88-025-02)","breeder":"NDSU Research Foundation","parentage":"PX-057/87-071-01","chars":"Medium maturity (90-100), days to maturity-94, 3a growth habit- vine-indeterminate, short guides with no ability to climb, days to flowering-41 (50% bloom)","resistance":"Bean common mosaic virus (Pathogroups I, II, III, IV, VII), air pollution","susceptibility":"rust (North Dakota isolates), white mold, common bacterial blight (North Dakota isolates)","tolerant":"","pvp":"9600109","mc":"Pinto","source":"Crop Science 1997, 37(1): 288","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"HMS Medalist (01054)","breeder":"ProVita Inc","parentage":"Mayflower/Avanti","chars":"2b growth habit-erect, indeterminate, guides medium to long with no ability to climb, mid-season maturity (90-100), days to maturity-96, days to flowering-53 (50% bloom)","resistance":"Bean common mosaic virus (I gene resistant), anthracnose (Race 7)","susceptibility":"anthracnose (Race 73 & 65)","tolerant":"","pvp":"200700330","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Hooter (EX 386)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"Cos 7/Etna","chars":"Medium maturity (98 days), 1a bush-determinate, strong and erect stem, and branches, adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (\"I\" gene resistance to all races), anthracnose (resistant/moderately resistant to Alpha, Delta, Gamma)","susceptibility":"","tolerant":"","pvp":"9900244","mc":"Cranberry","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Horizon (XP-B212)","breeder":"Asgrow Seed Co","parentage":"backcrossing I gene with Sacramento","chars":"Early maturity (83 days), 1a bush- determinate, strong and erect stem, and branches, adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (I gene)","susceptibility":"","tolerant":"","pvp":"8900217","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Hungerford (UIG4-6P-3P)","breeder":"University of Idaho","parentage":"Matterhorn/Starlight//Beryl/Weihing","chars":"Medium maturity (95 days), 3b vine-indeterminate, long guides with ability to climb, not adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (NY15, US6), rust (Race 38)","susceptibility":"","tolerant":"rust (Race 53)","pvp":"200900310","mc":"Great Northern","source":"Journal of Plant Registrations 2008, 2(3): 174-179","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Hydra (07111)","breeder":"ProVita, Inc","parentage":"Emerson/99-3059-1","chars":"Early maturity (89 days), 2b vine-indeterminate, long guides with ability to climb, not adapted to direct harvest, 48 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400415","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Indi (N5027557)","breeder":"Archer-Daniels-Midland Co","parentage":"Vista/Navigator","chars":"Medium maturity (95 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 47 days to 50% bloom","resistance":"Bean common mosaic virus (I gene), rust (Race 53)","susceptibility":"Bean common necrosis virus (NL3), anthracnose (Race 73), common bacterial blight (All)","tolerant":"","pvp":"201000192","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Kimberly (UIP7-24P-2P)","breeder":"University of Idaho","parentage":"Poncho/G 17341//Kodiak/BelDakMi-RMR-14","chars":"Medium maturity (97 days), 3b vine-indeterminate, long guides with ability to climb, not adapted to direct harvest, 43 days to 50% bloom","resistance":"Bean common mosaic virus (NY15, US6), Bean common necrosis mosaic virus (NL-3K), rust (Race 38)","susceptibility":"rust (Race 53)","tolerant":"Fusarium root rot/curly top virus","pvp":"200900306","mc":"Pinto","source":"Journal of Plant Registrations 2008, 2(3): 180-186","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Krimson (BD1003)","breeder":"USDA-ARS","parentage":"Cardinal/Ps98-302-5-5","chars":"Medium maturity (93 days), 1a bush- determinate, strong and erect stem and branches adapted to direct harvest, 35 days to 50% bloom","resistance":"Bean curly top virus (Idaho, Washington), Bean common mosaic virus (All strains)","susceptibility":"","tolerant":"","pvp":"201100480","mc":"Cranberry","source":"Journal of Plant Registrations 2012, 6(1): 11-14","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"La Paz (99236)","breeder":"ProVita, Inc","parentage":"PNE 6-94-75/Kodiak","chars":"Medium maturity (90 days), 3b vine-indeterminate, long guides with ability to climb, adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus (NL8)","susceptibility":"","tolerant":"","pvp":"200500219","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Lariat (ND 020069)","breeder":"NDSU Research Foundation","parentage":"T1255/'Aztec'//'Winchester'/3/P96753/4/'Maverick'","chars":"late maturity, days to maturity-100, 2b growth habit-erect, indeterminate, guides medium to long with no ability to climb, days to flowering- 45 (50% bloom)","resistance":"rust (40-42, 52-57, 59-61), anthracnose (Race 7), air pollution","susceptibility":"anthracnose (Race 73)","tolerant":"","pvp":"2000800305","mc":"Pinto","source":"Journal of Plant Registrations 2010, 4(1): 5-11","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Long's Peak (C055646)","breeder":"Colorado State University, Parentage: CO92905/CO75944","parentage":"CO92905/CO75944","chars":"Medium maturity (97 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb/adapted to direct harvest, 49 days to 50% bloom","resistance":"rust (Ur 6), Bean common mosaic virus (NL 3)","susceptibility":"","tolerant":"","pvp":"201200395","mc":"Pinto","source":"Journal of Plant Registrations 2015, 9(3): 279-282","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Loreto (00044)","breeder":"ProVita, Inc","parentage":"Mackinac/Jaguar","chars":"Medium maturity (96 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 52 days to 50% bloom","resistance":"rust (UR3), Bean common mosaic virus (NL3 and NL8), anthracnose (Races 73 and 65)","susceptibility":"","tolerant":"","pvp":"200700297","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Luckystrike (X1380012B)","breeder":"Archer-Daniels-Midland Co","parentage":"CAN47/G5707","chars":"Medium maturity (98 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest, 48 days to 50% bloom","resistance":"Bean common mosaic virus (All)","susceptibility":"Bean common mosaic necrosis virus (All)","tolerant":"common bacterial blight (Michigan)","pvp":"201000191","mc":"Yellow","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Mariah (EX 08540800)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"H9657-42-2/Buster","chars":"Medium maturity (93 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 50 days to 50% bloom","resistance":"BCMV (I), rust (Race 53)","susceptibility":"","tolerant":"","pvp":"200700157","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Medicine Hat (EX 08550813)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"98yt102/Buster","chars":"Early maturity (89 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed/adapted to direct harvest, 35 days to 50% bloom","resistance":"","susceptibility":"Bean common mosaic virus (NY15), rust (Race 53)","tolerant":"","pvp":"200700160","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Merlin (03019)","breeder":"ProVita, Cooperative Elevator Co","parentage":"Mackinac/98-1184-1","chars":"Medium maturity (94 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 49% days to 50% bloom","resistance":"Bean common mosaic virus (I), anthracnose (Race 7), rust (Nebraska, Colorado,","susceptibility":"","tolerant":"","pvp":"201100392","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Merlot (R98026)","breeder":"Michigan State University & USDA-ARS","parentage":"R94037/R94161","chars":"Medium maturity (95 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 45 days to 50% bloom","resistance":"Rust (Races 41, 53, 108)/Bean common mosaic virus (NL-1, NL-2, NL-7)","susceptibility":"common bacterial blight (Michigan Isolates)","tolerant":"","pvp":"200500181","mc":"Small Red","source":"Crop Science 2004, 44(1): 351-352","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Messina (ROG912)","breeder":"Novartis Seeds, Inc","parentage":"Cran 028(MSU)/MSU 81001","chars":"Early maturity (83 days)/Ib bush-determinate, weak steam and branches/adapted to direct harvest, 40 days to 50% bloom","resistance":"Bean common mosaic virus (NL3, NL8, NY15, BV1, NL5), anthracnose (Alpha, Delta)","susceptibility":"common bacterial blight, curly top virus, bacterial brown spot","tolerant":"","pvp":"200000184","mc":"Cranberry","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Monterrey (06185)","breeder":"ADM Edible Bean Specialties Inc","parentage":"La Paz/BelDakMi-RMR-14","chars":"Medium maturity (93 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 43 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201300354","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"ND Palomino (SF 103-8)","breeder":"North Dakota State University & USDA","parentage":"Santa Fe/PS08-103","chars":"Medium maturity (102 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest, 42 days to 50% bloom","resistance":"Bean common mosaic virus (I)","susceptibility":"common bacterial blight, rust (20-3), anthracnose (Race 73)","tolerant":"","pvp":"201700085","mc":"Slow Darkening Pinto","source":"Journal of Plant Registrations 2018, 12(1): 15-20","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"ND-307 (ND010307)","breeder":"NDSU Research Foundation","parentage":"USPT-CBB-3/Matterhorn//Maverick","chars":"Mid-season maturity, days to maturity-93, 3a growth habit-erect, indeterminate, runners short or not developed, days to flowering- 42 (50% bloom)","resistance":"Rust (40-42, 52-57, 59-61, 68-70, Bean common mosaic virus, air pollution","susceptibility":"white mold (all), Bean common mosaic necrosis virus, anthracnose (Race 73)","tolerant":"","pvp":"200900009","mc":"Pinto","source":"Journal of Plant Registrations 2020, 4(2): 109-114","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Orion (99124)","breeder":"ProVita, Kelley Bean Co","parentage":"Beryl/Matterhorn","chars":"Medium maturity (90 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus (all non-necrotic races)","susceptibility":"","tolerant":"","pvp":"200400176","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Panhandle Pride","breeder":"University of Nebraska-Lincoln, Farmers Bean LLC","parentage":"ABC-Weihing///G95023/Weihing//BelMiNeb-RMR-11)","chars":"2b growth habit-upright indeterminate, Mid Season maturity (85-89), days to maturity-87, days to flowering-44 (50% bloom)","resistance":"Bean Common Rust (41, 44,","susceptibility":"","tolerant":"","pvp":"Pending","mc":"Great Northern","source":"Journal of Plant Registrations 2019, 13(3): 311-315","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Patron (DBY60-1)","breeder":"Oregon State University","parentage":"Peruano 87/3//Peruano 87/Cardinal","chars":"Medium maturity (100 days), 1a bush- determinant, strong and erect stem and branches, adapted to direct harvest, 42 days to 50% bloom","resistance":"Bean common mosaic virus (BV1, NL4, Mexican, NY15, NL8, Western, NL2, Florida, Type, NL3, Idaho, I gene), curly top virus","susceptibility":"rust","tolerant":"","pvp":"201700233","mc":"Yellow","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Pilgrim (PVD 865)","breeder":"Wilbur-Ellis Co","parentage":"(Taylor Cranberry x DB 610248) x DB 610525 x^2 Taylor Cranberry","chars":"Early maturity (86 days), 1a bush-determinate, strong and erect stem, and branches, 35-37 days to 50% bloom","resistance":"Fusarium root rot, Pythium wilt, Bean common mosaic virus (BV1, BV2 & NY15), bean yellow mosaic virus, curly top, leafhopper, two-spotted mites, heat, drought","susceptibility":"rust, halo blight, aphids, lygus, pod borer, air pollution","tolerant":"","pvp":"8300037","mc":"Cranberry","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Pinata (ISB 82-354)","breeder":"Idaho Seed Bean Co","parentage":"Red Mexican UI 36/Pinto UI 114","chars":"3a growth habit-vine-indeterminate, short guides with no ability to climb, early maturity (80-90), days to maturity-88, days to flowering-42 (50% bloom)","resistance":"curly top virus, Bean common mosaic virus (NL 1&8)","susceptibility":"","tolerant":"","pvp":"900171","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Powderhorn (G08254)","breeder":"Michigan State University","parentage":"G04514/Matterhorn","chars":"Upright growth habit, days to maturity-95, medium maturity (90-100), days to flowering-42 (50% bloom)","resistance":"Bean common mosaic virus (All strains)","susceptibility":"anthracnose (Races 7 & 73), Bean common mosaic necrosis virus (All strains), common bacterial blight (Michigan Isolate), rust (Michigan isolate 22-2)","tolerant":"white mold (Michigan isolates)","pvp":"201500385","mc":"Great Northern","source":"Journal of Plant Registrations 2014, 8(1): 1-4","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Prize (GTS 0686)","breeder":"Gen-Tec Seeds, Limited","parentage":"C15 (Laker)/KW \"Are\"","chars":"late maturity (106 days), 1a bush-determinate, strong and erect stem, and branches, adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus (1, 15), anthracnose (Alpha, Beta, Gamma, Delta)","susceptibility":"bacterial blight (common & fuscans), white mold","tolerant":"","pvp":"9200186","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Radiant (12324-1)","breeder":"ProVita, ADM Edible Bean Specialties, Inc","parentage":"Sinaloa/SDP 1533","chars":"Early maturity (83 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 53 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201600322","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Red Cedar (K1306)","breeder":"Michigan State University","parentage":"K06621/USDK-CBB-15","chars":"late maturity (101 days), 1a bush-determinate, strong and erect stem and branches, 40 days to 50% bloom","resistance":"common bacterial blight/anthracnose (Race 73)","susceptibility":"Bean common mosaic virus (NL3 & NL8), rust (22:2)","tolerant":"root rot","pvp":"","mc":"Dark Red Kidney","source":"Journal of Plant Registrations 2018, 12(2): 199-202","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Red Dog (09354)","breeder":"ProVita Inc","parentage":"USWA 33/ K-59","chars":"Type 1a growth habit, days to maturity-93, days to flowering-43 (50% bloom), mid-season maturity (90-100)","resistance":"","susceptibility":"","tolerant":"","pvp":"201500392","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Red Flag (09353)","breeder":"ProVita Inc","parentage":"Red Kloud/ Chinook 2000","chars":"Type 1a growth habit, days to maturity-94, Medium maturity (90-100), days to flowering-42 (50% bloom)","resistance":"","susceptibility":"","tolerant":"","pvp":"201500390","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Red Rover (EX 08520700)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"Drake/ZAA3MntAAK","chars":"Medium maturity (92 days), 1a bush-determinate, strong and erect stem, and branches, adapted to direct harvest, 38 days to 50% bloom","resistance":"Bean common mosaic virus (\"I\" gene resistance to all races), Aphanomyces root rot (none known)","susceptibility":"","tolerant":"","pvp":"200700159","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Red Zone (09356)","breeder":"ProVita Inc","parentage":"USWA 33/ Foxfire","chars":"Type 1a growth habit, days to maturity-93, Midseason maturity (90-100), days to flowering-43 (50% bloom)","resistance":"","susceptibility":"","tolerant":"","pvp":"201500391","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"RedKanner (Cornell 10195)","breeder":"Cornell University","parentage":"Redkote/Redkloud","chars":"late maturity (105 days), 1a bush-determinate, strong and erect stem and branches, 45 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"9900359","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Remington (ROG123)","breeder":"Novartis Seeds Inc","parentage":"PT84347(RR812607-4)/RR812659-19","chars":"Early-Mid Season maturity, days to maturity-91, 2b growth habit- erect, indeterminate, guides short or not developed, days to flowering-48 (50% bloom)","resistance":"Bean common mosaic virus (NL8, NY15), anthracnose (alpha, 73)/Rust (40, 48, 53)","susceptibility":"","tolerant":"rust (44)","pvp":"9600337","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Rio Rojo (NDZ6249)","breeder":"NDSU Research Foundation","parentage":"Buster/VAX 3","chars":"Medium maturity (100 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed/adapted to direct harvest, 52 days to 50% bloom","resistance":"","susceptibility":"rust (40-42, 52-57, 59-61, 20-4), anthracnose (Races 7 and 73), Bean common mosaic virus (NL-3)","tolerant":"common bacterial blight","pvp":"201300090","mc":"Small Red","source":"Journal of Plant Registrations 2013, 7(2): 130-134","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Ronnie's Red (09360)","breeder":"ProVita, Trinidad Benham Corp","parentage":"USWA 33/Foxfire","chars":"Medium maturity (93 days), 1a bush-determinate, strong and erect stem, and branches, adapted to direct harvest, 41 days to 50% bloom","resistance":"","susceptibility":"rust, Bean common mosaic virus (NL8), curly top virus","tolerant":"bacterial brown spot, /common bacterial blight","pvp":"201900047","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Rosetta (S08418)","breeder":"Michigan State University","parentage":"S02754/S04503","chars":"Medium maturity (96 days), 3a vine-indeterminate, short guides with no ability to climb, 43 days to 50% bloom","resistance":"Bean common mosaic virus (NL3)","susceptibility":"","tolerant":"","pvp":"","mc":"Pink","source":"Journal of Plant Registrations 2012, 6(3): 229-232","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Rosie (ND061106)","breeder":"NDSU Research Foundation","parentage":"992-203-10/02-317","chars":"late maturity (>100), days to maturity-106, 1a growth habit, days to flowering-43 (50% bloom)","resistance":"rust (Most Mesoamerican races), anthracnose (73), Bean common mosaic virus (NL-3)","susceptibility":"","tolerant":"common bacterial blight, root rot, heat","pvp":"201500066","mc":"Light Red Kidney","source":"Journal of Plant Registrations 2017, 11(1): 1-8","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"RS 101","breeder":"Ronald D","parentage":"Single Selection from Olathe mutant seed","chars":"Medium maturity (90-100), days to maturity-95, 2a growth habit-erect, indeterminate, guides short or not developed, days to flowering-41 (50% bloom)","resistance":"Rust (40-42, 52-57, 59-61, 68-72, 76, 79, 82-84, 89-92, 95, 99)","susceptibility":"Bean common mosaic virus","tolerant":"White Mold","pvp":"8500149","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Ruby (09304)","breeder":"ProVita, Inc","parentage":"99238/Merlot","chars":"Medium maturity (92 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 53 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400393","mc":"Small Red","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Ryder (ROG013)","breeder":"Syngenta Seeds, Inc","parentage":"Ember/Pc 874-SPS4-5-1","chars":"Early maturity (88 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 48 days to 50% bloom","resistance":"Bean common mosaic virus (NL8)","susceptibility":"","tolerant":"","pvp":"200500212","mc":"Small Red","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Samurai (G12901)","breeder":"Michigan State University","parentage":"G07321/Fuji","chars":"Medium maturity (100 days), 2b erect growth habit-indeterminate, guides medium to long with no ability to climb, adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (All strains)","susceptibility":"anthracnose (Race 73), Bean common mosaic necrosis virus (all strains), common bacterial blight (Michigan Isolate), rust (Michigan Isolate 22-2), white mold (Michigan Isolates)","tolerant":"","pvp":"201700125","mc":"Otebo","source":"Journal of Plant Registrations 2016, 16(2): 109-114","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Santa Cruz (06189)","breeder":"ADM Edible Bean Specialties, Inc","parentage":"99-2221/La Paz","chars":"Medium maturity (93 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 46 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"PV201300355","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Santa Fe (P04205)","breeder":"Michigan State University","parentage":"P99119/G99750","chars":"Medium maturity (91 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest, 44 days to 50% bloom","resistance":"anthracnose (Race 7), Bean common mosaic virus (All strains), rust (Michigan isolates, Race 53)","susceptibility":"Bean common mosaic necrosis virus (All strains), common bacterial blight (Michigan Isolate)","tolerant":"white mold (Michigan isolates)","pvp":"201000269","mc":"Pinto","source":"Journal of Plant Registrations 2010, 4(1): 12-16","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Santiago (RNK278)","breeder":"Rogers Seed Co","parentage":"AR83-2/781898","chars":"Medium maturity (92 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus","susceptibility":"rust (Races 41, 43, 44, 52), common bacterial blight","tolerant":"white mold, Fusarium root rot, curly top virus","pvp":"9600019","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Sawtooth","breeder":"University of Idaho","parentage":"Matterhorn/Starlight//Beryl/Weihing","chars":"Medium maturity (98 days), 3b vine-indeterminate, long guides with ability to climb, not adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (NY15, US6), Bean common mosaic necrosis virus (necrotic reaction), rust (Race 38)","susceptibility":"","tolerant":"rust (Race 53)","pvp":"200900305","mc":"Great Northern","source":"Journal of Plant Registrations 2008, 2(3): 174-179","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Scout (23ST-27)","breeder":"North Dakota State University & USDA","parentage":"Z0818-23/Stampede","chars":"Medium maturity (100 days), 2b erect growth habit-indeterminate, guides medium to long with no ability to climb, not adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (NL3)","susceptibility":"common bacterial blight, rust, anthracnose, white mold","tolerant":"","pvp":"201700187","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Seabiskit (N128420)","breeder":"Archer-Daniels-Midland Co","parentage":"Crestwood/Rogers 331","chars":"Medium maturity (95 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 59 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"white mold","pvp":"200600056","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Seahawk (N97774)","breeder":"Michigan State University","parentage":"Bunsi/Huron","chars":"Medium maturity (97 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 45 days to 50% bloom","resistance":"anthracnose (Race 7, 65), Bean common mosaic virus (all strains)","susceptibility":"common bacterial blight (Michigan isolates), rust (Race 53)","tolerant":"white mold (Michigan isolates)","pvp":"200300283","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Sedona (S00809)","breeder":"Michigan State University","parentage":"X94076/R94142","chars":"Mid-season maturity, days to maturity-93, 2b growth habit- erect, indeterminate, guides medium to long with no ability to climb, days to flowering-42 (50% bloom)","resistance":"rust (Michigan isolates), Bean common mosaic virus (NL-1, NL-2, NL-7)","susceptibility":"common bacterial blight (Michigan isolates)","tolerant":"","pvp":"200700410","mc":"Pink","source":"Crop Science 2006, 46(6): 2707-2708","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Shania (B201240)","breeder":"Archer-Daniels-Midland Co","parentage":"T39/Midnight","chars":"2a growth habit-erect, indeterminate, guides short or not developed, mid-season maturity, days to maturity-98, days to flowering-47 (50% bloom)","resistance":"Bean common mosaic virus (I gene), rust (53), drought, air pollution","susceptibility":"Bean common necrosis virus, anthracnose (Race 73), common bacterial blight","tolerant":"heat, cold","pvp":"200800184","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Shiny Black Pearl","breeder":"Colorado State University","parentage":"ARA 13/UI 906//H9652-5","chars":"Medium maturity (95 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, not adapted to direct harvest, 41 days to 50% bloom","resistance":"Bean common mosaic virus (All strains)","susceptibility":"rust (Race 53), common bacterial blight","tolerant":"","pvp":"201100048","mc":"Black","source":"Bean Improvement Cooperative 2011, 212","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Shoshone (UIP 15-53)","breeder":"University of Idaho","parentage":"UIP15= H9657-42-2/3/'Poncho'/G 17341//'Kodiak'/BelDakMi-RMR-14","chars":"Mid-season maturity (90-100), days to maturity-94, 3b growth habit- vine, indeterminate, days to flowering-45 (50% bloom)","resistance":"Bean common mosaic virus (NY15 & US6), Bean common necrosis virus (NL-3K), rust (38)","susceptibility":"","tolerant":"rust (53), Fusarium root rot, curly top virus, heat, drought","pvp":"200900304","mc":"Pinto","source":"Journal of Plant Registrations 2008, 2(3): 180-186","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Sinaloa (06203)","breeder":"AmeriSeed, LLC","parentage":"01-3564-1/La Paz","chars":"Early maturity (90 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 46 days to 50% bloom","resistance":"rust (ur3 gene)","susceptibility":"","tolerant":"","pvp":"201100007","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Snowden (K08961)","breeder":"Michigan State University","parentage":"K04604/USDK-CBB-15","chars":"Medium maturity (95 days), 1a bush-determinate, strong and erect stem and branches, not adapted to direct harvest, 36 days to 50% bloom","resistance":"anthracnose (Races 73), Bean common mosaic virus (All strains)","susceptibility":"Bean common mosaic necrosis virus (All strains), common bacterial blight (Michigan isolate), rust (Michigan isolate 22:2), white mold (Michigan isolates)","tolerant":"","pvp":"201500009","mc":"White Kidney","source":"Journal of Plant Registrations 2012, 6(3): 238-242","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Sonora (99233)","breeder":"AmeriSeed, LLC","parentage":"PNE 6-94-75/Winchester","chars":"Early maturity (89 days)/IIb erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 49 days to 50% bloom","resistance":"rust","susceptibility":"Bean common mosaic virus (All races)","tolerant":"","pvp":"200700296","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Stampede (ND020351)","breeder":"NDSU Research Foundation","parentage":"94-029-01-01/BDM-RMR-14","chars":"Mid-season maturity (90-100), days to maturity-96, 2a growth habit-erect, indeterminate, guides short or not developed, days to flowering-42 (50% bloom)","resistance":"rust (40-42, 52-57, 59-61), Bean common mosaic virus (all races of necrotic strains), air pollution","susceptibility":"white mold","tolerant":"","pvp":"200800304","mc":"Pinto","source":"Journal of Plant Registrations 2010, 4(1): 5-11","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"StayBright (COSD 35)","breeder":"Colorado State University","parentage":"Long's Peak/CO 13484","chars":"Medium maturity (98 days), upright growth habit, adapted to direct harvest, 45 days to 50% bloom","resistance":"rust (Races 38, 39, 40, 44, 45, 46, 49, 50, 51, 52, 54, 56, 59, 72), Bean common mosaic virus (NY15, NL3, NL4, NL8)","susceptibility":"","tolerant":"","pvp":"201700230","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Sundance (COSD 07)","breeder":"Colorado State University","parentage":"CO 15542/Long's Peak","chars":"Medium maturity (94 days), upright growth habit, adapted to direct harvest, 45 days to 50% bloom","resistance":"rust (Race 38, 39, 40, 44, 45, 46, 49, 50, 51, 52, 54, 56, 59, 72), Bean common mosaic virus (NL3)","susceptibility":"","tolerant":"","pvp":"201700231","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"SV1893GH (12-NAV-1200)","breeder":"Seminis Vegetable Seeds Inc","parentage":"Regent/RWR2381","chars":"late maturity (>100), days to maturity-106, days to flowering-49 (50% bloom), Resistance: rust (Race 53), Bean common mosaic virus (I), Aphanomyces","resistance":"rust (Race 53), Bean common mosaic virus (I), Aphanomyces","susceptibility":"","tolerant":"","pvp":"201500339","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"SV6139GR (12-PIN-1012)","breeder":"Seminis Vegetable Seeds Inc","parentage":"Windbreaker/Medicine Hat","chars":"upright short vine growth habit, late maturity, days to maturity- 101, days to flowering-49 (50% bloom)","resistance":"rust (Race 53), Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"201500316","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"SV6533GR (12-PIN-1214)","breeder":"Seminis Vegetable Seeds Inc","parentage":"Windbreaker/Medicine Hat","chars":"late maturity (>100), days to maturity-101, days to flowering-47 (50% bloom), upright short vine growth habit","resistance":"rust (Race 53), Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"201500317","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"SV6894GB (12-BKB-1213)","breeder":"Seminis Vegetable Seeds Inc","parentage":"B01741/B0866","chars":"upright determinate growth habit, late maturity (>100), days to maturity-104, days to flowering-49 (50% bloom)","resistance":"Bean common mosaic virus (I gene resistance), anthracnose (Races 73, 105-Co2 gene resistance)","susceptibility":"","tolerant":"","pvp":"201500297","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"SVS 0815 (EX 0850815)","breeder":"Seminis Vegetable Seeds Inc","parentage":"97YT85/Matterhorn","chars":"Medium maturity (96 days), 2b erect growth habit- indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 45 days to 50% bloom","resistance":"Bean common mosaic virus (I), rust (Race 53)","susceptibility":"","tolerant":"","pvp":"201000301","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Talon (ND061210)","breeder":"NDSU Research Foundation","parentage":"02-367-16-09-01///////Foxfire/01-471//////00-615/Montcalm/////92-229R-01/Redhawk////89-161-13/Montcalm///Montcalm/89-067//Red Kloud/I89005","chars":"Mid-season maturity (90-100), days to maturity-100, 1a growth habit, days to flowering-43 (50% bloom)","resistance":"rust (most Mesoamerican races), anthracnose (Race 73), Bean common mosaic virus (NL-3)","susceptibility":"","tolerant":"common bacterial blight, root rot","pvp":"201500067","mc":"Dark Red Kidney","source":"Journal of Plant Registrations 2017, 11(1): 1-8","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Taurus (03138)","breeder":"ProVita, Inc","parentage":"Matterhorn/97-889-6","chars":"Medium maturity (93 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb/adapted to direct harvest, 54 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400387","mc":"Great Northern","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Topaz R (ROG123R)","breeder":"Syngenta Seeds, Inc","parentage":"BelDakMi-RMR-11/Topaz","chars":"early maturity (83 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb/adapted to direct harvest, 44 days to 50% bloom","resistance":"Bean common mosaic virus (NL8), rust (all known races except 108)","susceptibility":"","tolerant":"","pvp":"200500213","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Torreon (06206)","breeder":"ProVita, ADM Edible Bean Specialties, Inc","parentage":"01-3564-1/La Paz","chars":"Early maturity (89 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 48 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201600323","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Tuscola (MSU Strain #8467)","breeder":"Michigan State University","parentage":"Single plant selection of a diallel cross with 10 true-breeding strains","chars":"medium maturity (92 days), 1a bush-determinate, strong and erect stem, and branches","resistance":"anthracnose (Race 2), halo bight, Bean common mosaic virus (NY 15)","susceptibility":"rust, bacterial wilt, curly top virus, powdery mildew, root-knot nematode/yellow bean mosaic virus, Fusarium root rot","tolerant":"","pvp":"7900075","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"UC Rio Zape","breeder":"University of California, Davis, Foundation Seed Program, UC Davis","parentage":"1/64 Matterhorn, 63/64 Rio Zape","chars":"late maturity, highly viny race Durango type, very high yield potential in Southwestern USA, but may have low yields in other locations due to partial photoperiod sensitivity and selection in a dry climate","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"public release","mc":"Other","source":"Journal of Plant Registrations 2021, 15(1): 37-42","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"UC Southwest Gold","breeder":"University of California, Davis, Foundation Seed Program, UC Davis","parentage":"UCD Pink 9634/Zuni Gold","chars":"Early maturity, compact indeterminate, high yield, heat tolerant","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"public release","mc":"Other","source":"Journal of Plant Registrations 2021, 15(1): 48-52","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"UC Southwest Red","breeder":"University of California, Davis, Foundation Seed Program, UC Davis","parentage":"UCD Pink 9634/Zuni Gold","chars":"Early maturity, compact indeterminate, high yield, heat tolerant","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"public release","mc":"Other","source":"Journal of Plant Registrations 2021, 15(1): 21-27","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"UC Sunrise","breeder":"University of California, Davis, Foundation Seed Program, UC Davis","parentage":"UCD Pink 9634/Zuni Gold","chars":"Medium maturity, heat tolerant, vine","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"public release","mc":"Other","source":"Journal of Plant Registrations 2021, 15(1): 43-47","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"UC Tiger's Eye","breeder":"University of California, Davis, Foundation Seed Program, UC Davis","parentage":"1/16 UC Canario 707, 15/16 Tiger's Eye","chars":"Early maturity, compact indeterminate, high yield, heat tolerant","resistance":"Bean common mosaic virus (I)","susceptibility":"","tolerant":"","pvp":"Public release","mc":"Other","source":"Journal of Plant Registrations 2021, 15(1): 16-20","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Vero (C213259)","breeder":"Archer-Daniels-Midland Co","parentage":"Etna/H9678-41","chars":"Mid-season maturity (90-100), days to maturity-97, days to flowering-39 (50% bloom), 1a growth habit","resistance":"","susceptibility":"","tolerant":"","pvp":"201500286","mc":"Cranberry","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Vibrant (11258)","breeder":"ADM Edible Bean Specialties, Inc","parentage":"SDP1533/Sinaloa","chars":"early maturity (90 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb/adapted to direct harvest/53 days to 50% bloom","resistance":"","susceptibility":"","tolerant":"","pvp":"201400413","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Vigilant (02084)","breeder":"ProVita, Inc","parentage":"98-1570-1/Navigator","chars":"early maturity (86 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb/adapted to direct harvest","resistance":"","susceptibility":"","tolerant":"","pvp":"201200164","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Viper (09303)","breeder":"ProVita Inc","parentage":"Merlot/ 99238","chars":"Type 2b growth habit, days to maturity-100, medium maturity (90-100), days to flowering-53 (50% bloom)","resistance":"","susceptibility":"","tolerant":"","pvp":"201500389","mc":"Small Red","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Vision (XP B310)","breeder":"Asgrow Seed Co","parentage":"Midnight Black Turtle/Agate","chars":"Medium maturity (90-100), days to maturity-92, 2b growth habit- erect, indeterminate, guides medium to long, with no ability to climb, days to flowering-50 (50% bloom)","resistance":"rust (Race 40, 53)","susceptibility":"Bean common mosaic virus (NY15)","tolerant":"air pollution","pvp":"9600130","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Vista (GTS 0286)","breeder":"Gen-Tec Seeds, Limited","parentage":"C-20/3/GTS 0181-1/Seafarer","chars":"late maturity (102 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 43 days to 50% bloom","resistance":"Bean common mosaic virus (1, 15)/anthracnose (Alpha, Beta, Gamma, Delta)","susceptibility":"common bacterial blight, Bean common mosaic necrosis","tolerant":"","pvp":"9200046","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Voyager (RNK303)","breeder":"Novartis Seeds, Inc","parentage":"Aurora/782253","chars":"Medium maturity (90-100), days to maturity-92, 2b growth habit- bush-determinate, weak stem and branches, days to flowering-47 (50% bloom)","resistance":"Bean common mosaic virus (Serotype B)","susceptibility":"anthracnose (Races Alpha & 73)","tolerant":"anthracnose (Delta)","pvp":"9600020","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Wallace (773-V98)","breeder":"Cornell University","parentage":"CELRK/Red Kanner","chars":"Early maturity (80-90), days to maturity- 89, 1a growth habit- bush-determinate, days to flowering- 38 (50% bloom","resistance":"Bean common mosaic virus","susceptibility":"white mold, common bacterial blight","tolerant":"rust, heat, cold, drought","pvp":"200900281","mc":"Light Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Winchester (ROG171)","breeder":"Rogers Seed Co","parentage":"86277/84350","chars":"Early- mid-season maturity, days to maturity-92, 2b growth habit- erect, indeterminate, guides medium to long, with no ability to climb, days to flowering-43 (50% bloom)","resistance":"rust (40, 54), anthracnose (Race Alpha), Bean common mosaic virus (Western, NL 4, NL 8, NY15, NL3)","susceptibility":"anthracnose (Race 73), Bean common mosaic virus (NL5)","tolerant":"","pvp":"9600338","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Windbreaker (XP 08530762)","breeder":"Seminis Vegetable Seeds, Inc","parentage":"Buster/Matterhorn","chars":"Medium maturity (95 days), 2b erect growth habit-indeterminate, guides medium to long, with no ability to climb, adapted to direct harvest, 54 days to 50% bloom","resistance":"Bean common mosaic virus, rust (Race 53)","susceptibility":"","tolerant":"","pvp":"200500105","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Yellowstone (Y16507)","breeder":"Michigan State University","parentage":"PR1146-123/Y11405","chars":"Medium maturity (94 days), 1a bush-determinate, strong and erect stem, and branches, 41 days to 50% bloom","resistance":"","susceptibility":"anthracnose (Races 2 & 7), common bacterial blight","tolerant":"","pvp":"","mc":"Yellow","source":"Journal of Plant Registrations 2021, 15(2): 265-270","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Zenith (B10244)","breeder":"Michigan State University","parentage":"804644/Zorro","chars":"medium maturity (100 days), 2a erect growth habit-indeterminate, guides (runners) short or not developed, adapted to direct harvest, 45 days to 50% bloom","resistance":"anthracnose (Race 73), Bean common mosaic virus (non-necrotic strains)","susceptibility":"rust, common bacterial blight, Bean common mosaic virus (BV1, NL4, Mexican, NY15, Florida)","tolerant":"","pvp":"201700006","mc":"Black","source":"Journal of Plant Registrations 2015, 9(1): 5-20","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Zircon (D76063)","breeder":"Rogers Brothers Seed Co","parentage":"Aurora/Adjutant","chars":"medium maturity (93 days), 4a Indeterminate climbing, pods distributed throughout the plant, 47 days to first bloom","resistance":"Bean common mosaic virus (BV1 & NY15)","susceptibility":"","tolerant":"","pvp":"8200066","mc":"Small White","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"USA","name":"Zorro (B04554)","breeder":"Michigan State University","parentage":"B00103//B00103/X00822","chars":"medium maturity (96 days), 2a erect growth habit- indeterminate, guides (runners) short or not developed, adapted to direct harvest, 48 days to 50% bloom","resistance":"anthracnose (Race 7), Bean common mosaic virus (all strains), rust (Michigan isolates)","susceptibility":"Bean common mosaic necrosis (All strains)","tolerant":"common bacterial blight (Michigan Isolate), white mold (Michigan Isolate)","pvp":"201000268","mc":"Black","source":"Journal of Plant Registrations 2009, 3(3): 226-230","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"OAC Thunder","breeder":"University of Guelph- SeCan","parentage":"Ex Rico SL 1351 / W84\u2011129","chars":"Yield ~3016 lbs/acre, Direct harvestability 2.6, maturity 93days, 100seed weights 22.7 gr","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R17","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.6,"maturity":93.0,"seedwt":22.7,"uog":true},{"country":"Canada","name":"Ex Rico 23","breeder":"University of Guelph-SeCan","parentage":"unknown","chars":"Yield ~2634 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R23","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":null,"maturity":99.0,"seedwt":19.8,"uog":true},{"country":"Canada","name":"OAC Seaforth","breeder":"University of Guelph-SeCan","parentage":"Seafarer*6/PI 326418","chars":"Yield ~2027 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":null,"maturity":90.0,"seedwt":20.1,"uog":true},{"country":"Canada","name":"OAC Rico","breeder":"University of Guelph- SeCan","parentage":"Ex-Rico 23*6/Narda","chars":"Yield ~2483 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"registered as a cultivar with License No. 2326 on May 2","mc":"White Navy","source":"","dh":null,"maturity":100.0,"seedwt":20.2,"uog":true},{"country":"Canada","name":"OAC Gryphon","breeder":"University of Guelph","parentage":"Ex Rico/5/Ex Rico 23","chars":"Yield ~3254 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":4.0,"maturity":96.0,"seedwt":20.4,"uog":true},{"country":"Canada","name":"OAC Silvercreek","breeder":"University of Guelph","parentage":"OAC Laser/Cran 74 Navigator","chars":"Yield ~3172 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":3.7,"maturity":95.0,"seedwt":21.4,"uog":true},{"country":"Canada","name":"OAC Rex","breeder":"University of Guelph","parentage":"HR20-738/3/ICA Pijao/PI 440795//Ex Rico 23","chars":"Yield ~3191 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R17","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.6,"maturity":98.0,"seedwt":21.5,"uog":true},{"country":"Canada","name":"OAC Redstar","breeder":"University of Guelph","parentage":"Montcalm/AC Litekid//Cran09/Foxfire ///Chinook/AC Darkid //Generatif/OAC 90-C1","chars":"Yield ~2398 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R23","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":null,"maturity":97.0,"seedwt":59.2,"uog":true},{"country":"Canada","name":"OAC Lyrik","breeder":"University of Guelph","parentage":"AC Elk/AC Litekid","chars":"Yield ~2304 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R23","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":null,"maturity":89.0,"seedwt":66.8,"uog":true},{"country":"Canada","name":"Lightning","breeder":"University of Guelph-Hensall Co-op","parentage":"Navigator/OAC Thunder//AC Compass/Silvercreek","chars":"Yield ~2845 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R17","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.1,"maturity":93.0,"seedwt":22.0,"uog":true},{"country":"Canada","name":"OAC Dublin","breeder":"University of Guelph","parentage":"OAC Rex/M97I082","chars":"Yield ~2965 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Mosaic Virus R15","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":3.1,"maturity":96.0,"seedwt":21.3,"uog":true},{"country":"Canada","name":"OAC Inferno","breeder":"University of Guelph-Hensall Co-op","parentage":"HR85/Montcalm//USWA-39/Litekid///Foxfire/Elk//Sacr/Calmont","chars":"Yield ~2550 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Mosaic Virus R15","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":3.3,"maturity":99.0,"seedwt":65.0,"uog":true},{"country":"Canada","name":"Dynasty","breeder":"University of Guelph-Hensall Co-op","parentage":"HR85/Montcalm//USWA-39/Litekid","chars":"Yield ~2399 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Mosaic Virus R15","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":2.9,"maturity":94.0,"seedwt":64.6,"uog":true},{"country":"Canada","name":"Yeti","breeder":"University of Guelph-Hensall Co-op","parentage":"AC Calmont/PI 358207","chars":"Yield ~2162 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R23","tolerant":"","pvp":"","mc":"White Kidney","source":"","dh":2.7,"maturity":95.0,"seedwt":58.5,"uog":true},{"country":"Canada","name":"Mist","breeder":"University of Guelph-Hensall Co-op","parentage":"spscbbr136/PI207262//ICB-10/Vax4///Speedvale/Avanti//99-1/Rex","chars":"Yield ~3163 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R17","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.8571428571428574,"maturity":97.0,"seedwt":23.2,"uog":true},{"country":"Canada","name":"Bolt","breeder":"University of Guelph-Hensall Co-op","parentage":"Rex/A98083//Compass/B98143///RESW2138/B981045//B91213/Kippen","chars":"Yield ~2777 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R17","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.6,"maturity":91.0,"seedwt":24.5,"uog":true},{"country":"Canada","name":"Fathom","breeder":"University of Guelph-Hensall Co-op","parentage":"spse087/spsbf019 (aka 11-5","chars":"Yield ~2762 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.275,"maturity":97.0,"seedwt":23.3,"uog":true},{"country":"Canada","name":"OAC Rosito","breeder":"University of Guelph- Hensall Co-op","parentage":"selected from an El Salvadoran landrace","chars":"Yield ~3327 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Small Red","source":"","dh":1.9,"maturity":96.0,"seedwt":24.1,"uog":true},{"country":"Canada","name":"OAC Vortex","breeder":"University of Guelph-Plovgh","parentage":"HR199-4587/Zorro","chars":"Yield ~3669 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Black","source":"","dh":2.2,"maturity":97.0,"seedwt":23.9,"uog":true},{"country":"Canada","name":"OAC Racer","breeder":"University of Guelph-Plovgh","parentage":"HR161/Etna","chars":"Yield ~2003 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.8,"maturity":85.0,"seedwt":65.0,"uog":true},{"country":"Canada","name":"OAC Plasma","breeder":"University of Guelph","parentage":"Mist/H5211-36253","chars":"Yield ~3541 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.4,"maturity":94.0,"seedwt":22.3,"uog":true},{"country":"Canada","name":"OAC Jewel","breeder":"University of Guelph","parentage":"HR190-4849/Blush","chars":"Yield ~2162 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":2.6,"maturity":93.0,"seedwt":64.3,"uog":true},{"country":"Canada","name":"OAC Candycane","breeder":"University of Guelph","parentage":"HR161/Etna","chars":"Yield ~2348 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.2,"maturity":90.0,"seedwt":67.3,"uog":true},{"country":"Canada","name":"Rogue","breeder":"University of Guelph-Hensall Co-op","parentage":"Apex/H5211-36253","chars":"Yield ~3250 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":3.2,"maturity":97.0,"seedwt":20.4,"uog":true},{"country":"Canada","name":"OAC Snowshoe","breeder":"University of Guelph-Treasure Valley Seed Co.","parentage":"Yeti/Dynasty","chars":"Yield ~2357 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Kidney","source":"","dh":2.9,"maturity":92.0,"seedwt":62.7,"uog":true},{"country":"Canada","name":"OAC Navabi","breeder":"University Of Guelph- Treasure Valley Seed Co.","parentage":"H5357C-42101///Capri/2793CBB//SAB68","chars":"Yield ~2226 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.3,"maturity":83.0,"seedwt":61.2,"uog":true},{"country":"Canada","name":"OAC Jasper","breeder":"University Of Guelph","parentage":"Dynasty/Lighthouse","chars":"Yield ~1860 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":2.7,"maturity":90.0,"seedwt":64.0,"uog":true},{"country":"Canada","name":"OAC Firestripe","breeder":"University Of Guelph-Treasure Valley Seeds Co.","parentage":"H5357C-42101//Red Rider/SAB685","chars":"Yield ~2212 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.2,"maturity":89.0,"seedwt":68.5,"uog":true},{"country":"Canada","name":"Gallantry","breeder":"University of Guelph-Hensall Co-op","parentage":"Dynasty/H4713-34772","chars":"Yield ~2303 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":2.5,"maturity":88.0,"seedwt":58.0,"uog":true},{"country":"Canada","name":"OAC Iceberg","breeder":"University of Guelph","parentage":"Inferno/Yeti","chars":"Yield ~2160 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"White Kidney","source":"","dh":2.9,"maturity":94.0,"seedwt":56.0,"uog":true},{"country":"Canada","name":"OAC Fusion","breeder":"University Of Guelph- Plovgh","parentage":"RWBX5172/ACUG 10-5","chars":"Yield ~2962 lbs/acre","resistance":"Anthracnose R73","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.9,"maturity":90.0,"seedwt":20.0,"uog":true},{"country":"Canada","name":"OAC Firebrand","breeder":"University of Guelph/AAFC","parentage":"ACUG11-D1/Inferno","chars":"Yield ~2518 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":2.7,"maturity":91.0,"seedwt":55.3,"uog":true},{"country":"Canada","name":"OAC Equinox","breeder":"University of Guelph- Meridian Seeds","parentage":"Mist/Apex","chars":"Yield ~3711 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.8,"maturity":97.0,"seedwt":25.8,"uog":true},{"country":"Canada","name":"OAC Charm","breeder":"University of Guelph- Treasure Valley Seed Co.","parentage":"ACUG11-B1/Mist","chars":"Yield ~3271 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.0,"maturity":93.0,"seedwt":23.0,"uog":true},{"country":"Canada","name":"OAC Award","breeder":"University of Guelph","parentage":"Mist/Apex","chars":"Yield ~3703 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.4,"maturity":97.0,"seedwt":23.1,"uog":true},{"country":"Canada","name":"OAC Seal","breeder":"University of Guelph- Jefferies Seeds","parentage":"Fathom/GF6-11-8","chars":"Yield ~2936 lbs/acre","resistance":"Anthracnose race 73; moderately resistant to CBB","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.7,"maturity":98.0,"seedwt":23.7,"uog":true},{"country":"Canada","name":"OAC Souper","breeder":"University of Guelph","parentage":"Cirrus/Mist//Fleetwood/T9905","chars":"Yield ~3355 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.8,"maturity":102.0,"seedwt":22.1,"uog":true},{"country":"Canada","name":"Stavros","breeder":"University of Guelph - Columbia Seed Co.","parentage":"CBX9151ND/ACUG10-C1","chars":"Yield ~2349 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":1.8,"maturity":85.0,"seedwt":51.7,"uog":true},{"country":"Canada","name":"OAC Sunrise","breeder":"University of Guelph- Crooked Creek Acres","parentage":"CBX9151ND/PI414807","chars":"Yield ~2619 lbs/acre","resistance":"Anthracnose R73","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"Kintoki","source":"","dh":3.4,"maturity":95.0,"seedwt":60.6,"uog":true},{"country":"Canada","name":"OAC Blaze","breeder":"University of Guelph","parentage":"16-NDP1/Stampede","chars":"Yield ~2384 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Slow Darkening Pinto","source":"","dh":2.5,"maturity":87.0,"seedwt":39.4,"uog":true},{"country":"Canada","name":"XPT One","breeder":"University of Guelph- Columbia Seed Co.","parentage":"16-NDP1/Stampede","chars":"Yield ~2495 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"under Application No. 22-10861","mc":"Slow Darkening Pinto","source":"","dh":2.1,"maturity":88.0,"seedwt":40.2,"uog":true},{"country":"Canada","name":"OAC Paint","breeder":"University of Guelph","parentage":"BLKX9205E/Stampede","chars":"Yield ~2745 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Slow Darkening Pinto","source":"","dh":3.1,"maturity":97.0,"seedwt":37.0,"uog":true},{"country":"Canada","name":"Umbra","breeder":"University of Guelph","parentage":"Zorro/W11WE194","chars":"Yield ~3710 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Black","source":"","dh":1.9,"maturity":98.0,"seedwt":23.5,"uog":true},{"country":"Canada","name":"Steam","breeder":"University of Guelph - Hensall Co-op","parentage":"ACUG13-2/ACUG13-3","chars":"Yield ~3533 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.9,"maturity":97.0,"seedwt":22.2,"uog":true},{"country":"Canada","name":"OAC Volterra","breeder":"University of Guelph","parentage":"15-C2/15-C1","chars":"Yield ~2754 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.0,"maturity":86.0,"seedwt":66.0,"uog":true},{"country":"Canada","name":"OAC Resilient","breeder":"University of Guelph","parentage":"ACUG12-8/SXB415","chars":"Yield ~3469 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.0,"maturity":97.0,"seedwt":18.9,"uog":true},{"country":"Canada","name":"OAC Bechamel","breeder":"University of Guelph","parentage":"Not disclosed","chars":"Yield ~3430 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.5,"maturity":97.0,"seedwt":20.9,"uog":true},{"country":"Canada","name":"OAC Agate","breeder":"University of Guelph","parentage":"12-C1//W12HR582","chars":"Yield ~2757 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":2.3,"maturity":85.0,"seedwt":61.0,"uog":true},{"country":"Canada","name":"Blast","breeder":"University of Guelph- Hensall Co-op","parentage":"W11WE194/Indi","chars":"Yield ~3446 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.0,"maturity":95.0,"seedwt":21.7,"uog":true},{"country":"Canada","name":"Bannock","breeder":"University of Guelph- Hensall Co-op","parentage":"Zorro//F1 86 Zorro/Fathom","chars":"Yield ~3785 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Black","source":"","dh":1.6,"maturity":98.0,"seedwt":23.5,"uog":true},{"country":"Canada","name":"OAC Tong","breeder":"University of Guelph","parentage":"12-D1/W12HR697","chars":"Yield ~1840 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Mosaic Virus R15","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":2.9,"maturity":89.0,"seedwt":72.9,"uog":true},{"country":"Canada","name":"Eternal","breeder":"University of Guelph- Hensall Co-op","parentage":"PT9-6/W12HR1410","chars":"Yield ~1984 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Slow Darkening Pinto","source":"","dh":3.3,"maturity":89.0,"seedwt":36.4,"uog":true},{"country":"Canada","name":"OAC Endeavour","breeder":"University of Guelph","parentage":"W12HR693/Dynasty","chars":"Yield ~1911 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":2.9,"maturity":92.0,"seedwt":73.6,"uog":true},{"country":"Canada","name":"OAC M\u00e4rzen","breeder":"University of Guelph","parentage":"Inferno/W12HR705","chars":"Yield ~1901 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Mosaic Virus R15","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":4.4,"maturity":92.0,"seedwt":68.4,"uog":true},{"country":"Canada","name":"OAC Toast","breeder":"University of Guelph","parentage":"La Paz/ACHR49580","chars":"Yield ~3743 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R7","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":3.1,"maturity":89.0,"seedwt":42.0,"uog":true},{"country":"Canada","name":"OAC Clever","breeder":"University of Guelph- Columbia Seeds Co.","parentage":"W12W2503/W12W2491","chars":"Yield ~3254 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.1,"maturity":91.0,"seedwt":19.8,"uog":true},{"country":"Canada","name":"OAC Storm","breeder":"University of Guelph","parentage":"W11WE229/W12W1965","chars":"Yield ~3006 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.8,"maturity":89.0,"seedwt":19.5,"uog":true},{"country":"Canada","name":"OAC Spades","breeder":"University of Guelph","parentage":"W12B1684/W12W1965","chars":"Yield ~3376 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Black","source":"","dh":1.5,"maturity":92.0,"seedwt":24.3,"uog":true},{"country":"Canada","name":"OAC Rev","breeder":"University of Guelph","parentage":"Dynasty/K12HR877","chars":"Yield ~2975 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Common Blight","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":3.5,"maturity":98.0,"seedwt":69.8,"uog":true},{"country":"Canada","name":"Sundust","breeder":"University of Guelph","parentage":"Not disclosed","chars":"Yield ~1955 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Otebo","source":"","dh":3.8,"maturity":95.0,"seedwt":27.6,"uog":true},{"country":"Canada","name":"Stardust","breeder":"University of Guelph","parentage":"13-01/Samurai","chars":"Yield ~2617 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Otebo","source":"","dh":3.2,"maturity":101.0,"seedwt":29.0,"uog":true},{"country":"Canada","name":"OAC Glacier","breeder":"University of Guelph","parentage":"Fuji/Samurai","chars":"Yield ~2336 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Otebo","source":"","dh":2.6,"maturity":101.0,"seedwt":27.0,"uog":true},{"country":"Canada","name":"Yolk","breeder":"University of Guelph- Hensall Co-op","parentage":"13-C1/28-1","chars":"Yield ~3276 lbs/acre","resistance":"Anthracnose R73","susceptibility":"","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":3.7,"maturity":107.0,"seedwt":61.5,"uog":true},{"country":"Canada","name":"Yak","breeder":"University of Guelph- Hensall Co-op","parentage":"C12HR107/28-1","chars":"Yield ~2792 lbs/acre","resistance":"","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":3.1,"maturity":102.0,"seedwt":57.6,"uog":true},{"country":"Canada","name":"Wake","breeder":"University of Guelph- Hensall Co-op","parentage":"ACUG 16-3/ACUG 15-3","chars":"Yield ~3089 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"Anthracnose R73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.8,"maturity":88.0,"seedwt":22.3,"uog":true},{"country":"Canada","name":"OAC Copperhead","breeder":"University of Guelph","parentage":"51830/Inferno","chars":"Yield ~2360 lbs/acre","resistance":"Common Mosaic Virus R1","susceptibility":"","tolerant":"","pvp":"","mc":"Light Red Kidney","source":"","dh":4.1,"maturity":89.0,"seedwt":49.4,"uog":true},{"country":"Canada","name":"Marker","breeder":"University of Guelph","parentage":"Indi / ACUG12-B1","chars":"Yield ~ 3135 lbs/acre","resistance":"","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.2,"maturity":99.0,"seedwt":21.7,"uog":true},{"country":"Canada","name":"Epic","breeder":"Trinity Genetics (distributor)","parentage":"02-2668/Red Hawk","chars":"Maturity ~94 days","resistance":"anthracnose Race 6","susceptibility":"Anthracnose (Race 73) PVP/Patent #: PVP#: 201600108","tolerant":"","pvp":"PVP#: 201600108","mc":"Dark Red Kidney","source":"","dh":3.2,"maturity":94.0,"seedwt":63.0,"uog":false},{"country":"Canada","name":"Majesty","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"","chars":"Yield ~ 2231 lbs/acre Maturity ~97 days","resistance":"BCMV(race 1 and 15)","susceptibility":"Anthracnose (race 23 and 73) PVP/Patent #: PBR 04-4182","tolerant":"","pvp":"PBR 04-4182","mc":"Dark Red Kidney","source":"","dh":1.8,"maturity":97.0,"seedwt":73.0,"uog":false},{"country":"Canada","name":"AAC Shock","breeder":"Agriculture and Agri-Food Canada (AAFC)-Hensall Co-op","parentage":"HR164/W4170a-96060","chars":"Yield ~3144 lbs/acre","resistance":"Common Bacterial Blight and Bean Common Mosaic Virus races 1 & 15","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.8,"maturity":104.0,"seedwt":23.4,"uog":false},{"country":"Canada","name":"AAC Argosy","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"Rex/SWX2045","chars":"Yield ~3222 lbs/acre","resistance":"Common Bacterial Blight and Bean Common Mosaic Virus (races 1 & 15)","susceptibility":"Anthracnose","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.3,"maturity":103.0,"seedwt":23.9,"uog":false},{"country":"Canada","name":"Nautica","breeder":"Hensall Co-op","parentage":"OAC Laser/HR20-827/Ex Rico 23/Midnight","chars":"Yield ~3141.4 lbs/acre","resistance":"white mold","susceptibility":"anthracnose","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":2.0,"maturity":95.0,"seedwt":19.1,"uog":false},{"country":"Canada","name":"Lighthouse","breeder":"University of Guelph-R.T. Bolton","parentage":"spscbbr136/PI 207262//ICB-10/Vax4///Speedvale/Avanti//99-1/Rex","chars":"Yield ~3785 lbs/acre","resistance":"Common Bacterial Blight","susceptibility":"Anthracnose race 73","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":1.9,"maturity":102.0,"seedwt":22.6,"uog":true},{"country":"Canada","name":"AAC Scotty","breeder":"Agriculture and Agri-Food Canada (AAFC)-Canterra Seeds (Canada) and Meridian Seeds (USA)","parentage":"Hooter/SVM Taylor Hort//Etna","chars":"Yield ~1","resistance":"anthracnose races 73 and 105","susceptibility":"","tolerant":"","pvp":"CFIA Reg. No. 8374; PVP granted in U.S.","mc":"Cranberry","source":"","dh":null,"maturity":97.0,"seedwt":42.8,"uog":false},{"country":"Canada","name":"AAC Cranford","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"Cran 09/W06-043","chars":"Yield ~ 2917.426 lbs/acre","resistance":"","susceptibility":"Moderately susceptible to white mold","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":1.7,"maturity":100.0,"seedwt":62.3,"uog":false},{"country":"Canada","name":"AAC Portage","breeder":"AAFC (Agriculture and Agri-Food Canada)- Canterra Seeds","parentage":"Hooter/SVM Taylor Hort//Etna","chars":"Yield ~ 2","resistance":"anthracnose (races 73 and 105)","susceptibility":"","tolerant":"","pvp":"","mc":"White Navy","source":"","dh":null,"maturity":97.0,"seedwt":42.8,"uog":false},{"country":"Canada","name":"S09-27C","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"","chars":"Yield ~ lbs/acre","resistance":"anthracnose (race 73) and common bacterial blight","susceptibility":"Anthracnose race 105","tolerant":"","pvp":"","mc":"Navy","source":"","dh":null,"maturity":97.0,"seedwt":18.5,"uog":false},{"country":"Canada","name":"Carman Black","breeder":"Agriculture and Agri-Food Canada (AAFC)- Canterra Seeds","parentage":"BLR903/CDC Expresso/UI 906","chars":"Yield ~ 2270 lbs/acre","resistance":"","susceptibility":"","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":108.0,"seedwt":22.2,"uog":false},{"country":"Canada","name":"AAC Black Diamond 2","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"AC Black Diamond \u00d7 5 backcrosses to OAC Rex","chars":"Yield ~2670 lbs/acre","resistance":"Common bacterial blight","susceptibility":"White mold and anthracnose races 73 and 105","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":105.0,"seedwt":24.6,"uog":false},{"country":"Canada","name":"CR10875-6-2","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"","chars":"Yield ~ lbs/acre","resistance":"Anthracnose race 73","susceptibility":"White Mold and Common Bacterial Blight","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":98.0,"seedwt":45.5,"uog":false},{"country":"Canada","name":"AAC Burdett","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"L04B818/Agrinto","chars":"Yield ~ 3274.297 lbs/acre","resistance":"White mold","susceptibility":"","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":97.0,"seedwt":34.4,"uog":false},{"country":"Canada","name":"AAC Expedition","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"W06-121/Island","chars":"Yield ~ 3693 lbs/acre","resistance":"Anthracnose (race 73 and 105) and white mold","susceptibility":"Common bacterial blight","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":97.0,"seedwt":40.7,"uog":false},{"country":"Canada","name":"AAC Tundra","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"L99E247/354B-5","chars":"Yield ~ 3283 lbs/acre","resistance":"White mold (moderately)","susceptibility":"Anthracnose (race 73 and 105)","tolerant":"","pvp":"","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":105.0,"seedwt":32.5,"uog":false},{"country":"Canada","name":"AAC Whitestar","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"L04E494/Resolute","chars":"Yield ~ 3434 lbs/acre","resistance":"White mold","susceptibility":"Anthracnose (race 73 and 105)","tolerant":"","pvp":"","mc":"Navy","source":"","dh":null,"maturity":98.0,"seedwt":36.9,"uog":false},{"country":"Canada","name":"Resolute","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"83B352/5/GN Star*2/ 3/Redkloud/Kentwood/ 2/Swan Valley/4/GN Star*2 /3/Redkloud/Kentwood/ 2/Swan Valley/ 6/Sask 92070.","chars":"Yield ~1837 lbs/acre","resistance":"Bacterial wilt","susceptibility":"Anthracnose (Delta","tolerant":"","pvp":"","mc":"Great Northern","source":"","dh":null,"maturity":98.0,"seedwt":32.9,"uog":false},{"country":"Canada","name":"AAC Y012","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"PI 406158/Peruano","chars":"Yield ~ 2453 lbs/acre","resistance":"","susceptibility":"Anthracnose (race 73 and 105)","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":null,"maturity":102.0,"seedwt":41.6,"uog":false},{"country":"Canada","name":"AAC Y015","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"PI 406158/Peruano","chars":"Yield ~ 2328 lbs/acre","resistance":"","susceptibility":"Anthracnose (race 73 and 105)","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":null,"maturity":102.0,"seedwt":42.6,"uog":false},{"country":"Canada","name":"AAC Y073","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"W08-109/CDC 2253-4","chars":"Yield ~ 2774 lbs/acre","resistance":"White mold","susceptibility":"Anthracnose (race 73 and 105)","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":null,"maturity":96.0,"seedwt":43.2,"uog":false},{"country":"Canada","name":"AAC PT600","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"AAC Burdett/L11PS252","chars":"Yield ~ 3357 lbs/acre","resistance":"Anthracnose","susceptibility":"Common bacterial blight","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":96.0,"seedwt":39.0,"uog":false},{"country":"Canada","name":"Harohawk","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"Raven and H2895-B67278","chars":"Yield ~2298 lbs/acre","resistance":"Bean common mosaic virus","susceptibility":"Anthracnose race 17","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":96.0,"seedwt":21.1,"uog":false},{"country":"Canada","name":"Harblack","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"Snowflake and Midnight","chars":"Yield ~2455 lbs/acre","resistance":"anthracnose race 73","susceptibility":"","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":89.0,"seedwt":20.2,"uog":false},{"country":"Canada","name":"Black Violet","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"","chars":"Yield ~ 2890 lbs/acre","resistance":"White mould","susceptibility":"anthracnose races 73 and 17","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":106.0,"seedwt":19.7,"uog":false},{"country":"Canada","name":"Red Rider","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"SVM Taylor Horticulture and Dolly cranberry","chars":"Yield ~ 2572 lbs/acre","resistance":"Bean common mosaic virus (race 15)","susceptibility":"Anthracnose","tolerant":"","pvp":"","mc":"Cranberry","source":"","dh":null,"maturity":96.0,"seedwt":63.7,"uog":false},{"country":"Canada","name":"CDC Blackstrap","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~1700 lbs/acre","resistance":"Common bacterial blight","susceptibility":"Anthracnose (races 73 and 105)","tolerant":"","pvp":"PBR \u201991","mc":"Black","source":"","dh":null,"maturity":null,"seedwt":19.5,"uog":false},{"country":"Canada","name":"Wolfe","breeder":"Gowan Seeds","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"PBR Certificate #0550 (Application #96\u2011975)","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"Cirrus","breeder":"W.G. Thompson & Sons Ltd","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #02-3221","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"CDC WM-3","breeder":"University of Saskatchewan","parentage":"derived from bulked F\u2082 selection","chars":"Yield ~ 2","resistance":"","susceptibility":"","tolerant":"","pvp":"PBR Certificate #6424 (Application #18-9454)","mc":"Slow Darkening Pinto","source":"","dh":null,"maturity":78.0,"seedwt":36.0,"uog":false},{"country":"Canada","name":"CDC Superjet","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 2663 lbs/acre","resistance":"Bacterial blight","susceptibility":"Anthracnose races 73 and 105 and white mold","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":110.0,"seedwt":17.0,"uog":false},{"country":"Canada","name":"CDC Jet","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 2200 lbs/acre","resistance":"","susceptibility":"Anthracnose","tolerant":"","pvp":"","mc":"Black","source":"","dh":null,"maturity":110.0,"seedwt":17.0,"uog":false},{"country":"Canada","name":"CDC WM-2","breeder":"University of Saskatchewan","parentage":"Minto/3/Minto/Weihing//Minto/OAC Rex/4/CDC WM-1*3 /6/ Minto*2/5/ CDC WM-1/4/ Minto /3/ Minto/Weihing//Minto/OAC Rex","chars":"Yield ~1722 lbs/acre","resistance":"Common bacterial blight","susceptibility":"","tolerant":"","pvp":"PBR '91","mc":"Pinto","source":"","dh":null,"maturity":95.0,"seedwt":36.5,"uog":false},{"country":"Canada","name":"CDC Whitetrack","breeder":"University of Saskatchewan","parentage":"(1190m-13 \u00d7 OAC 95-4) F\u2082 / (2558-19 \u00d7 UDO303684) F\u2081","chars":"Yield ~ lbs/acre","resistance":"","susceptibility":"","tolerant":"","pvp":"","mc":"Navy","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"CDC Turtle Mountain","breeder":"University of Saskatchewan","parentage":"Derived from a three-way cross (CDC Blackstrap \u00d7 AG11155) // backcross to CDC Blackstrap","chars":"Yield ~ lbs/acre","resistance":"Common bacterial blight SU91 marker","susceptibility":"","tolerant":"","pvp":"Canadian PBR Application No. 22-11050","mc":"Black","source":"","dh":null,"maturity":95.0,"seedwt":22.3,"uog":false},{"country":"Canada","name":"CDC Sunburst","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 2","resistance":"","susceptibility":"","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":null,"maturity":96.0,"seedwt":40.5,"uog":false},{"country":"Canada","name":"CDC Sol","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 2244\u20132693 lbs/acre","resistance":"Common bacterial blight","susceptibility":"","tolerant":"","pvp":"","mc":"Yellow","source":"","dh":1.9,"maturity":102.0,"seedwt":39.9,"uog":false},{"country":"Canada","name":"CDC Ray","breeder":"University of Saskatchewan","parentage":"Mejorado/ 2818B-1-2-F4","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"PBR Certificate #5805","mc":"Flor de Junio","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"CDC Floral","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #21-10590","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"CDC Amarilla","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #25-12020","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"AAC Alberta North","breeder":"Agriculture & Agri-Food Canada (AAFC)","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #25-12009","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"4767CBB-6-2","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #21-10590","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"3850-1","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #17-9202","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"3458-7","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"","tolerant":"","pvp":"Application #14-8322","mc":"Other","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"Island","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"X99-011 (64-68-8/L98B359)","chars":"Yield ~ 3","resistance":"White mold","susceptibility":"Anthracnose (races 73 and 1096)","tolerant":"","pvp":"Registration no. 6228","mc":"Pinto","source":"","dh":null,"maturity":102.0,"seedwt":38.5,"uog":false},{"country":"Canada","name":"CDC Marmot","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 109% of CDC Pintium lbs/acre","resistance":"","susceptibility":"","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":null,"seedwt":36.7,"uog":false},{"country":"Canada","name":"CDC Pintium","breeder":"University of Saskatchewan","parentage":"Not disclosed","chars":"Yield ~ 2","resistance":"","susceptibility":"Anthracnose (races 73 & 105)","tolerant":"","pvp":"","mc":"Pinto","source":"","dh":null,"maturity":105.0,"seedwt":37.0,"uog":false},{"country":"Canada","name":"AC Redbond","breeder":"Agriculture and Agri-Food Canada (AAFC)","parentage":"Ember/3/2*NW63 // Redkloud / Kentwood","chars":"Yield ~ 2","resistance":"White mold","susceptibility":"Common bacterial blight","tolerant":"","pvp":"","mc":"Small Red","source":"","dh":null,"maturity":99.0,"seedwt":32.4,"uog":false},{"country":"Canada","name":"Canadian Wonder","breeder":"Wildrose Heritage Seed Company","parentage":"originating in Canada before 1873","chars":"","resistance":"","susceptibility":"Bean common mosaic virus","tolerant":"","pvp":"","mc":"Dark Red Kidney","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false},{"country":"Canada","name":"Beka","breeder":"Traditional Canadian heirloom genotype","parentage":"Not disclosed","chars":"","resistance":"","susceptibility":"common fungal and bacterial diseases","tolerant":"","pvp":"","mc":"Golden brown","source":"","dh":null,"maturity":null,"seedwt":null,"uog":false}];
+
+// ═══════════════════════════════════════════════════════════════════
+// FINDER STATE
+// ═══════════════════════════════════════════════════════════════════
+let fvSourceFilter='all', fvMcFilter='all';
+const MC_COLORS={
+  'White Navy':'#3b82f6','Navy':'#60a5fa','Black':'#6b7280',
+  'Cranberry':'#dc2626','Dark Red Kidney':'#991b1b','Light Red Kidney':'#f87171',
+  'White Kidney':'#e2e8f0','Pinto':'#a16207','Slow Darkening Pinto':'#92400e',
+  'Great Northern':'#94a3b8','Yellow':'#ca8a04','Small Red':'#b45309',
+  'Otebo':'#7c3aed','Kintoki':'#be123c','Pink':'#ec4899',
+  'Peruano':'#d97706','Other':'#475569','Flor de Junio':'#15803d',
+  'Flor de Mayo':'#16a34a','Small White':'#cbd5e1','Golden brown':'#78716c'
+};
+function fvCol(mc){return MC_COLORS[mc]||'#4a5568';}
+
+// ── Filter helpers ──
+function getFvList(){
+  let list=[...CULTIVARS_DB];
+  if(fvSourceFilter==='uog') list=list.filter(r=>r.uog);
+  else if(fvSourceFilter==='canada') list=list.filter(r=>r.country==='Canada');
+  else if(fvSourceFilter==='usa') list=list.filter(r=>r.country==='USA');
+  if(fvMcFilter!=='all') list=list.filter(r=>r.mc===fvMcFilter);
+  const q=(document.getElementById('fv-search')?.value||'').toLowerCase().trim();
+  if(q) list=list.filter(r=>
+    r.name.toLowerCase().includes(q)||
+    r.breeder.toLowerCase().includes(q)||
+    r.mc.toLowerCase().includes(q)||
+    r.parentage.toLowerCase().includes(q)||
+    r.resistance.toLowerCase().includes(q)||
+    r.chars.toLowerCase().includes(q)
+  );
+  const sort=document.getElementById('fv-sort')?.value||'alpha';
+  if(sort==='alpha') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='mat') list.sort((a,b)=>(a.maturity||999)-(b.maturity||999));
+  else if(sort==='sw') list.sort((a,b)=>(a.seedwt||999)-(b.seedwt||999));
+  else if(sort==='dh') list.sort((a,b)=>(b.dh||0)-(a.dh||0));
+  return list;
+}
+
+function fvSource(src,btn){
+  fvSourceFilter=src;
+  document.querySelectorAll('#fv-source-tabs button').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  renderFinderNew();
+}
+
+function fvMC(mc,btn){
+  fvMcFilter=mc;
+  document.querySelectorAll('#fv-mc-row .fb').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  renderFinderNew();
+}
+
+// ── Card builder ──
+function mkFvCard(r){
+  const safeN=r.name.replace(/['"]/g,'');
+  const inCmp=CMP.has(safeN);
+  const mc=r.mc, col=fvCol(mc);
+  const matStr=r.maturity?r.maturity+'d':'—';
+  const swStr=r.seedwt?r.seedwt+'g':'—';
+  const dhStr=r.dh?r.dh.toFixed(1):'—';
+  // Resistance summary
+  const res=r.resistance?r.resistance.substring(0,80)+(r.resistance.length>80?'…':''):'—';
+  const sus=r.susceptibility?r.susceptibility.substring(0,60)+(r.susceptibility.length>60?'…':''):'';
+  const pvpBadge=r.pvp?`<span class="badge-pvp">PVP</span>`:'';
+  const uogBadge=r.uog?`<span class="badge-uog">UoG</span>`:'';
+  const breederShort=r.breeder.length>38?r.breeder.substring(0,38)+'…':r.breeder;
+  return `<div class="fv-card${inCmp?' selected':''}" onclick="fvToggleCmp('${safeN}')">
+    <div class="fc-header">
+      <div style="width:32px;height:32px;border-radius:8px;background:${col}22;border:1px solid ${col}44;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🫘</div>
+      <div style="flex:1;min-width:0">
+        <div class="fc-name">${r.name}</div>
+        <div class="fc-badges">${pvpBadge}${uogBadge}<span style="background:${col}22;color:${col};border:1px solid ${col}44;font-size:.5rem;padding:1px 5px;border-radius:6px;font-weight:700">${mc}</span></div>
+      </div>
+    </div>
+    <div class="fc-body">
+      <div class="fc-breeder">${breederShort}</div>
+      <div class="fc-stats">
+        <div class="fcs"><div class="fcs-v">${matStr}</div><div class="fcs-l">Maturity</div></div>
+        <div class="fcs"><div class="fcs-v">${swStr}</div><div class="fcs-l">Seed Wt</div></div>
+        <div class="fcs"><div class="fcs-v">${dhStr}</div><div class="fcs-l">D.Harv.</div></div>
+      </div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:${r.maturity?Math.min(100,Math.round((r.maturity-75)/35*100)):0}%;background:linear-gradient(90deg,${col}55,${col})"></div></div>
+      <div class="fc-resist"><strong>R:</strong> ${res}${sus?`<br><span style="color:#ef4444;font-size:.55rem">S: ${sus}</span>`:''}</div>
+    </div>
+    <div class="fc-foot">
+      <span class="fc-country ${r.country==='USA'?'usa':'can'}">${r.country}</span>
+      <button class="fc-cmp-btn ${inCmp?'sel':''}" onclick="event.stopPropagation();fvToggleCmp('${safeN}')">${inCmp?'✓ Added':'+ Compare'}</button>
+    </div>
+  </div>`;
+}
+
+function fvToggleCmp(name){
+  if(CMP.has(name))CMP.delete(name);else if(CMP.size<3)CMP.add(name);
+  updCmpStrip();
+  renderFinderNew();
+}
+
+// ── Main render ──
+let fvChartsInit=false;
+let fvMcChart=null,fvScatterChart=null,fvCountryChart=null;
+
+function renderFinderNew(){
+  const list=getFvList();
+  document.getElementById('fv-count').textContent=list.length+' varieties';
+  // Update stats
+  const uogN=list.filter(r=>r.uog).length;
+  const usaN=list.filter(r=>r.country==='USA').length;
+  document.getElementById('fn-total').textContent=list.length;
+  document.getElementById('fn-uog').textContent=uogN;
+  document.getElementById('fn-usa').textContent=usaN;
+  // Cards
+  document.getElementById('fv-grid').innerHTML=list.map(mkFvCard).join('');
+  // Charts (rebuild on first load of tab, update on filter)
+  buildFvCharts(list);
+}
+
+function buildFvCharts(list){
+  // ── MC Distribution (Doughnut) ──
+  const mcCounts={};
+  list.forEach(r=>{mcCounts[r.mc]=(mcCounts[r.mc]||0)+1;});
+  const mcEntries=Object.entries(mcCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const ctx1=document.getElementById('fv-ch-mc');
+  if(fvMcChart)fvMcChart.destroy();
+  fvMcChart=new Chart(ctx1,{
+    type:'doughnut',
+    data:{
+      labels:mcEntries.map(e=>e[0]),
+      datasets:[{data:mcEntries.map(e=>e[1]),backgroundColor:mcEntries.map(e=>fvCol(e[0])),borderColor:'#0a1a0e',borderWidth:2}]
+    },
+    options:{plugins:{legend:{display:true,position:'right',labels:{color:'#a0b4a0',font:{size:9},boxWidth:10,padding:6}},tooltip:{callbacks:{label:(c)=>` ${c.label}: ${c.parsed} vars`}}},cutout:'60%',maintainAspectRatio:true}
+  });
+
+  // ── Scatter: Maturity vs Seed Weight ──
+  const scatterData=list.filter(r=>r.maturity&&r.seedwt).map(r=>({x:r.maturity,y:r.seedwt,label:r.name,mc:r.mc,country:r.country,uog:r.uog}));
+  const ctx2=document.getElementById('fv-ch-scatter');
+  if(fvScatterChart)fvScatterChart.destroy();
+  fvScatterChart=new Chart(ctx2,{
+    type:'scatter',
+    data:{datasets:[{
+      label:'Varieties',
+      data:scatterData,
+      backgroundColor:scatterData.map(d=>d.uog?'rgba(74,222,128,0.7)':(d.country==='Canada'?'rgba(248,113,113,0.6)':'rgba(96,165,250,0.6)')),
+      pointRadius:scatterData.map(d=>d.uog?6:4),
+      pointHoverRadius:8,
+      borderWidth:0
+    }]},
+    options:{
+      scales:{
+        x:{title:{display:true,text:'Maturity (days)',color:'#6b8f6b',font:{size:9}},ticks:{color:'#6b8f6b',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{title:{display:true,text:'100-Seed Wt (g)',color:'#6b8f6b',font:{size:9}},ticks:{color:'#6b8f6b',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:(c)=>` ${c.raw.label} (${c.raw.mc}) — Mat:${c.raw.x}d / SW:${c.raw.y}g`}}
+      },
+      maintainAspectRatio:true
+    }
+  });
+
+  // ── Bar: UoG vs AAFC vs MSU vs Others by MC ──
+  const topMCs=['White Navy','Black','Cranberry','Dark Red Kidney','Pinto','Great Northern','Yellow','Light Red Kidney'];
+  const uogByMc=topMCs.map(m=>list.filter(r=>r.mc===m&&r.uog).length);
+  const otherByMc=topMCs.map(m=>list.filter(r=>r.mc===m&&!r.uog).length);
+  const ctx3=document.getElementById('fv-ch-country');
+  if(fvCountryChart)fvCountryChart.destroy();
+  fvCountryChart=new Chart(ctx3,{
+    type:'bar',
+    data:{
+      labels:topMCs.map(m=>m.replace(' Kidney','K').replace(' Northern','N').replace(' Navy','N')),
+      datasets:[
+        {label:'UoG',data:uogByMc,backgroundColor:'rgba(74,222,128,0.75)',borderRadius:4,borderSkipped:false},
+        {label:'Others',data:otherByMc,backgroundColor:'rgba(96,165,250,0.55)',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:{
+      scales:{
+        x:{stacked:true,ticks:{color:'#6b8f6b',font:{size:8}},grid:{display:false}},
+        y:{stacked:true,ticks:{color:'#6b8f6b',font:{size:8}},grid:{color:'rgba(255,255,255,.04)'}}
+      },
+      plugins:{legend:{labels:{color:'#a0b4a0',font:{size:9},boxWidth:10}}},
+      maintainAspectRatio:true
+    }
+  });
+}
+
+// Init on tab open (lazy) — handled inside goTab directly above
 
 // ═══════════════════════════════════════════════════════════════════
 // COMPARE
@@ -1468,7 +1877,231 @@ document.getElementById('cmp-modal').addEventListener('click',e=>{if(e.target===
 // ═══════════════════════════════════════════════════════════════════
 // WEATHER — Open-Meteo API (free, no key, CORS-friendly)
 // ═══════════════════════════════════════════════════════════════════
-let wxChartT=null,wxChartP=null,selWxLoc=WX_LOCS[0];
+let wxChartT=null,wxChartP=null,wxChartET=null,wxChartGDDd=null,gddTimelineChart=null;
+let selWxLoc=WX_LOCS[0];
+let lastWxData=null; // store last fetched weather data
+
+// ── GDD PLANTING CALCULATOR ──────────────────────────────────────
+// GDD requirements per market class
+const GDD_BY_CLASS={
+  'White Navy':{gdd:1100,col:'#3b82f6',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:160,icon:'🌿'},{n:'V3',gdd:300,icon:'🌿'},{n:'Flowering R1',gdd:550,icon:'🌸'},{n:'Pod Fill R5',gdd:800,icon:'🫘'},{n:'Maturity R8',gdd:1100,icon:'🌾'}]},
+  'Black':{gdd:1200,col:'#64748b',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:160,icon:'🌿'},{n:'V3',gdd:320,icon:'🌿'},{n:'Flowering',gdd:600,icon:'🌸'},{n:'Pod Fill',gdd:850,icon:'🫘'},{n:'Maturity',gdd:1200,icon:'🌾'}]},
+  'Cranberry':{gdd:1350,col:'#dc2626',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:170,icon:'🌿'},{n:'V3',gdd:340,icon:'🌿'},{n:'Flowering',gdd:650,icon:'🌸'},{n:'Pod Fill',gdd:950,icon:'🫘'},{n:'Maturity',gdd:1350,icon:'🌾'}]},
+  'Dark Red Kidney':{gdd:1450,col:'#ef4444',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:170,icon:'🌿'},{n:'V3',gdd:360,icon:'🌿'},{n:'Flowering',gdd:700,icon:'🌸'},{n:'Pod Fill',gdd:1050,icon:'🫘'},{n:'Maturity',gdd:1450,icon:'🌾'}]},
+  'Light Red Kidney':{gdd:1500,col:'#f87171',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:175,icon:'🌿'},{n:'V3',gdd:370,icon:'🌿'},{n:'Flowering',gdd:720,icon:'🌸'},{n:'Pod Fill',gdd:1100,icon:'🫘'},{n:'Maturity',gdd:1500,icon:'🌾'}]},
+  'White Kidney':{gdd:1400,col:'#d9bfa0',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:170,icon:'🌿'},{n:'V3',gdd:350,icon:'🌿'},{n:'Flowering',gdd:680,icon:'🌸'},{n:'Pod Fill',gdd:1000,icon:'🫘'},{n:'Maturity',gdd:1400,icon:'🌾'}]},
+  'Pinto':{gdd:1250,col:'#d4a26a',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:160,icon:'🌿'},{n:'V3',gdd:310,icon:'🌿'},{n:'Flowering',gdd:600,icon:'🌸'},{n:'Pod Fill',gdd:900,icon:'🫘'},{n:'Maturity',gdd:1250,icon:'🌾'}]},
+  'Small Red':{gdd:1200,col:'#fb923c',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:160,icon:'🌿'},{n:'V3',gdd:310,icon:'🌿'},{n:'Flowering',gdd:590,icon:'🌸'},{n:'Pod Fill',gdd:870,icon:'🫘'},{n:'Maturity',gdd:1200,icon:'🌾'}]},
+  'Otebo':{gdd:1600,col:'#fde68a',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:180,icon:'🌿'},{n:'V3',gdd:380,icon:'🌿'},{n:'Flowering',gdd:750,icon:'🌸'},{n:'Pod Fill',gdd:1150,icon:'🫘'},{n:'Maturity',gdd:1600,icon:'🌾'}]},
+  'Yellow':{gdd:1550,col:'#fef08a',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:175,icon:'🌿'},{n:'V3',gdd:370,icon:'🌿'},{n:'Flowering',gdd:730,icon:'🌸'},{n:'Pod Fill',gdd:1120,icon:'🫘'},{n:'Maturity',gdd:1550,icon:'🌾'}]},
+  'Kintoki':{gdd:1400,col:'#f9a8d4',stages:[{n:'Germination',gdd:80,icon:'🌱'},{n:'Emergence',gdd:170,icon:'🌿'},{n:'V3',gdd:350,icon:'🌿'},{n:'Flowering',gdd:680,icon:'🌸'},{n:'Pod Fill',gdd:1000,icon:'🫘'},{n:'Maturity',gdd:1400,icon:'🌾'}]},
+};
+
+function updateVarietyList(){
+  const mc=document.getElementById('pc-mc').value;
+  const sel=document.getElementById('pc-variety');
+  sel.innerHTML='<option value="">All varieties in class</option>';
+  const list=mc?ALL_VARS.filter(v=>v.mc===mc&&v.d):ALL_VARS.filter(v=>v.d);
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+  list.forEach(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=`${v.name} (${v.d}d, ${v.year})`;sel.appendChild(o);});
+}
+
+function estimateGDDFromDate(plantDate){
+  // Use Ontario seasonal GDD model + weather data if available
+  const today=new Date();
+  const plant=new Date(plantDate);
+  if(plant>today) return 0;
+  const daysSincePlant=Math.floor((today-plant)/(1000*60*60*24));
+  // Use actual weather data if we have it
+  if(lastWxData){
+    const dailyMax=lastWxData.daily.temperature_2m_max;
+    const dailyMin=lastWxData.daily.temperature_2m_min;
+    // Ontario seasonal average daily GDD above 10°C
+    // Approx: May≈8, June≈12, July≈15, Aug≈13, Sep≈6
+    const monthAvgGDD={1:0,2:0,3:0,4:1,5:8,6:12,7:15,8:13,9:6,10:1,11:0,12:0};
+    let totalGDD=0;
+    const plantMs=plant.getTime();
+    const todayMs=today.getTime();
+    const oneDay=1000*60*60*24;
+    for(let d=plantMs;d<todayMs;d+=oneDay){
+      const dt=new Date(d);
+      const m=dt.getMonth()+1;
+      totalGDD+=monthAvgGDD[m]||0;
+    }
+    // Adjust based on today's actual temp vs average
+    const currentT=lastWxData.current.temperature_2m;
+    const todayGDD=Math.max(0,currentT-10);
+    const avgForToday=monthAvgGDD[today.getMonth()+1]||0;
+    const adjustment=(todayGDD-avgForToday)*0.3;
+    return Math.max(0,Math.round(totalGDD+adjustment));
+  }
+  // Fallback: seasonal table
+  const monthAvgGDD={1:0,2:0,3:0,4:1,5:8,6:12,7:15,8:13,9:6,10:1,11:0,12:0};
+  let totalGDD=0;
+  const plantMs=plant.getTime();
+  const todayMs=today.getTime();
+  const oneDay=1000*60*60*24;
+  for(let d=plantMs;d<todayMs;d+=oneDay){
+    const dt=new Date(d);
+    totalGDD+=monthAvgGDD[dt.getMonth()+1]||0;
+  }
+  return Math.max(0,Math.round(totalGDD));
+}
+
+function estimateHarvestDate(plantDate, gddTarget, accumulatedGDD){
+  const today=new Date();
+  const plant=new Date(plantDate);
+  const remaining=Math.max(0,gddTarget-accumulatedGDD);
+  // Ontario average GDD per day in summer
+  const monthAvgGDD={1:0,2:0,3:0,4:1,5:8,6:12,7:15,8:13,9:6,10:1,11:0,12:0};
+  let daysAhead=0;
+  let gddLeft=remaining;
+  const startDate=new Date(today);
+  while(gddLeft>0&&daysAhead<200){
+    daysAhead++;
+    const d=new Date(startDate);d.setDate(d.getDate()+daysAhead);
+    const m=d.getMonth()+1;
+    gddLeft-=(monthAvgGDD[m]||0.5);
+  }
+  const harvest=new Date(today);
+  harvest.setDate(harvest.getDate()+daysAhead);
+  return {date:harvest,daysAhead};
+}
+
+function buildGDDTimelineChart(plantDate, accGDD, gddTarget, mc){
+  const ctx=document.getElementById('ch-gdd-timeline');
+  if(!ctx) return;
+  const plant=new Date(plantDate);
+  const today=new Date();
+  const monthAvgGDD={1:0,2:0,3:0,4:1,5:8,6:12,7:15,8:13,9:6,10:1,11:0,12:0};
+  // Build past labels/data
+  const labels=[],gddData=[],forecastData=[];
+  let cumGDD=0;
+  const oneDay=86400000;
+  // Past: from planting to today
+  for(let d=plant.getTime();d<=today.getTime();d+=oneDay){
+    const dt=new Date(d);
+    const m=dt.getMonth()+1;
+    cumGDD+=monthAvgGDD[m]||0;
+    labels.push(dt.toLocaleDateString('en-CA',{month:'short',day:'numeric'}));
+    gddData.push(Math.round(cumGDD));
+    forecastData.push(null);
+  }
+  // Sync with actual accumulated
+  if(gddData.length>0) gddData[gddData.length-1]=accGDD;
+  // Future: from today to maturity
+  let futureCum=accGDD;
+  for(let i=1;futureCum<gddTarget&&i<120;i++){
+    const ft=new Date(today);ft.setDate(ft.getDate()+i);
+    const m=ft.getMonth()+1;
+    futureCum+=monthAvgGDD[m]||0.5;
+    labels.push(ft.toLocaleDateString('en-CA',{month:'short',day:'numeric'}));
+    gddData.push(null);
+    forecastData.push(Math.round(futureCum));
+  }
+  const col=(GDD_BY_CLASS[mc]||GDD_BY_CLASS['White Navy']).col;
+  if(gddTimelineChart){gddTimelineChart.destroy();}
+  gddTimelineChart=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Accumulated GDD',data:gddData,borderColor:col,backgroundColor:col+'22',tension:.4,fill:true,pointRadius:0,borderWidth:2},
+      {label:'Projected GDD',data:forecastData,borderColor:col+'88',backgroundColor:col+'11',tension:.4,fill:true,pointRadius:0,borderWidth:1.5,borderDash:[5,4]},
+      {label:'Maturity Target',data:labels.map(()=>gddTarget),borderColor:'rgba(245,158,11,.5)',borderWidth:1,borderDash:[6,4],pointRadius:0,fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'},title:{display:true,text:'Cumulative GDD',color:'#7a9e82',font:{family:'JetBrains Mono',size:9}}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},maxTicksLimit:10},border:{color:'transparent'}}}}
+  });
+}
+
+function updateGDDCalc(){
+  const plantDateVal=document.getElementById('pc-plant-date').value;
+  const mcVal=document.getElementById('pc-mc').value;
+  const varVal=document.getElementById('pc-variety').value;
+  const kpiRow=document.getElementById('gdd-kpi-row');
+  const stageWrap=document.getElementById('gdd-stage-wrap');
+  const matWrap=document.getElementById('mat-board-wrap');
+  const tlWrap=document.getElementById('gdd-timeline-wrap');
+  if(!plantDateVal){kpiRow.style.display='none';stageWrap.style.display='none';matWrap.style.display='none';tlWrap.style.display='none';return;}
+  const plant=new Date(plantDateVal);
+  const today=new Date();
+  if(plant>today){kpiRow.style.display='none';stageWrap.style.display='none';matWrap.style.display='none';tlWrap.style.display='none';return;}
+  const dap=Math.floor((today-plant)/(1000*60*60*24));
+  const accGDD=estimateGDDFromDate(plantDateVal);
+  // Determine target GDD
+  let mc=mcVal||'White Navy';
+  let gddTarget=(GDD_BY_CLASS[mc]||GDD_BY_CLASS['White Navy']).gdd;
+  let varData=null;
+  if(varVal){
+    varData=ALL_VARS.find(v=>v.name===varVal);
+    if(varData&&varData.d){
+      // Adjust GDD target based on variety's days to maturity vs class average
+      const classBase=GDD_BY_CLASS[varData.mc]||GDD_BY_CLASS['White Navy'];
+      // Scale: days-to-maturity correlates linearly with GDD
+      const dayRatio=varData.d/(classBase.gdd/((new Date('2024-09-01')-new Date('2024-05-15'))/86400000/((classBase.gdd/15)||1)));
+      gddTarget=Math.round(classBase.gdd*(varData.d/((classBase.gdd/13.5))));
+      mc=varData.mc;
+    }
+  }
+  if(!mcVal&&!varVal) mc='White Navy';
+  const {date:harvestDate,daysAhead}=estimateHarvestDate(plantDateVal,gddTarget,accGDD);
+  const pct=Math.min(100,Math.round((accGDD/gddTarget)*100));
+  // Update KPIs
+  document.getElementById('gkpi-dap').textContent=dap;
+  document.getElementById('gkpi-plant-info').textContent=`Planted ${plant.toLocaleDateString('en-CA',{month:'short',day:'numeric'})}`;
+  document.getElementById('gkpi-gdd').textContent=accGDD.toLocaleString();
+  document.getElementById('gkpi-gdd-sub').textContent=`${pct}% of target`;
+  document.getElementById('gkpi-target').textContent=gddTarget.toLocaleString();
+  document.getElementById('gkpi-target-sub').textContent=varVal||mc||'Class average';
+  document.getElementById('gkpi-dtr').textContent=pct>=100?'Ready!':daysAhead;
+  document.getElementById('gkpi-harvest-date').textContent=pct>=100?'✅ Maturity reached':harvestDate.toLocaleDateString('en-CA',{month:'long',day:'numeric'});
+  kpiRow.style.display='grid';
+  // Crop stage timeline
+  const stages=(GDD_BY_CLASS[mc]||GDD_BY_CLASS['White Navy']).stages;
+  let stageHTML='';
+  stages.forEach((s,i)=>{
+    const next=stages[i+1];
+    const isPast=accGDD>=(next?next.gdd:s.gdd);
+    const isCurrent=!isPast&&accGDD>=s.gdd;
+    const cls=isPast?'past':isCurrent?'current':'future';
+    stageHTML+=`<div class="stage-seg ${cls}"><div class="stage-seg-icon">${s.icon}</div><div class="stage-seg-name">${s.n}</div><div class="stage-seg-gdd">${s.gdd} GDD</div></div>`;
+  });
+  document.getElementById('gdd-stage-tl').innerHTML=stageHTML;
+  stageWrap.style.display='block';
+  // Variety maturity board
+  let varList=mc&&mc!==''?ALL_VARS.filter(v=>v.mc===mc&&v.d):ALL_VARS.filter(v=>v.d&&v.isOAC!==false);
+  if(varList.length>20) varList=varList.slice(0,20);
+  document.getElementById('mat-board-title').textContent=`${mc||'All Classes'} — Maturity Status`;
+  const boardHTML=varList.map(v=>{
+    const vGddTarget=Math.round((GDD_BY_CLASS[v.mc]||GDD_BY_CLASS['White Navy']).gdd*(v.d/((GDD_BY_CLASS[v.mc]||GDD_BY_CLASS['White Navy']).gdd/13.5)));
+    const vPct=Math.min(100,Math.round((accGDD/vGddTarget)*100));
+    const cls=vPct>=100?'ready':vPct>=80?'close':'';
+    const status=vPct>=100?'ready':vPct>=80?'close':'far';
+    const statusLabel=vPct>=100?'✅ Ready to harvest':vPct>=80?`⚠ ~${Math.max(0,Math.round((vGddTarget-accGDD)/13.5))} days`:Math.round((vGddTarget-accGDD)/13.5)+' days';
+    const col=(GDD_BY_CLASS[v.mc]||GDD_BY_CLASS['White Navy']).col;
+    const barW=Math.min(100,vPct);
+    return `<div class="mat-card ${cls}">
+      <div class="mat-card-name">${v.name}</div>
+      <span class="cp ${css(v.mc)}" style="font-size:.52rem;margin-bottom:6px;display:inline-block">${v.mc}</span>
+      <div style="background:rgba(255,255,255,.06);border-radius:3px;height:4px;overflow:hidden;margin-bottom:6px"><div style="width:${barW}%;height:100%;border-radius:3px;background:${col};transition:width .8s"></div></div>
+      <div class="mat-card-stat"><span>GDD needed</span><span class="v">${vGddTarget}</span></div>
+      <div class="mat-card-stat"><span>Progress</span><span class="v">${vPct}%</span></div>
+      <div class="mat-card-stat"><span>Days to mat.</span><span class="v">${v.d}d</span></div>
+      <div class="mat-status ${status}">${statusLabel}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('mat-board-grid').innerHTML=boardHTML;
+  matWrap.style.display='block';
+  // GDD timeline chart
+  buildGDDTimelineChart(plantDateVal,accGDD,gddTarget,mc);
+  tlWrap.style.display='block';
+}
+
+// Initialize default planting date (May 20 of current year)
+function initPlantDate(){
+  const y=new Date().getFullYear();
+  const defDate=`${y}-05-20`;
+  const el=document.getElementById('pc-plant-date');
+  if(el){el.value=defDate;updateVarietyList();updateGDDCalc();}
+}
 
 function buildWxUI(){
   const grid=document.getElementById('wx-loc-grid');
@@ -1492,7 +2125,10 @@ async function fetchWx(loc){
     const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration,weather_code,wind_speed_10m_max&timezone=America%2FToronto&forecast_days=7`;
     const res=await fetch(url);
     const d=await res.json();
+    lastWxData=d; // store for GDD calc
     renderWx(loc,d);
+    // Refresh GDD calculator with real data
+    const pv=document.getElementById('pc-plant-date');if(pv&&pv.value)updateGDDCalc();
     // Update mini card
     const mini=document.getElementById('wx-mini-'+loc.code);
     if(mini) mini.innerHTML=`<span style="color:var(--g1);font-family:var(--mono);font-size:.8rem;font-weight:600">${d.current.temperature_2m}°C</span> ${wxIcon(d.current.weather_code)}`;
@@ -1551,10 +2187,53 @@ function renderWx(loc,d){
   // Charts
   const co={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},boxWidth:8}}},scales:{y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9}},border:{color:'transparent'}},x:{grid:{display:false},ticks:{color:'#7a9e82',font:{family:'JetBrains Mono',size:9},maxRotation:30},border:{color:'transparent'}}}};
   const labels=dates.map(d=>new Date(d).toLocaleDateString('en-CA',{weekday:'short',day:'numeric'}));
+
+  // Frost risk assessment
+  const frostRow=document.getElementById('frost-risk-row');
+  const frostAlert=document.getElementById('frost-alert');
+  if(frostRow){
+    let hasFrostRisk=false;
+    frostRow.innerHTML=dates.map((_,i)=>{
+      const minT=days.temperature_2m_min[i];
+      const riskCls=minT<=0?'risk-high':minT<=2?'risk-low':'';
+      if(minT<=2) hasFrostRisk=true;
+      const riskLabel=minT<=0?'❄ Frost!':minT<=2?'⚠ Near frost':'✓ Safe';
+      const col=minT<=0?'#ef4444':minT<=2?'#f59e0b':'#22c55e';
+      return `<div class="frost-day ${riskCls}"><div class="frost-day-date">${new Date(dates[i]).toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div><div class="frost-day-temp" style="color:${col}">${minT}°C</div><div class="frost-day-label" style="color:${col}">${riskLabel}</div></div>`;
+    }).join('');
+    if(frostAlert) frostAlert.innerHTML=hasFrostRisk?'<span style="color:#f87171;font-family:var(--mono);font-size:.68rem">⚠️ Frost risk detected in the 7-day forecast. Protect recently emerged seedlings and late-season pods. Watch forecasts closely.</span>':'<span style="color:var(--g1);font-family:var(--mono);font-size:.65rem">✅ No frost risk detected in the 7-day forecast.</span>';
+  }
+
+  // ET vs Precipitation chart
+  if(wxChartET){wxChartET.destroy();}
+  const etEl=document.getElementById('ch-wx-et');
+  if(etEl){
+    const etData=days.et0_fao_evapotranspiration||[];
+    const precData=days.precipitation_sum||[];
+    const deficitData=labels.map((_,i)=>{const et=etData[i]||0;const pr=precData[i]||0;return+(et-pr).toFixed(1);});
+    wxChartET=new Chart(etEl,{type:'bar',data:{labels,datasets:[
+      {label:'ET₀ (mm)',data:etData,backgroundColor:'rgba(251,146,60,.55)',borderColor:'#fb923c',borderWidth:1.5,borderRadius:4},
+      {label:'Precipitation (mm)',data:precData,backgroundColor:'rgba(96,165,250,.55)',borderColor:'#60a5fa',borderWidth:1.5,borderRadius:4},
+      {type:'line',label:'Water Deficit (ET-P)',data:deficitData,borderColor:'#ef4444',backgroundColor:'transparent',borderWidth:2,borderDash:[4,4],pointRadius:4,tension:.3,yAxisID:'y2'}
+    ]},options:{...co,plugins:{...co.plugins,tooltip:{mode:'index',intersect:false}},scales:{y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'mm'},title:{display:true,text:'mm',color:'#7a9e82',font:{family:'JetBrains Mono',size:8}}},y2:{position:'right',grid:{display:false},ticks:{color:'#ef4444',font:{family:'JetBrains Mono',size:8},callback:v=>v+'mm'},border:{color:'transparent'},title:{display:true,text:'Deficit',color:'#ef4444',font:{family:'JetBrains Mono',size:8}}},x:{...co.scales.x}}}});
+  }
+
   if(wxChartT){wxChartT.destroy();}
   wxChartT=new Chart(document.getElementById('ch-wx-temp'),{type:'line',data:{labels,datasets:[{label:'Max °C',data:days.temperature_2m_max,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.1)',tension:.4,fill:false,pointRadius:4,borderWidth:2},{label:'Min °C',data:days.temperature_2m_min,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.1)',tension:.4,fill:false,pointRadius:4,borderWidth:2}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'°C'}}}}});
   if(wxChartP){wxChartP.destroy();}
   wxChartP=new Chart(document.getElementById('ch-wx-prec'),{type:'bar',data:{labels,datasets:[{label:'Precipitation (mm)',data:days.precipitation_sum,backgroundColor:'rgba(96,165,250,.5)',borderColor:'#60a5fa',borderWidth:1.5,borderRadius:5}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,callback:v=>v+'mm'}}}}});
+
+  // Daily GDD chart
+  if(wxChartGDDd){wxChartGDDd.destroy();}
+  const gddDailyEl=document.getElementById('ch-wx-gdd-daily');
+  if(gddDailyEl){
+    const gddDaily=days.temperature_2m_max.map((mx,i)=>+(Math.max(0,((mx+days.temperature_2m_min[i])/2)-10)).toFixed(1));
+    const gddCumulative=gddDaily.reduce((acc,v,i)=>{acc.push(+(acc[i-1]||0)+v);return acc;},[]);
+    wxChartGDDd=new Chart(gddDailyEl,{type:'bar',data:{labels,datasets:[
+      {label:'Daily GDD',data:gddDaily,backgroundColor:'rgba(34,197,94,.45)',borderColor:'#22c55e',borderWidth:1.5,borderRadius:4},
+      {type:'line',label:'Cumulative GDD (week)',data:gddCumulative,borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,pointRadius:4,tension:.3,yAxisID:'y2'}
+    ]},options:{...co,plugins:{...co.plugins,tooltip:{mode:'index',intersect:false}},scales:{y:{...co.scales.y,title:{display:true,text:'GDD/day',color:'#7a9e82',font:{family:'JetBrains Mono',size:8}}},y2:{position:'right',grid:{display:false},ticks:{color:'#f59e0b',font:{family:'JetBrains Mono',size:8}},border:{color:'transparent'},title:{display:true,text:'Cumulative',color:'#f59e0b',font:{family:'JetBrains Mono',size:8}}},x:{...co.scales.x}}}});
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1912,11 +2591,12 @@ function calcYield(){
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════
+// ══════════════════════════�// ═══════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
   setTimeout(initMap,150);
   calcYield();
   calcCBB();
+  initPlantDate();
 });
 </script>
 </body>
