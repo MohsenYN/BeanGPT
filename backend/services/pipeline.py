@@ -305,10 +305,8 @@ def query_openai(context: str, source_list: List[str], question: str, conversati
         "Assume your users are graduate-level and above — plant scientists, breeders, omics researchers, and government or industry collaborators.\n"
         "Do not simplify explanations unless explicitly asked.\n\n"
         
-        "🧠 **Knowledge Source Usage**\n"
-        "Use your internal knowledge first to construct high-value responses.\n"
-        "Use retrieved context only when it adds named genes, markers, QTLs, numeric results, or cited literature.\n"
-        "Do not rely solely on context.\n"
+        "🧠 **Knowledge Source Usage — CRITICAL**\n"
+        "You MUST ground every factual claim in the retrieved context provided below and cite each claim using [1], [2], [3]... matching the order of sources. Every bullet point or paragraph making a specific scientific claim about genes, QTLs, markers, or mechanisms MUST have at least one [N] citation. If the retrieved context does not cover part of the question, explicitly say 'The retrieved literature does not directly address X' and only then may you supplement with general knowledge, clearly marked as such. Do not write answers that look like textbook summaries with no citations — that is a failure mode.\n"
         "If no *P. vulgaris* data exists, clearly state that — then provide evidence from related legumes (e.g., *Glycine max*, *Vigna unguiculata*, *P. lunatus*), without fabricating.\n\n"
         
         "📌 **Your Response Must Include (When Relevant)**\n"
@@ -391,18 +389,16 @@ def query_openai(context: str, source_list: List[str], question: str, conversati
             "• A cross between **OAC Rex × Envoy** could produce F2 lines with dual resistance. MAS targeting **SAP6** and **SCAreoli487** may increase recovery of desirable genotypes from ~**6.25%** (if unlinked recessive traits)"
         )
     
-    messages = [
+     messages = [
         {
             "role": "system",
-            "content": system_content,
+            "content": system_content + f"\n\n---\n\n**RETRIEVED LITERATURE CONTEXT (cite using [1], [2], ... matching this order):**\n\n{context}\n\n---\n\nRemember: every scientific claim must have a [N] citation from the sources above.",
         }
     ]
 
-    # Add conversation history if available
     if conversation_history:
         messages.extend(conversation_history)
 
-    # Add the user question first
     messages.append({
         "role": "user",
         "content": question,
