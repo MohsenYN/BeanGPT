@@ -179,35 +179,37 @@ def embed_query_openai(query: str, api_key: str) -> List[float]:
         raise
 
 def query_zilliz(vector: List[float], api_key: str) -> List[dict]:
-    """Query Zilliz Cloud using REST API."""
+    """Query Zilliz Cloud using the v2 REST API."""
     try:
-        # Zilliz Cloud serverless API endpoint
-        api_url = f"{settings.zilliz_uri.rstrip('/')}/v1/vector/search"
-        
+        api_url = f"{settings.zilliz_uri.rstrip('/')}/v2/vectordb/entities/search"
+
         print(f"🔍 Querying Zilliz at: {api_url}")
         print(f"🔍 Collection: {settings.collection_name}")
         print(f"🔍 Vector dim: {len(vector)}")
         print(f"🔍 Limit: {settings.top_k}")
-        
+
         payload = {
             "collectionName": settings.collection_name,
-            "vector": vector,
+            "data": [vector],
+            "annsField": "vector",
             "limit": settings.top_k,
-            "outputFields": ["doi", "summary"]
+            "outputFields": ["doi", "summary"],
         }
-        
+
         response = requests.post(
             api_url,
             headers=get_zilliz_headers(),
             json=payload,
-            timeout=30
+            timeout=30,
         )
-        
+
         print(f"🔍 Response status: {response.status_code}")
-        
+
         if response.status_code == 200:
             result = response.json()
-            print(f"🔍 Response data: {result}")
+            if result.get("code") not in (0, 200):
+                print(f"❌ Zilliz returned error body: {result}")
+                return []
             data = result.get("data", [])
             print(f"🔍 Found {len(data)} results")
             return data
@@ -215,13 +217,13 @@ def query_zilliz(vector: List[float], api_key: str) -> List[dict]:
             print(f"❌ Zilliz API error: {response.status_code}")
             print(f"❌ Response: {response.text}")
             return []
-            
+
     except Exception as e:
         print(f"❌ Error querying Zilliz: {e}")
         import traceback
         traceback.print_exc()
         return []
-
+        
 def normalize_scores(matches: List[dict]) -> Dict[str, float]:
     """Normalize similarity scores from Zilliz matches."""
     if not matches:
