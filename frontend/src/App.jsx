@@ -411,7 +411,7 @@ export default function App() {
 
   // Fix overscroll background color
   useEffect(() => {
-    const backgroundColor = darkMode ? '#04060f' : '#f4f7fb';
+    const backgroundColor = darkMode ? '#04060f' : '#e0eafc';
     document.body.style.backgroundColor = backgroundColor;
     document.body.style.overscrollBehavior = 'none';
     document.documentElement.style.backgroundColor = backgroundColor;
@@ -867,7 +867,9 @@ export default function App() {
   return (
     <div className={`h-screen w-screen flex ${darkMode ? 'bg-slate-950' : 'bg-gray-50'} transition-all duration-300 overflow-hidden relative`} style={{
       height: '100vh',
-      background: darkMode ? '#04060f' : '#f4f7fb',
+      background: darkMode
+        ? 'radial-gradient(ellipse at top left, #0b1230 0%, #04060f 55%)'
+        : 'radial-gradient(ellipse at top left, #e0eafc 0%, #dfe7fb 40%, #efe6fb 100%)',
       overscrollBehavior: 'none'
     }}>
       {/* Futuristic ambient backgrounds */}
