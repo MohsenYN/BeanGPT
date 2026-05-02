@@ -1051,11 +1051,19 @@ export default function App() {
             <div className="space-y-2">
                   <div>
                     <p className="text-xs font-medium text-gray-700 dark:text-slate-300">Developed by:</p>
-                    <a 
-                      href="https://www.linkedin.com/in/kiarash-mirkamandari/" 
-                      target="_blank" 
+                    <a
+                      href="https://www.linkedin.com/in/mohsen-yoosefzadeh-n-82365bb2/"
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+                      className="block text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+                    >
+                      Mohsen Yoosefzadeh Najafabadi
+                    </a>
+                    <a
+                      href="https://www.linkedin.com/in/kiarash-mirkamandari/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
                     >
                       Kiarash Mirkamandari
                     </a>
