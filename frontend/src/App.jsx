@@ -411,7 +411,7 @@ export default function App() {
 
   // Fix overscroll background color
   useEffect(() => {
-    const backgroundColor = darkMode ? '#020617' : '#f9fafb';
+    const backgroundColor = darkMode ? '#04060f' : '#f4f7fb';
     document.body.style.backgroundColor = backgroundColor;
     document.body.style.overscrollBehavior = 'none';
     document.documentElement.style.backgroundColor = backgroundColor;
@@ -867,9 +867,13 @@ export default function App() {
   return (
     <div className={`h-screen w-screen flex ${darkMode ? 'bg-slate-950' : 'bg-gray-50'} transition-all duration-300 overflow-hidden relative`} style={{
       height: '100vh',
-      background: darkMode ? '#020617' : '#f9fafb',
+      background: darkMode ? '#04060f' : '#f4f7fb',
       overscrollBehavior: 'none'
     }}>
+      {/* Futuristic ambient backgrounds */}
+      <div className="bg-aurora"><div className="blob3"></div></div>
+      <div className="bg-grid"></div>
+
       {/* Mobile Sidebar Overlay */}
       {showMobileSidebar && (
         <div 
@@ -880,29 +884,32 @@ export default function App() {
 
       {/* Sidebar */}
       <div className={`
-        ${isMobile || isTablet 
+        ${isMobile || isTablet
           ? `fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ${
               showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
             } w-96 mobile-sidebar`
           : `${sidebarCollapsed ? 'w-16' : 'w-96'} transition-all duration-300`
-        } 
-        ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} 
-        ${isMobile || isTablet ? 'border-r shadow-2xl' : 'border-r'} 
-        flex flex-col
+        }
+        glass-strong
+        ${isMobile || isTablet ? 'shadow-2xl' : ''}
+        flex flex-col relative z-10
       `}>
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+        <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
           <div className="flex items-center justify-between">
             {(!sidebarCollapsed || (isMobile || isTablet)) && (
               <div className="flex items-center space-x-3">
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/UniversityOfGuelphLogo.png`} 
-                  alt="University of Guelph"
-                  className="w-10 h-10 object-contain"
-                />
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center glow-cyan"
+                     style={{ background: 'linear-gradient(135deg, rgba(34,211,238,.18), rgba(59,130,246,.18))' }}>
+                  <img
+                    src={`${import.meta.env.BASE_URL}images/UniversityOfGuelphLogo.png`}
+                    alt="University of Guelph"
+                    className="w-9 h-9 object-contain"
+                  />
+                </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white">BeanGPT</h1>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">Powered by Beans</p>
+                  <h1 className="text-lg font-bold gradient-brand tracking-tight">BeanGPT</h1>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono tracking-wider uppercase">Powered by Beans</p>
                 </div>
               </div>
             )}
@@ -932,7 +939,7 @@ export default function App() {
               )}
         {/* Session Info */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
               <FaFlask className="text-blue-500" />
               <span>{currentSession}</span>
@@ -945,8 +952,8 @@ export default function App() {
 
         {/* Quick Actions */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="p-4 border-b border-gray-200 dark:border-slate-800">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Quick Research</h3>
+          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
+            <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">Quick Research</h3>
             <div className="space-y-2">
               {quickActions.map((action, idx) => (
                 <button
@@ -997,13 +1004,13 @@ export default function App() {
 
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
 
-          <div className="p-4 border-b border-gray-200 dark:border-slate-800">
+          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
 
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Platform</h3>
+            <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">Platform</h3>
 
             <div className="space-y-2">
 
-              <button onClick={() => setActiveView('chat')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'chat' ? 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300'}`}>
+              <button onClick={() => setActiveView('chat')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'chat' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
 
                 <FaMicroscope className="text-blue-500 text-sm" />
 
@@ -1011,7 +1018,7 @@ export default function App() {
 
               </button>
 
-              <button onClick={() => setActiveView('platform')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'platform' ? 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400' : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300'}`}>
+              <button onClick={() => setActiveView('platform')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'platform' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
 
                 <FaDatabase className="text-blue-500 text-sm" />
 
@@ -1030,7 +1037,7 @@ export default function App() {
         {/* About Us Section */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
           <div className="p-4 flex-1">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">About</h3>
+            <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">About</h3>
             <div className="space-y-4">
               <div className={`p-4 rounded-lg ${darkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Research Platform</h4>
@@ -1113,7 +1120,7 @@ export default function App() {
         )}
 
         {/* Dark Mode Toggle */}
-        <div className="p-4 border-t border-gray-200 dark:border-slate-800">
+        <div className="p-4 border-t border-slate-900/5 dark:border-white/5">
           <button
             onClick={() => setDarkMode(!darkMode)}
             className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors`}
@@ -1133,10 +1140,10 @@ export default function App() {
       </div>
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col min-h-0 ${isMobile || isTablet ? 'w-full' : ''}`} style={{position:"relative"}}>
+      <div className={`flex-1 flex flex-col min-h-0 ${isMobile || isTablet ? 'w-full' : ''} relative z-10`} style={{position:"relative"}}>
         {activeView === "platform" && <iframe src="/dry-bean-platform.html" title="Data Platform" style={{position:"absolute",inset:0,width:"100%",height:"100%",border:"none",zIndex:10}} />}
         {/* Header */}
-        <div className={`flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'} border-b ${darkMode ? 'border-slate-800 bg-slate-900/50' : 'border-gray-200 bg-white/80'} backdrop-blur-sm`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'} glass-strong relative`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* Mobile menu button */}
@@ -1149,11 +1156,11 @@ export default function App() {
                 </button>
               )}
               <div>
-                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 dark:text-white`}>
-                  {isMobile ? 'BeanGPT' : 'Main Platform'}
+                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold tracking-tight text-gray-900 dark:text-white`}>
+                  {isMobile ? <span className="gradient-brand">BeanGPT</span> : 'Main Platform'}
                 </h2>
                 {!isMobile && (
-                  <p className="text-gray-600 dark:text-slate-400 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-slate-400 text-sm mt-1 font-light">
                     Dry Bean Breeding & Computational Biology
                   </p>
                 )}
@@ -1317,7 +1324,7 @@ You're ready to start asking questions!
                   `);
                   newTab.document.close();
                 }}
-                className={`flex items-center ${isMobile ? 'px-2 py-1' : 'px-3 py-2'} text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors`}
+                className={`flex items-center ${isMobile ? 'px-2 py-1' : 'px-3 py-2'} text-sm gborder rounded-xl text-cyan-600 dark:text-cyan-300 hover:text-cyan-700 dark:hover:text-cyan-200 transition-colors`}
                 title="API Key Instructions"
               >
                 <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mr-1`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1334,14 +1341,14 @@ You're ready to start asking questions!
               />
               </div>
               
-              <div className={`flex items-center space-x-2 ${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 dark:text-slate-400`}>
-                <div className={`w-2 h-2 rounded-full ${
-                  isLoading ? 'bg-yellow-400 animate-pulse' : 
-                  isStreaming ? 'bg-green-400 animate-pulse' : 
-                  isPostProcessing ? 'bg-blue-400 animate-pulse' : 
-                  apiKeyStatus === 'valid' ? 'bg-green-400' : 
-                  apiKeyStatus === 'invalid' ? 'bg-red-400 animate-pulse' : 
-                  'bg-red-400'
+              <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl glass ${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 dark:text-slate-300`}>
+                <div className={`w-2 h-2 rounded-full status-dot ${
+                  isLoading ? 'bg-yellow-400 text-yellow-400 animate-pulse' :
+                  isStreaming ? 'bg-emerald-400 text-emerald-400 animate-pulse' :
+                  isPostProcessing ? 'bg-cyan-400 text-cyan-400 animate-pulse' :
+                  apiKeyStatus === 'valid' ? 'bg-emerald-400 text-emerald-400' :
+                  apiKeyStatus === 'invalid' ? 'bg-red-400 text-red-400 animate-pulse' :
+                  'bg-red-400 text-red-400'
                 }`}></div>
                 <span className={isMobile ? 'hidden sm:inline' : ''}>
                   {isLoading ? 'Processing' : 
@@ -1483,7 +1490,7 @@ You're ready to start asking questions!
                     `);
                     newTab.document.close();
                   }}
-                  className="flex items-center px-3 py-2 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                  className="flex items-center px-3 py-2 text-sm gborder rounded-xl text-cyan-600 dark:text-cyan-300 hover:text-cyan-700 dark:hover:text-cyan-200 transition-colors"
                   title="API Key Instructions"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1514,13 +1521,16 @@ You're ready to start asking questions!
                 <div className={`${isMobile ? 'max-w-[95%]' : 'max-w-[85%]'} ${msg.sender === 'user' ? 'order-2' : 'order-1'}`}>
                   {/* Message Header */}
                   <div className={`flex items-center space-x-2 mb-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                      msg.sender === 'user' 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
-                        : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
-                    }`}>
-                      {msg.sender === 'user' ? 'R' : 'AI'}
-                    </div>
+                    {msg.sender === 'user' ? (
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                           style={{ boxShadow: '0 0 24px -6px rgba(168,85,247,.5)' }}>
+                        R
+                      </div>
+                    ) : (
+                      <div className="relative w-8 h-8 rounded-full p-[2px] avatar-ring">
+                        <div className={`${darkMode ? 'avatar-inner-dark' : 'avatar-inner-light'} w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>AI</div>
+                      </div>
+                    )}
                     <span className="text-xs text-gray-500 dark:text-slate-400">
                       {msg.sender === 'user' ? 'Researcher' : 'BeanGPT AI'}
                     </span>
@@ -1532,10 +1542,10 @@ You're ready to start asking questions!
                   </div>
 
                   {/* Message Content */}
-                  <div className={`${isMobile ? 'p-3' : 'p-5'} rounded-2xl shadow-sm border transition-all hover:shadow-md ${isMobile ? 'text-sm' : 'text-sm'} ${
+                  <div className={`${isMobile ? 'p-3' : 'p-5'} rounded-2xl transition-all ${isMobile ? 'text-sm' : 'text-sm'} ${
                     msg.sender === 'user'
-                      ? `${darkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-blue-50 border-blue-200 text-gray-900'}`
-                      : `${darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`
+                      ? `user-bubble ${darkMode ? 'text-slate-100' : 'text-gray-900'}`
+                      : `gborder lift ${darkMode ? 'bg-slate-900/60 text-slate-100' : 'bg-white/80 text-gray-900'}`
                   }`}>
                     {msg.sender === 'assistant' ? (
                       <>
@@ -1696,7 +1706,7 @@ You're ready to start asking questions!
 
                         {/* Gene Information Panel */}
                         {msg.genes && msg.genes.length > 0 && (
-                          <div className={`mt-5 p-4 rounded-xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-emerald-50/50 border-emerald-200'}`}>
+                          <div className={`mt-5 p-4 rounded-xl gborder lift ${darkMode ? 'bg-slate-900/40' : 'bg-white/70'}`}>
                             <button 
                               className="w-full flex items-center justify-between text-left"
                               onClick={() => setShowGenePanel(prevState => ({ ...prevState, [idx]: !prevState[idx] }))}
@@ -1996,14 +2006,14 @@ You're ready to start asking questions!
               <div className="flex justify-start">
                 <div className="max-w-[85%]">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-sm font-semibold text-white">
-                      AI
+                    <div className="relative w-8 h-8 rounded-full p-[2px] avatar-ring">
+                      <div className={`${darkMode ? 'avatar-inner-dark' : 'avatar-inner-light'} w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>AI</div>
                     </div>
                     <span className="text-xs text-gray-500 dark:text-slate-400">BeanGPT AI</span>
                     <span className="text-xs text-blue-500 dark:text-blue-400">Adding Research Context...</span>
                   </div>
-                  <div className={`p-5 rounded-2xl shadow-sm border text-sm ${
-                    darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'
+                  <div className={`p-5 rounded-2xl gborder text-sm ${
+                    darkMode ? 'bg-slate-900/60 text-slate-100' : 'bg-white/80 text-gray-900'
                   }`}>
                     <ReactMarkdown 
                       className="prose dark:prose-invert max-w-none prose-blue prose-sm prose-compact" 
@@ -2051,14 +2061,14 @@ You're ready to start asking questions!
               <div className="flex justify-start">
                 <div className="max-w-[85%]">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-sm font-semibold text-white">
-                      AI
+                    <div className="relative w-8 h-8 rounded-full p-[2px] avatar-ring">
+                      <div className={`${darkMode ? 'avatar-inner-dark' : 'avatar-inner-light'} w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>AI</div>
                     </div>
                     <span className="text-xs text-gray-500 dark:text-slate-400">BeanGPT AI</span>
                     <span className="text-xs text-blue-500 dark:text-blue-400">Processing...</span>
                   </div>
-                  <div className={`p-5 rounded-2xl shadow-sm border text-sm ${
-                    darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'
+                  <div className={`p-5 rounded-2xl gborder text-sm ${
+                    darkMode ? 'bg-slate-900/60 text-slate-100' : 'bg-white/80 text-gray-900'
                   }`}>
                     <ReactMarkdown 
                       className="prose dark:prose-invert max-w-none prose-blue prose-sm prose-compact" 
@@ -2138,14 +2148,14 @@ You're ready to start asking questions!
               <div className="flex justify-start">
                 <div className="max-w-[85%]">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center text-sm font-semibold text-white">
-                      AI
+                    <div className="relative w-8 h-8 rounded-full p-[2px] avatar-ring">
+                      <div className={`${darkMode ? 'avatar-inner-dark' : 'avatar-inner-light'} w-full h-full rounded-full flex items-center justify-center text-[10px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>AI</div>
                     </div>
                     <span className="text-xs text-gray-500 dark:text-slate-400">BeanGPT AI</span>
                     <span className="text-xs text-blue-500 dark:text-blue-400">Thinking...</span>
                   </div>
-                  <div className={`p-4 rounded-2xl shadow-sm border ${
-                    darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'
+                  <div className={`p-4 rounded-2xl gborder ${
+                    darkMode ? 'bg-slate-900/60' : 'bg-white/80'
                   }`}>
                     <div className="space-y-3">
                       {/* Current step */}
@@ -2192,28 +2202,29 @@ You're ready to start asking questions!
         </div>
 
         {/* Input Area */}
-        <div className={`flex-shrink-0 ${isMobile ? 'p-3' : 'p-6'} border-t ${darkMode ? 'border-slate-800 bg-slate-900/50' : 'border-gray-200 bg-white/80'} backdrop-blur-sm`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'p-3' : 'p-6'} glass-strong relative`}>
+          <div className="sweep-line absolute top-0 left-0 right-0"></div>
           <div className={`${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto`}>
             <form onSubmit={handleSend} className={`flex items-end ${isMobile ? 'space-x-2' : 'space-x-4'}`}>
-              <div className="flex-1">
+              <div className="flex-1 gborder rounded-2xl">
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={apiKeyStatus === 'valid' 
-                    ? (isMobile 
-                      ? "Ask about genes, cultivars, or data..." 
+                  placeholder={apiKeyStatus === 'valid'
+                    ? (isMobile
+                      ? "Ask about genes, cultivars, or data..."
                       : "Ask about gene functions, cultivar performance, or request data analysis...")
-                    : (isMobile 
-                      ? "Enter API key above to start..." 
+                    : (isMobile
+                      ? "Enter API key above to start..."
                       : "Please enter your API key above to start asking questions...")}
                   disabled={isLoading || isStreaming || apiKeyStatus !== 'valid'}
                   rows={isMobile ? 2 : 1}
-                  className={`w-full ${isMobile ? 'p-3 text-base' : 'p-4'} rounded-xl border resize-none transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    darkMode 
-                      ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder-slate-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  className={`w-full ${isMobile ? 'p-3 text-base' : 'p-4'} rounded-2xl bg-transparent resize-none transition-all focus:outline-none ${
+                    darkMode
+                      ? 'text-slate-100 placeholder-slate-500'
+                      : 'text-gray-900 placeholder-gray-500'
                   } ${isLoading || isStreaming || apiKeyStatus !== 'valid' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  style={{ fontSize: isMobile ? '16px' : 'inherit' }} // Prevent zoom on iOS
+                  style={{ fontSize: isMobile ? '16px' : 'inherit' }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -2225,7 +2236,7 @@ You're ready to start asking questions!
               <button
                 type="submit"
                 disabled={isLoading || isStreaming || !input.trim() || apiKeyStatus !== 'valid'}
-                className={`${isMobile ? 'p-3' : 'p-4'} rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl min-h-[44px] min-w-[44px] flex items-center justify-center`}
+                className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl btn-send text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px] flex items-center justify-center`}
               >
                 <FaPaperPlane className={isMobile ? 'text-base' : 'text-lg'} />
               </button>
