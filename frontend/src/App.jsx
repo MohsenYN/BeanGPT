@@ -889,29 +889,29 @@ export default function App() {
         ${isMobile || isTablet
           ? `fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ${
               showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
-            } w-96 mobile-sidebar`
-          : `${sidebarCollapsed ? 'w-16' : 'w-96'} transition-all duration-300`
+            } w-80 mobile-sidebar`
+          : `${sidebarCollapsed ? 'w-16' : 'w-72'} transition-all duration-300`
         }
         glass-strong
         ${isMobile || isTablet ? 'shadow-2xl' : ''}
-        flex flex-col relative z-10
+        flex flex-col relative z-10 overflow-y-auto
       `}>
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
+        <div className="p-3 border-b border-slate-900/5 dark:border-white/5">
           <div className="flex items-center justify-between">
             {(!sidebarCollapsed || (isMobile || isTablet)) && (
-              <div className="flex items-center space-x-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center glow-cyan"
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center glow-cyan"
                      style={{ background: 'linear-gradient(135deg, rgba(34,211,238,.18), rgba(59,130,246,.18))' }}>
                   <img
                     src={`${import.meta.env.BASE_URL}images/UniversityOfGuelphLogo.png`}
                     alt="University of Guelph"
-                    className="w-9 h-9 object-contain"
+                    className="w-7 h-7 object-contain"
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold gradient-brand tracking-tight">BeanGPT</h1>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono tracking-wider uppercase">Powered by Beans</p>
+                  <h1 className="text-base font-bold gradient-brand tracking-tight leading-none">BeanGPT</h1>
+                  <p className="text-[10px] text-gray-500 dark:text-slate-400 font-mono tracking-wider uppercase mt-0.5">Powered by Beans</p>
                 </div>
               </div>
             )}
@@ -941,7 +941,7 @@ export default function App() {
               )}
         {/* Session Info */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
+          <div className="p-3 border-b border-slate-900/5 dark:border-white/5">
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
               <FaFlask className="text-blue-500" />
               <span>{currentSession}</span>
@@ -954,7 +954,7 @@ export default function App() {
 
         {/* Quick Actions */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
+          <div className="p-3 border-b border-slate-900/5 dark:border-white/5">
             <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">Quick Research</h3>
             <div className="space-y-2">
               {quickActions.map((action, idx) => (
@@ -963,7 +963,7 @@ export default function App() {
                   onClick={action.disabled ? undefined : action.action}
                   disabled={action.disabled}
                   title={action.tooltip || ''}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors text-sm ${
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg text-left transition-colors text-sm ${
                     action.disabled 
                       ? 'cursor-not-allowed bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50' 
                       : 'hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -1006,13 +1006,13 @@ export default function App() {
 
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
 
-          <div className="p-4 border-b border-slate-900/5 dark:border-white/5">
+          <div className="p-3 border-b border-slate-900/5 dark:border-white/5">
 
             <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">Platform</h3>
 
             <div className="space-y-2">
 
-              <button onClick={() => setActiveView('chat')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'chat' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
+              <button onClick={() => setActiveView('chat')} className={`w-full flex items-center space-x-3 p-2.5 rounded-lg text-left transition-colors text-sm ${activeView === 'chat' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
 
                 <FaMicroscope className="text-blue-500 text-sm" />
 
@@ -1020,7 +1020,7 @@ export default function App() {
 
               </button>
 
-              <button onClick={() => setActiveView('platform')} className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors text-sm ${activeView === 'platform' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
+              <button onClick={() => setActiveView('platform')} className={`w-full flex items-center space-x-3 p-2.5 rounded-lg text-left transition-colors text-sm ${activeView === 'platform' ? 'nav-active text-cyan-600 dark:text-cyan-300' : 'hover:bg-slate-900/5 dark:hover:bg-white/5 text-gray-700 dark:text-slate-300'}`}>
 
                 <FaDatabase className="text-blue-500 text-sm" />
 
@@ -1038,10 +1038,10 @@ export default function App() {
 
         {/* About Us Section */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="p-4 flex-1">
+          <div className="p-3 flex-1">
             <h3 className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-3">About</h3>
             <div className="space-y-4">
-              <div className={`p-4 rounded-lg ${darkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+              <div className={`p-3 rounded-lg ${darkMode ? 'bg-slate-800/60' : 'bg-white/60'}`}>
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Research Platform</h4>
                 <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed mb-3">
                   BeanGPT is an AI-powered research platform for dry bean breeding and computational biology, 
@@ -1089,12 +1089,12 @@ export default function App() {
 
         {/* Dry Bean Breeding Program Logo */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="px-4 py-2">
+          <div className="px-3 py-1.5">
             <div className="flex justify-center">
-              <img 
-                src={`${import.meta.env.BASE_URL}images/DryBeanBreedingLogo.png`} 
+              <img
+                src={`${import.meta.env.BASE_URL}images/DryBeanBreedingLogo.png`}
                 alt="Dry Bean Breeding & Computational Biology Program"
-                className="w-40 h-20 object-contain"
+                className="w-32 h-16 object-contain"
               />
             </div>
           </div>
@@ -1102,7 +1102,7 @@ export default function App() {
 
         {/* Program Credit */}
         {(!sidebarCollapsed || (isMobile || isTablet)) && (
-          <div className="px-4 py-2">
+          <div className="px-3 py-1.5">
             <div className="text-center">
                 <a 
                 href="https://uogbeans.com/" 
@@ -1122,10 +1122,10 @@ export default function App() {
         )}
 
         {/* Dark Mode Toggle */}
-        <div className="p-4 border-t border-slate-900/5 dark:border-white/5">
+        <div className="p-3 border-t border-slate-900/5 dark:border-white/5">
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors`}
+            className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-2 rounded-lg hover:bg-slate-900/5 dark:hover:bg-white/5 transition-colors`}
           >
             {!sidebarCollapsed && (
               <span className="text-sm text-gray-700 dark:text-slate-300">
@@ -1145,7 +1145,7 @@ export default function App() {
       <div className={`flex-1 flex flex-col min-h-0 ${isMobile || isTablet ? 'w-full' : ''} relative z-10`} style={{position:"relative"}}>
         {activeView === "platform" && <iframe src="/dry-bean-platform.html" title="Data Platform" style={{position:"absolute",inset:0,width:"100%",height:"100%",border:"none",zIndex:10}} />}
         {/* Header */}
-        <div className={`flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'} glass-strong relative`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'p-3' : 'px-5 py-3'} glass-strong relative`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* Mobile menu button */}
@@ -1158,11 +1158,11 @@ export default function App() {
                 </button>
               )}
               <div>
-                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold tracking-tight text-gray-900 dark:text-white`}>
+                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold tracking-tight text-gray-900 dark:text-white leading-none`}>
                   {isMobile ? <span className="gradient-brand">BeanGPT</span> : 'Main Platform'}
                 </h2>
                 {!isMobile && (
-                  <p className="text-gray-600 dark:text-slate-400 text-sm mt-1 font-light">
+                  <p className="text-gray-600 dark:text-slate-400 text-xs mt-1 font-light">
                     Dry Bean Breeding & Computational Biology
                   </p>
                 )}
@@ -1513,8 +1513,8 @@ You're ready to start asking questions!
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          <div className={`${isMobile ? 'p-3' : 'p-6'} space-y-4`}>
-            <div className={`${isMobile ? 'max-w-full' : 'max-w-6xl'} mx-auto space-y-4`}>
+          <div className={`${isMobile ? 'p-3' : 'px-5 py-4'} space-y-3`}>
+            <div className={`${isMobile ? 'max-w-full' : 'max-w-5xl'} mx-auto space-y-3`}>
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -1544,7 +1544,7 @@ You're ready to start asking questions!
                   </div>
 
                   {/* Message Content */}
-                  <div className={`${isMobile ? 'p-3' : 'p-5'} rounded-2xl transition-all ${isMobile ? 'text-sm' : 'text-sm'} ${
+                  <div className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl transition-all ${isMobile ? 'text-sm' : 'text-sm'} ${
                     msg.sender === 'user'
                       ? `user-bubble ${darkMode ? 'text-slate-100' : 'text-gray-900'}`
                       : `gborder lift ${darkMode ? 'bg-slate-900/60 text-slate-100' : 'bg-white/80 text-gray-900'}`
@@ -2204,7 +2204,7 @@ You're ready to start asking questions!
         </div>
 
         {/* Input Area */}
-        <div className={`flex-shrink-0 ${isMobile ? 'p-3' : 'p-6'} glass-strong relative`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'p-3' : 'px-5 py-3'} glass-strong relative`}>
           <div className="sweep-line absolute top-0 left-0 right-0"></div>
           <div className={`${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto`}>
             <form onSubmit={handleSend} className={`flex items-end ${isMobile ? 'space-x-2' : 'space-x-4'}`}>
