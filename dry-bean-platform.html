@@ -1313,10 +1313,8 @@ textarea{resize:vertical;min-height:65px}
   <div class="sh"><div class="sh-tag">Powered by OpenAI GPT-4o</div><h2>UoG Dry Bean Variety Advisor</h2><p>Market-class specific recommendations from the M. Yoosefzadeh Najafabadi Lab data. Considers recent releases alongside established performers.</p></div>
   <div class="ai-layout">
     <div class="ai-form">
-      <div class="fg" style="padding:10px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.18);border-radius:7px;margin-bottom:14px">
-        <label class="fl" style="color:var(--blue)">OpenAI API Key</label>
-        <input type="password" id="api-key" placeholder="sk-..." style="font-family:var(--mono);font-size:.72rem">
-        <div id="api-key-source" style="font-size:.6rem;color:var(--td);margin-top:5px;line-height:1.5">Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a>. Key stays in your browser only.</div>
+      <div id="api-key-status" class="fg" style="padding:10px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.18);border-radius:7px;margin-bottom:14px;font-size:.7rem;line-height:1.55;color:var(--td)">
+        <span id="api-key-status-text">Checking your BeanGPT API key…</span>
       </div>
       <div class="fg"><label class="fl">Province</label>
         <select id="a-prov" onchange="fillCounty()">
@@ -2349,16 +2347,23 @@ function showProv(p){
 function fillCounty(){const p=document.getElementById('a-prov').value;const sel=document.getElementById('a-county');sel.innerHTML=(COUNTIES[p]||['All']).map(c=>`<option>${c}</option>`).join('');}
 fillCounty();
 
+function getBeanGptApiKey(){
+  let key='';
+  try{ if(window.parent && window.parent!==window){ key=window.parent.localStorage.getItem('openai_api_key')||''; } }catch(e){}
+  if(!key){ try{ key=localStorage.getItem('openai_api_key')||''; }catch(e){} }
+  return (key||'').trim();
+}
+
 async function doAdvice(){
-  const apiKey=(document.getElementById('api-key').value||'').trim();
-  if(!apiKey||!apiKey.startsWith('sk-')){
+  const apiKey=getBeanGptApiKey();
+  if(!apiKey||(!apiKey.startsWith('sk-')&&!apiKey.startsWith('sk-proj-'))){
     document.getElementById('ai-out').innerHTML=`<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:14px;font-size:.8rem;line-height:1.65">
       <strong style="color:var(--blue)">🔑 OpenAI API Key Required</strong><br><br>
-      1. Go to <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a><br>
-      2. Click <strong>Create new secret key</strong><br>
-      3. Paste the key (starts with <code style="color:var(--blue)">sk-</code>) into the field above<br>
-      4. Click <strong>Get Recommendations</strong><br><br>
-      <span style="color:var(--td);font-size:.7rem">Your key is used only locally in your browser — never stored or sent anywhere except directly to OpenAI's API.</span>
+      The AI Advisor uses the same OpenAI API key you set in <strong>BeanGPT</strong>.<br><br>
+      1. Open the <strong>BeanGPT Chat</strong> tab in the sidebar<br>
+      2. Paste your OpenAI API key in the field at the top<br>
+      3. Come back here and click <strong>Get Recommendations</strong><br><br>
+      <span style="color:var(--td);font-size:.7rem">No key yet? Get one at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a>. Your key stays in your browser only — it is sent directly to OpenAI's API.</span>
     </div>`;
     return;
   }
@@ -2592,24 +2597,15 @@ function calcYield(){
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════�// ═══════════════════════════════════════════════════════════════
-// Reuse the OpenAI API key already saved by BeanGPT (same-origin, parent localStorage)
+// Show whether BeanGPT's saved OpenAI API key is available to the Advisor
 function syncBeanGptApiKey(){
-  const inp=document.getElementById('api-key');
-  const note=document.getElementById('api-key-source');
-  if(!inp) return;
-  let key='';
-  try{ key=(window.parent && window.parent!==window ? window.parent.localStorage : localStorage).getItem('openai_api_key')||''; }
-  catch(e){ try{ key=localStorage.getItem('openai_api_key')||''; }catch(_){} }
+  const txt=document.getElementById('api-key-status-text');
+  if(!txt) return;
+  const key=(typeof getBeanGptApiKey==='function')?getBeanGptApiKey():'';
   if(key && (key.startsWith('sk-')||key.startsWith('sk-proj-'))){
-    if(!inp.value){ inp.value=key; }
-    if(note){ note.innerHTML='✓ Using your BeanGPT API key. <a href="#" id="api-key-override" style="color:var(--blue)">Use a different key</a>'; }
-    const ov=document.getElementById('api-key-override');
-    if(ov){ ov.addEventListener('click',e=>{
-      e.preventDefault();
-      inp.value='';
-      if(note){ note.innerHTML='Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue)">platform.openai.com/api-keys</a>. Key stays in your browser only.'; }
-      inp.focus();
-    });}
+    txt.innerHTML='✓ Using your BeanGPT OpenAI API key.';
+  }else{
+    txt.innerHTML='⚠️ No API key found. Open <strong>BeanGPT Chat</strong> in the sidebar and paste your OpenAI key — the Advisor will use it automatically.';
   }
 }
 
