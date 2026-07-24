@@ -1066,10 +1066,17 @@ export default function App() {
                   </div>
                   
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-slate-300">Research Paper:</p>
-                    <p className="text-xs text-gray-600 dark:text-slate-400">
-                      Currently under review
+                    <p className="text-xs font-medium text-gray-700 dark:text-slate-300">
+                      Research Paper:
                     </p>
+                    <a
+                      href="https://link.springer.com/article/10.1186/s13007-026-01575-w"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                      BeanGPT: a domain-specific retrieval-augmented generation system for Phaseolus vulgaris research
+                    </a>
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700"><p className="text-xs text-gray-500 dark:text-slate-500 leading-relaxed">Thanks to the Research Innovation Office at the University of Guelph for supporting this initiative.</p></div>
                 </div>
