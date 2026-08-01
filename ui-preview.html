@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BeanGPT — UI Preview (Futuristic Redesign)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter','system-ui','sans-serif'],
+          mono: ['JetBrains Mono','monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --bg-0: #04060f;
+    --bg-1: #07091a;
+    --bg-2: #0b1024;
+    --line: rgba(148,163,184,0.08);
+    --cyan: #22d3ee;
+    --blue: #3b82f6;
+    --emerald: #10b981;
+    --violet: #a855f7;
+  }
+  html, body { background: var(--bg-0); color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
+
+  /* Aurora background */
+  .aurora {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  }
+  .aurora::before, .aurora::after {
+    content: ''; position: absolute; border-radius: 9999px; filter: blur(110px); opacity: .35;
+    will-change: transform;
+  }
+  .aurora::before {
+    width: 720px; height: 720px; left: -180px; top: -200px;
+    background: radial-gradient(circle at center, rgba(34,211,238,.55), transparent 60%);
+    animation: drift1 22s ease-in-out infinite alternate;
+  }
+  .aurora::after {
+    width: 760px; height: 760px; right: -220px; bottom: -260px;
+    background: radial-gradient(circle at center, rgba(168,85,247,.45), transparent 60%);
+    animation: drift2 26s ease-in-out infinite alternate;
+  }
+  .aurora .blob3 {
+    position: absolute; width: 540px; height: 540px; left: 40%; top: 40%;
+    background: radial-gradient(circle, rgba(16,185,129,.30), transparent 60%);
+    filter: blur(110px); border-radius: 9999px; opacity: .35;
+    animation: drift3 30s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 { from { transform: translate(0,0) scale(1);} to { transform: translate(120px,80px) scale(1.15);} }
+  @keyframes drift2 { from { transform: translate(0,0) scale(1);} to { transform: translate(-90px,-70px) scale(1.1);} }
+  @keyframes drift3 { from { transform: translate(0,0) scale(1);} to { transform: translate(-50px,40px) scale(1.2);} }
+
+  /* Subtle grid overlay */
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(148,163,184,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  }
+
+  /* Glass panels */
+  .glass {
+    background: linear-gradient(180deg, rgba(15,23,42,0.55), rgba(15,23,42,0.35));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(148,163,184,0.12);
+  }
+  .glass-strong {
+    background: linear-gradient(180deg, rgba(15,23,42,0.78), rgba(15,23,42,0.55));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(148,163,184,0.14);
+  }
+
+  /* Gradient borders */
+  .gborder {
+    position: relative; border-radius: 16px;
+  }
+  .gborder::before {
+    content:''; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(135deg, rgba(34,211,238,.55), rgba(59,130,246,.35), rgba(168,85,247,.55));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; opacity: .9;
+  }
+
+  .glow-cyan { box-shadow: 0 0 0 1px rgba(34,211,238,.25), 0 10px 40px -10px rgba(34,211,238,.35); }
+  .glow-violet { box-shadow: 0 0 0 1px rgba(168,85,247,.25), 0 10px 40px -10px rgba(168,85,247,.35); }
+  .glow-emerald { box-shadow: 0 0 0 1px rgba(16,185,129,.30), 0 10px 40px -10px rgba(16,185,129,.40); }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #22d3ee 0%, #60a5fa 45%, #a855f7 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* Send button glow */
+  .send-btn {
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #a855f7 100%);
+    box-shadow: 0 8px 30px -8px rgba(59,130,246,.65), 0 0 0 1px rgba(255,255,255,.07) inset;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .send-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 40px -8px rgba(168,85,247,.7), 0 0 0 1px rgba(255,255,255,.1) inset; }
+
+  /* Status pill */
+  .status-dot { box-shadow: 0 0 14px currentColor; }
+
+  /* Animated header underline */
+  .header-line {
+    height: 1px; background: linear-gradient(90deg, transparent, rgba(34,211,238,.6), rgba(168,85,247,.6), transparent);
+    background-size: 200% 100%;
+    animation: lineSweep 6s linear infinite;
+  }
+  @keyframes lineSweep { from { background-position: 0% 0; } to { background-position: 200% 0; } }
+
+  /* Avatar pulse */
+  .avatar-ai {
+    background: conic-gradient(from 0deg, #06b6d4, #3b82f6, #a855f7, #10b981, #06b6d4);
+    animation: spin 8s linear infinite;
+  }
+  .avatar-ai-inner {
+    background: #0b1024;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Typing dots */
+  .tdot { animation: tpulse 1.4s infinite ease-in-out; }
+  .tdot:nth-child(2) { animation-delay: .2s; }
+  .tdot:nth-child(3) { animation-delay: .4s; }
+  @keyframes tpulse { 0%,80%,100% { transform: scale(.6); opacity:.4;} 40% { transform: scale(1); opacity:1;} }
+
+  /* Hover lift */
+  .lift { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover { transform: translateY(-2px); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px;}
+  ::-webkit-scrollbar-thumb { background: rgba(148,163,184,.2); border-radius: 8px;}
+  ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,.35); }
+
+  /* Sidebar item active accent */
+  .nav-active {
+    background: linear-gradient(90deg, rgba(34,211,238,.12), rgba(59,130,246,.08), transparent);
+    border-left: 2px solid #22d3ee;
+  }
+
+  /* Sample message bubble user */
+  .user-bubble {
+    background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(168,85,247,.14));
+    border: 1px solid rgba(148,163,184,.14);
+  }
+
+  /* DNA divider */
+  .dna {
+    height: 18px; width: 100%;
+    background-image:
+      radial-gradient(circle at 0% 50%, rgba(34,211,238,.5) 1.5px, transparent 2px),
+      radial-gradient(circle at 100% 50%, rgba(168,85,247,.5) 1.5px, transparent 2px);
+    background-size: 18px 18px; opacity: .5;
+  }
+</style>
+</head>
+<body class="overflow-hidden">
+
+<!-- Backgrounds -->
+<div class="aurora"><div class="blob3"></div></div>
+<div class="grid-overlay"></div>
+
+<!-- App shell -->
+<div class="relative z-10 h-screen w-screen flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-96 glass-strong border-r border-white/5 flex flex-col">
+    <!-- Header -->
+    <div class="p-5 border-b border-white/5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative w-11 h-11 rounded-xl glow-cyan flex items-center justify-center"
+               style="background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(59,130,246,.18));">
+            <!-- Logo placeholder for University of Guelph -->
+            <span class="text-xl">🎓</span>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold gradient-text tracking-tight">BeanGPT</h1>
+            <p class="text-[11px] text-slate-400 font-mono tracking-wider uppercase">Powered by Beans</p>
+          </div>
+        </div>
+        <button class="p-2 rounded-lg hover:bg-white/5 transition">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Session Info -->
+    <div class="p-5 border-b border-white/5">
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-cyan-400">⚗</span>
+        <span class="text-slate-200">Research Session 1</span>
+      </div>
+      <div class="text-[11px] text-slate-500 mt-1 font-mono">3 interactions</div>
+    </div>
+
+    <!-- Quick Research -->
+    <div class="p-5 border-b border-white/5">
+      <h3 class="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.18em] mb-3">Quick Research</h3>
+      <div class="space-y-2">
+        <button class="w-full flex items-center justify-between p-3 rounded-xl text-left transition lift hover:bg-white/5 border border-transparent hover:border-cyan-400/20">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34,211,238,.15), rgba(59,130,246,.15));">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+            <span class="text-sm text-slate-200">Gene Lookup</span>
+          </div>
+        </button>
+        <button class="w-full flex items-center justify-between p-3 rounded-xl text-left transition lift hover:bg-white/5 border border-transparent hover:border-violet-400/20">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(59,130,246,.15));">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <span class="text-sm text-slate-200">Resources</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Platform -->
+    <div class="p-5 border-b border-white/5">
+      <h3 class="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.18em] mb-3">Platform</h3>
+      <div class="space-y-2">
+        <button class="w-full flex items-center gap-3 p-3 rounded-xl nav-active text-cyan-300 text-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M8 6h10v10"/></svg>
+          <span>BeanGPT Chat</span>
+        </button>
+        <button class="w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 text-sm hover:bg-white/5 transition">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+          <span>Data Platform</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="p-5 flex-1">
+      <h3 class="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.18em] mb-3">About</h3>
+      <div class="gborder p-4">
+        <div class="space-y-3">
+          <h4 class="text-sm font-semibold text-white">Research Platform</h4>
+          <p class="text-[12px] text-slate-400 leading-relaxed">
+            BeanGPT is an AI-powered research platform for dry bean breeding and computational biology,
+            developed to support sustainable agriculture and breeding research.
+          </p>
+          <div class="space-y-2 pt-1">
+            <div>
+              <p class="text-[11px] font-medium text-slate-300">Developed by:</p>
+              <a class="block text-[11px] text-cyan-400 hover:underline">Mohsen Yoosefzadeh Najafabadi</a>
+              <a class="block text-[11px] text-cyan-400 hover:underline">Kiarash Mirkamandari</a>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium text-slate-300">Supervised by:</p>
+              <a class="text-[11px] text-cyan-400 hover:underline">Dr. Mohsen Yoosefzadeh Najafabadi</a>
+              <p class="text-[11px] text-slate-500">Principal Investigator</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium text-slate-300">Research Paper:</p>
+              <p class="text-[11px] text-slate-400">Currently under review</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logo placeholder -->
+    <div class="px-5 py-2">
+      <div class="flex justify-center">
+        <div class="w-40 h-20 rounded-xl glass flex items-center justify-center text-[10px] text-slate-400 font-mono">
+          DryBean Breeding Logo
+        </div>
+      </div>
+    </div>
+
+    <!-- Program Credit -->
+    <div class="px-5 py-2 text-center">
+      <a class="text-[12px] font-medium text-slate-300 hover:text-cyan-300 transition">Dry Bean Breeding & Computational Biology Program</a>
+      <div class="flex items-center justify-center gap-1.5 mt-1">
+        <span class="w-1 h-1 rounded-full bg-cyan-400 status-dot text-cyan-400"></span>
+        <span class="text-[11px] text-slate-400 font-mono">University of Guelph</span>
+        <span class="w-1 h-1 rounded-full bg-cyan-400 status-dot text-cyan-400"></span>
+      </div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <div class="p-4 border-t border-white/5">
+      <button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition">
+        <span class="text-sm text-slate-300">Light Mode</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col min-h-0">
+
+    <!-- Header -->
+    <div class="flex-shrink-0 glass-strong border-b border-white/5">
+      <div class="px-7 py-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Main Platform</h2>
+            <p class="text-slate-400 text-sm mt-1 font-light">Dry Bean Breeding &amp; Computational Biology</p>
+          </div>
+          <div class="flex items-center gap-5">
+            <!-- API Setup -->
+            <button class="flex items-center gap-2 px-3 py-2 text-sm rounded-xl gborder text-cyan-300 hover:text-cyan-200 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+              <span class="font-medium">API Setup</span>
+            </button>
+
+            <!-- API Key Input -->
+            <div class="relative">
+              <input class="w-72 pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-900/60 border border-slate-700/60 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 outline-none transition placeholder-slate-500" placeholder="sk-... your OpenAI API key" />
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M21 2l-9.6 9.6M15.5 7.5L19 4M14 8a6 6 0 1 1-6 6"/></svg>
+            </div>
+
+            <!-- Status -->
+            <div class="flex items-center gap-2 text-sm text-slate-300 px-3 py-2 rounded-xl glass">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 status-dot text-emerald-400"></span>
+              <span>Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- Chat -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="p-7 max-w-6xl mx-auto space-y-6">
+
+        <!-- Welcome assistant -->
+        <div class="flex justify-start">
+          <div class="max-w-[85%] w-full">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="relative w-9 h-9 rounded-full p-[2px] avatar-ai">
+                <div class="avatar-ai-inner w-full h-full rounded-full flex items-center justify-center text-[11px] font-bold text-white">AI</div>
+              </div>
+              <span class="text-xs text-slate-400">BeanGPT AI</span>
+            </div>
+            <div class="gborder p-6 lift">
+              <h1 class="text-2xl font-bold mb-3 gradient-text">👩‍🔬 Welcome to BeanGPT!</h1>
+              <h3 class="text-base font-semibold text-slate-200 mb-4">Your AI-Powered Partner for Bean Breeding &amp; Computational Biology</h3>
+              <div class="dna mb-4"></div>
+              <p class="text-sm text-slate-300 leading-relaxed mb-3">
+                BeanGPT is a next-generation, domain-specialized large language model built to boost research in bean breeding and computational biology.
+              </p>
+              <p class="text-sm text-slate-300 leading-relaxed mb-4">
+                Trained on over <strong class="text-cyan-300">100 million words</strong> from a curated collection of more than <strong class="text-cyan-300">300,000 peer-reviewed papers</strong> — Web of Science, PubMed, OPCC field trials, technical reports, and multi-omics resources.
+              </p>
+
+              <h2 class="text-lg font-bold text-white mb-3 mt-5">How Can You Use BeanGPT?</h2>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 rounded-xl glass lift">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-emerald-400">🔬</span>
+                    <span class="text-sm font-semibold text-white">Explore Genes &amp; Traits</span>
+                  </div>
+                  <p class="text-[12px] text-slate-400">Ask about genes, proteins, and multi-omics features.</p>
+                </div>
+                <div class="p-3 rounded-xl glass lift">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-cyan-400">📊</span>
+                    <span class="text-sm font-semibold text-white">Analyze Field Trials</span>
+                  </div>
+                  <p class="text-[12px] text-slate-400">Query historical OPCC field trial summaries.</p>
+                </div>
+                <div class="p-3 rounded-xl glass lift">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-violet-400">📚</span>
+                    <span class="text-sm font-semibold text-white">Literature Reviews</span>
+                  </div>
+                  <p class="text-[12px] text-slate-400">Citation-backed syntheses on resistance &amp; agronomy.</p>
+                </div>
+                <div class="p-3 rounded-xl glass lift">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-blue-400">📈</span>
+                    <span class="text-sm font-semibold text-white">Visualize &amp; Predict</span>
+                  </div>
+                  <p class="text-[12px] text-slate-400">Trend visualization &amp; environment predictions.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User message -->
+        <div class="flex justify-end">
+          <div class="max-w-[80%]">
+            <div class="flex items-center gap-2 mb-2 justify-end">
+              <span class="text-xs text-slate-400">Researcher</span>
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+                   style="background: linear-gradient(135deg,#3b82f6,#a855f7); box-shadow: 0 0 24px -6px rgba(168,85,247,.5);">R</div>
+            </div>
+            <div class="user-bubble rounded-2xl px-5 py-4 text-sm text-slate-100 leading-relaxed">
+              What genes are associated with anthracnose resistance in <em>Phaseolus vulgaris</em>?
+            </div>
+          </div>
+        </div>
+
+        <!-- Assistant streaming -->
+        <div class="flex justify-start">
+          <div class="max-w-[85%] w-full">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="relative w-9 h-9 rounded-full p-[2px] avatar-ai">
+                <div class="avatar-ai-inner w-full h-full rounded-full flex items-center justify-center text-[11px] font-bold text-white">AI</div>
+              </div>
+              <span class="text-xs text-slate-400">BeanGPT AI</span>
+              <span class="text-[11px] text-cyan-400 font-mono">Thinking…</span>
+            </div>
+            <div class="gborder p-5">
+              <div class="flex items-center gap-3">
+                <div class="text-lg">🧬</div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-white font-medium">Searching literature</span>
+                    <div class="flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 tdot"></span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 tdot"></span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 tdot"></span>
+                    </div>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1">Querying research paper database</div>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-white/5 space-y-2 opacity-70">
+                <div class="text-[11px] text-slate-500">Previous steps</div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span>💭</span><span class="text-slate-300 flex-1">Thinking</span><span class="text-emerald-400">✓</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span>🤔</span><span class="text-slate-300 flex-1">Analyzing query</span><span class="text-emerald-400">✓</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                  <span>🧮</span><span class="text-slate-300 flex-1">Processing embeddings</span><span class="text-emerald-400">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gene Panel sample -->
+        <div class="flex justify-start">
+          <div class="max-w-[85%] w-full">
+            <div class="gborder p-5">
+              <button class="w-full flex items-center justify-between text-left">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center glow-emerald" style="background: linear-gradient(135deg, rgba(16,185,129,.25), rgba(34,211,238,.25));">
+                    <span class="text-white text-sm">🧬</span>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-semibold text-emerald-300">🧬 Genetic Elements Identified</h3>
+                    <p class="text-[11px] text-emerald-400/80">3 genes and molecular markers found</p>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 text-[11px] font-medium rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">3</span>
+              </button>
+              <div class="mt-4 grid md:grid-cols-3 gap-3">
+                <div class="p-4 rounded-xl glass lift hover:border-emerald-400/40 border border-white/5">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-[10px] uppercase tracking-wider text-emerald-300">Gene Target</span>
+                  </div>
+                  <code class="px-2.5 py-1 rounded-md font-mono text-sm font-bold text-emerald-200 border border-emerald-400/30" style="background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(34,211,238,.10));">Co-1</code>
+                  <p class="text-xs text-slate-400 mt-3 leading-relaxed">Anthracnose resistance locus on chromosome Pv01.</p>
+                  <div class="mt-3 pt-2 border-t border-white/5 flex items-center gap-2 text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-emerald-400 font-medium">Research Target</span>
+                  </div>
+                </div>
+                <div class="p-4 rounded-xl glass lift hover:border-emerald-400/40 border border-white/5">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-[10px] uppercase tracking-wider text-emerald-300">Gene Target</span>
+                  </div>
+                  <code class="px-2.5 py-1 rounded-md font-mono text-sm font-bold text-emerald-200 border border-emerald-400/30" style="background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(34,211,238,.10));">Co-2</code>
+                  <p class="text-xs text-slate-400 mt-3 leading-relaxed">Resistance gene cluster, chromosome Pv11.</p>
+                  <div class="mt-3 pt-2 border-t border-white/5 flex items-center gap-2 text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-emerald-400 font-medium">Research Target</span>
+                  </div>
+                </div>
+                <div class="p-4 rounded-xl glass lift hover:border-emerald-400/40 border border-white/5">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-[10px] uppercase tracking-wider text-emerald-300">Gene Target</span>
+                  </div>
+                  <code class="px-2.5 py-1 rounded-md font-mono text-sm font-bold text-emerald-200 border border-emerald-400/30" style="background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(34,211,238,.10));">Phvul.001G243300</code>
+                  <p class="text-xs text-slate-400 mt-3 leading-relaxed">NB-LRR class disease resistance protein.</p>
+                  <div class="mt-3 pt-2 border-t border-white/5 flex items-center gap-2 text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-emerald-400 font-medium">Research Target</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
+                <span class="text-emerald-300/80">💡 Genes extracted from research literature and databases</span>
+                <span class="text-emerald-400 font-mono">NCBI • UniProt</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="flex-shrink-0 glass-strong border-t border-white/5">
+      <div class="header-line"></div>
+      <div class="px-7 py-5 max-w-4xl mx-auto">
+        <form class="flex items-end gap-3">
+          <div class="flex-1 gborder">
+            <textarea rows="1"
+              class="w-full bg-transparent p-4 rounded-2xl resize-none outline-none text-slate-100 placeholder-slate-500"
+              placeholder="Ask about gene functions, cultivar performance, or request data analysis..."></textarea>
+          </div>
+          <button type="button" class="send-btn w-12 h-12 rounded-2xl flex items-center justify-center text-white">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+          </button>
+        </form>
+        <div class="flex items-center justify-center mt-3 text-[11px] text-slate-500 gap-2">
+          <span>BeanGPT can make mistakes, verify important info</span>
+          <span class="text-slate-600">•</span>
+          <span>© 2025 BeanGPT. All rights reserved.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
